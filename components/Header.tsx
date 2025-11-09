@@ -21,8 +21,6 @@ const Logos: React.FC<{ onNavigate: (view: View) => void }> = ({ onNavigate }) =
     </div>
     <span className="text-slate-300">|</span>
     <span>IplanRio</span>
-    <span className="text-slate-300">|</span>
-    <span>Escritório de Dados</span>
   </button>
 );
 
