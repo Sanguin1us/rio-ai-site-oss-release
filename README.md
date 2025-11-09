@@ -10,9 +10,10 @@ Portal institucional da Prefeitura do Rio/Escritório de Dados para apresentar a
 - `AnimateOnScroll` e `TerminalAnimation` trazem microinterações sem dependências externas pesadas.
 
 ## Principais Experiências
-- **Home / Catálogo** – hero com CTA, filtro por categoria e cartões clicáveis que descrevem cada modelo.
-- **Detalhe do modelo** – visões de casos de uso, snippets com highlight, specs formatadas e playground embutido quando `supportsChat` é verdadeiro.
-- **Chat Rio 2.0 32B Omni** – suporta Markdown, GFM, KaTeX, realce de código, edição de mensagens e cópia rápida.
+- **Home / Catálogo** — hero com CTA, filtro por categoria e cartões clicáveis que descrevem cada modelo.
+- **Detalhe do modelo** — visões de casos de uso, snippets com highlight, specs formatadas e playground embutido quando `supportsChat` é verdadeiro.
+- **Comparativos externos** — Rio 2.5 Preview ganhou dois gráficos de dispersão (AIME 2025 e GPQA-Diamond) com escala logarítmica, marcações customizáveis e destaque visual para o próprio modelo.
+- **Chat Rio 2.0 32B Omni** — suporta Markdown, GFM, KaTeX, realce de código, edição de mensagens e cópia rápida.
 - **Open Source** – lista modelos com `isOpenSource`, destacando licenças CC BY 4.0 e atalhos para Hugging Face.
 - **Plataforma Evolve** – storytelling sobre fluxo evolutivo com terminal animado e etapas descritas em bullet points.
 
@@ -74,6 +75,7 @@ Portal institucional da Prefeitura do Rio/Escritório de Dados para apresentar a
 ## Customização
 - **Adicionar modelos**: edite `constants.ts`, preenchendo `Model` e opcionalmente `useCases`, `codeSnippets`, `huggingFaceUrl` e `supportsChat`.
 - **Ajustar o chat**: passe opções adicionais para `useRioChat` (ex.: `historyLimit`, `model`, `apiUrl`) ou sobrescreva o proxy com `VITE_RIO_CHAT_PROXY_URL`.
+- **Reposicionar labels dos gráficos**: em `components/detail/Rio25PreviewDetail.tsx` há o objeto `LABEL_POSITION_OVERRIDES`, que aceita quadrantes (`top-left`, `top-right`, `bottom-left`, `bottom-right`) globais ou específicos por benchmark (`aime`/`gpqa`) para cada modelo.
 - **Estilos**: Tailwind é carregado via CDN; ajuste tokens em `index.html` ou adicione classes utilitárias nos componentes.
 - **Automação interna**: mantenha este README como fonte de verdade ao atualizar arquitetura, fluxos ou onboarding.
 

@@ -152,6 +152,7 @@ const ComparisonChart: React.FC<{
   yTicks: number[];
   minY?: number;
 }> = ({ metric, label, yTicks, minY }) => {
+  const [hovered, setHovered] = React.useState<ModelComparisonDatum | null>(null);
   const { width, height } = CHART_DIMENSIONS;
   const { top, right, bottom, left } = CHART_PADDING;
   const plotWidth = width - left - right;
@@ -182,6 +183,36 @@ const ComparisonChart: React.FC<{
     const position = specific ?? (typeof override === 'string' ? override : fallback);
     return LABEL_POSITION_CONFIG[position];
   };
+  const formatTooltipScore = (value: number) =>
+    Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1);
+  const formatTooltipCost = (value: number) => {
+    if (value < 1) return `$${value.toFixed(2)}`;
+    const fixed = value.toFixed(2);
+    return `$${fixed.endsWith('.00') ? fixed.slice(0, -3) : fixed}`;
+  };
+  const tooltipMetrics = hovered
+    ? {
+        pointX: getX(hovered.cost),
+        pointY: getY(hovered[metric]),
+        score: hovered[metric],
+      }
+    : null;
+  const tooltipBox = (() => {
+    if (!tooltipMetrics) return null;
+    const tooltipWidth = 220;
+    const tooltipHeight = 78;
+    const xMin = left;
+    const xMax = width - right - tooltipWidth;
+    const clampedX = Math.min(Math.max(tooltipMetrics.pointX - tooltipWidth / 2, xMin), xMax);
+    const clampedY = Math.max(tooltipMetrics.pointY - tooltipHeight - 16, top);
+    return {
+      ...tooltipMetrics,
+      boxX: clampedX,
+      boxY: clampedY,
+      width: tooltipWidth,
+      height: tooltipHeight,
+    };
+  })();
 
   return (
     <div className="rounded-3xl border border-slate-200 bg-white/80 p-4 sm:p-5">
@@ -189,7 +220,12 @@ const ComparisonChart: React.FC<{
         <p className="text-sm font-semibold uppercase tracking-[0.5em] text-rio-primary">{label}</p>
       </div>
       <div className="mt-4">
-        <svg viewBox={`0 0 ${width} ${height}`} role="img" className="h-80 w-full">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          role="img"
+          className="h-80 w-full"
+          onMouseLeave={() => setHovered(null)}
+        >
           <line
             x1={left}
             y1={height - bottom}
@@ -271,15 +307,29 @@ const ComparisonChart: React.FC<{
               lineLength > shorten ? (lineLength - shorten) / lineLength : 0;
             const lineEndX = lineStartX + dxLine * scale;
             const lineEndY = lineStartY + dyLine * scale;
+            const isHovered = hovered?.model === item.model;
+            const circleRadius = radius + (isHovered ? 2 : 0);
+            const faded = Boolean(hovered) && !isHovered;
             return (
-              <g key={`${metric}-${item.model}`}>
+              <g
+                key={`${metric}-${item.model}`}
+                className="cursor-pointer outline-none focus-visible:opacity-100"
+                tabIndex={0}
+                role="button"
+                aria-label={`${item.model} - ${label} ${formatTooltipScore(item[metric])}, custo ${formatTooltipCost(item.cost)} por 1M tokens`}
+                onMouseEnter={() => setHovered(item)}
+                onFocus={() => setHovered(item)}
+                onMouseLeave={() => setHovered(null)}
+                onBlur={() => setHovered(null)}
+              >
                 <circle
                   cx={x}
                   cy={y}
-                  r={radius + (item.isRio ? 1 : 0)}
+                  r={circleRadius + (item.isRio ? 1 : 0)}
                   fill={item.isRio ? '#1E40AF' : '#FFFFFF'}
                   stroke={item.isRio ? '#1E40AF' : item.color}
                   strokeWidth={item.isRio ? 2.5 : 1.5}
+                  opacity={faded ? 0.4 : 1}
                 />
                 <line
                   x1={lineStartX}
@@ -288,18 +338,55 @@ const ComparisonChart: React.FC<{
                   y2={lineEndY}
                   className="stroke-slate-300"
                   strokeWidth={1}
+                  opacity={faded ? 0.5 : 1}
                 />
                 <text
                   x={labelX}
                   y={labelY}
                   textAnchor={anchor}
                   className="text-[11px] font-semibold fill-slate-700"
+                  opacity={faded ? 0.5 : 1}
                 >
                   {item.model}
                 </text>
               </g>
             );
           })}
+          {tooltipBox && hovered && (
+            <>
+              <line
+                x1={tooltipBox.pointX}
+                y1={tooltipBox.pointY}
+                x2={tooltipBox.pointX}
+                y2={tooltipBox.boxY + tooltipBox.height}
+                className="stroke-slate-300"
+                strokeDasharray="4 4"
+                strokeWidth={1}
+              />
+              <foreignObject
+                x={tooltipBox.boxX}
+                y={tooltipBox.boxY}
+                width={tooltipBox.width}
+                height={tooltipBox.height}
+                pointerEvents="none"
+              >
+                <div className="h-full rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg ring-1 ring-black/5">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    {hovered.model}
+                  </p>
+                  <p className="mt-1 text-sm font-semibold text-slate-900">
+                    {label}:{' '}
+                    <span className="text-rio-primary">
+                      {formatTooltipScore(tooltipBox.score)}
+                    </span>
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Preco: {formatTooltipCost(hovered.cost)} / 1M tokens
+                  </p>
+                </div>
+              </foreignObject>
+            </>
+          )}
         </svg>
       </div>
     </div>
