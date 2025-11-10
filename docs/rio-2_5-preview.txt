@@ -3,7 +3,7 @@
 
 Overview
 --------
-Rio 2.5 Preview e uma previa da proxima geracao de modelos proprietarios da Prefeitura do Rio. Ele foi treinado a partir do Qwen3-30B-A3B-Thinking-2507 e recebeu uma camada adicional de Reinforcement Learning proprietario para alinhar o comportamento ao uso institucional, entregando uma versao mais avancada do modelo base.
+Rio 2.5 Preview e uma previa da proxima geracao de modelos proprietarios da Prefeitura do Rio. Ele foi treinado a partir do checkpoint Qwen 3 30B-A3B 2507 Thinking (https://huggingface.co/Qwen/Qwen3-30B-A3B-Thinking-2507) e recebeu uma camada adicional de Reinforcement Learning proprietario para alinhar o comportamento ao uso institucional, entregando uma versao mais avancada do modelo base.
 
 Reasoning Modes
 ---------------
@@ -14,9 +14,15 @@ Benchmarks (maior e melhor)
 Metric                 | Base Qwen3 | Rio 2.5 (sem latent) | Rio 2.5 (com latent)
 ---------------------- | ---------- | -------------------- | --------------------
 AIME 2025              | 85.0       | 93.3                 | 95.0
-HMMT 2025              | 71.4       | 80.0                 | 86.6
+HMMT 2025              | 71.4       | 80.0                 | 83.3
 GPQA Diamond           | 73.4       | 75.8                 | 77.2
 LiveCodeBench v6       | 66.0       | 69.4                 | 69.6
+
+Disponibilidade e Licenca
+-------------------------
+- Licenca: Creative Commons Attribution 4.0 (https://creativecommons.org/licenses/by/4.0/deed.en)
+- Custo de inferencia: USD 0.10 por 1M de output tokens
+- Datasets utilizados: https://huggingface.co/datasets/nvidia/OpenScienceReasoning-2 e https://huggingface.co/datasets/nvidia/Nemotron-Post-Training-Dataset-v1
 
 BibTeX
 ------
