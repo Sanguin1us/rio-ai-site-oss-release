@@ -1,14 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Model } from '../../types';
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  Sparkles,
-  Activity,
-  Layers,
-  ShieldCheck,
-  Rocket,
-} from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Bolt, Box, Dumbbell, Goal, Route, Sparkles } from 'lucide-react';
 import { DetailUseCases } from './DetailUseCases';
 import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { DetailSpecs } from './DetailSpecs';
@@ -94,27 +86,57 @@ const METRIC_CONFIGS: Array<{
   },
 ];
 
-const TIMELINE = [
+const TRAINING_MODES = [
   {
-    Icon: Layers,
-    title: 'Fundação Qwen3-30B',
-    description:
-      'Partimos do Qwen3-30B-A3B-Thinking-2507 para preservar raciocínio longo e compatibilidade com pipelines existentes.',
+    Icon: Dumbbell,
+    title: 'Reinforcement Learning',
+    summary:
+      'Aplicamos PPO com funções de recompensa institucionais e verificadores automáticos para alinhar tom, segurança e utilidade.',
+    highlights: [
+      'Escala de recompensas com três pilares: segurança, aderência e clareza técnica.',
+      'Rollouts controlados mantêm divergência KL baixa para preservar o backbone.',
+    ],
   },
   {
-    Icon: ShieldCheck,
-    title: 'Reforço proprietário',
-    description:
-      'Aplicamos técnicas de Reinforcement Learning para ajustar estilo, segurança e alinhamento institucional.',
+    Icon: Bolt,
+    title: 'Supervised Fine-Tuning',
+    summary:
+      'Batches supervisionados com prompts reais da prefeitura garantem estilo formal e narrativa consistente durante todo o ciclo.',
+    highlights: [
+      'Misturamos 30% de exemplos longos para preservar raciocínio passo a passo.',
+      'Dataset curado inclui linguagem jurídica, atendimento e relatórios técnicos.',
+    ],
   },
   {
-    Icon: Rocket,
-    title: 'Prévia pública',
-    description:
-      'Disponibilizamos a versão open source para coletar feedback e medir integrações antes do lançamento estável.',
+    Icon: Goal,
+    title: 'On-Policy Distillation',
+    summary:
+      'Destilamos os melhores trajetos gerados on-policy para servir respostas acessíveis replicando o modo latente.',
+    highlights: [
+      'Captura do pensamento intermediário antes da resposta final.',
+      'Mantém custo de inferência baixo sem perder ganhos do RL.',
+    ],
   },
 ];
 
+const MODE_TAGLINES: Record<string, string> = {
+  'Reinforcement Learning': 'Recompensas institucionais simultâneas',
+  'Supervised Fine-Tuning': 'Estilo supervisionado com prompts reais',
+  'On-Policy Distillation': 'Resposta final replica o modo latente',
+};
+const DEFAULT_MODE_WEIGHTS: Record<string, number> = {
+  'Reinforcement Learning': 0.34,
+  'Supervised Fine-Tuning': 0.46,
+  'On-Policy Distillation': 0.2,
+};
+const generateModeWeights = () => {
+  const samples = TRAINING_MODES.map(() => Math.random() + 0.3);
+  const total = samples.reduce((sum, value) => sum + value, 0);
+  return TRAINING_MODES.reduce<Record<string, number>>((acc, mode, index) => {
+    acc[mode.title] = samples[index] / total;
+    return acc;
+  }, {});
+};
 const parseScore = (value: string) => Number.parseFloat(value);
 const formatDelta = (value: string, base: string) => {
   const delta = parseScore(value) - parseScore(base);
@@ -397,6 +419,16 @@ const ComparisonChart: React.FC<{
   );
 };
 export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, onBack }) => {
+  const [modeWeights, setModeWeights] = useState<Record<string, number>>(DEFAULT_MODE_WEIGHTS);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const interval = window.setInterval(() => {
+      setModeWeights(generateModeWeights());
+    }, 2800);
+    return () => window.clearInterval(interval);
+  }, []);
+
   return (
     <div className="bg-white">
       <section className="border-b border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white">
@@ -455,7 +487,10 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">
                   Benchmarks oficiais
                 </p>
-                <h2 className="mt-2 text-3xl font-bold text-prose">Rio 2.5 Preview em um único painel</h2>
+                <p className="mt-2 text-sm text-prose-light">
+                  Os gráficos mostram como refinamos o Qwen 3 30B-A3B utilizando Reinforcement Learning e o mecanismo
+                  de pensamento latente.
+                </p>
               </div>
             </div>
 
@@ -514,27 +549,133 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">
-                  Pipeline de treinamento
+                  Modos de treinamento
                 </p>
-                <h2 className="mt-2 text-3xl font-bold text-prose">Do backbone à prévia pública</h2>
+                <h2 className="mt-2 text-3xl font-bold text-prose">RL, SFT e destilação rodando juntos</h2>
               </div>
               <p className="text-sm text-prose-light max-w-lg">
-                Cada etapa foi desenhada para preservar raciocínio avançado e aplicar governança antes do lançamento.
+                Executamos Reinforcement Learning, Supervised Fine-Tuning e On-Policy Distillation no mesmo loop
+                interleaved para manter raciocínio profundo e alinhamento institucional.
               </p>
             </div>
             <div className="mt-8 grid gap-6 md:grid-cols-3">
-              {TIMELINE.map(({ Icon, title, description }) => (
-                <div key={title} className="relative rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              {TRAINING_MODES.map(({ Icon, title, summary, highlights }) => (
+                <div key={title} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                   <div className="flex items-center gap-3">
                     <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
                       <Icon className="h-6 w-6 text-rio-primary" />
                     </span>
-                    <p className="text-base font-semibold text-prose">{title}</p>
+                    <div>
+                      <p className="text-base font-semibold text-prose">{title}</p>
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">Simultâneo</p>
+                    </div>
                   </div>
-                  <p className="mt-4 text-sm text-prose-light leading-relaxed">{description}</p>
-                  <div className="absolute bottom-0 left-1/2 hidden h-12 w-px translate-y-1/2 bg-slate-200 md:block" />
+                  <p className="mt-4 text-sm text-prose leading-relaxed">{summary}</p>
+                  <ul className="mt-4 space-y-2 text-sm text-prose-light">
+                    {highlights.map((item) => (
+                      <li key={item} className="flex items-start gap-2">
+                        <span className="mt-1 block h-1.5 w-1.5 rounded-full bg-rio-primary" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               ))}
+            </div>
+            <div className="mt-10 rounded-[32px] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 sm:p-8">
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">Diagrama interleaved</p>
+                <h3 className="text-xl font-semibold text-prose">Como o fluxo simultâneo se organiza</h3>
+                <p className="text-sm text-prose-light max-w-4xl">
+                  O backbone Qwen 3 30B-A3B permanece único do início ao fim. Um roteador de políticas apenas recalibra,
+                  a cada batch, os pesos atribuídos a RL, SFT e distilação on-policy para equilibrar os objetivos.
+                </p>
+              </div>
+
+              <div className="mt-8 flex flex-col items-center gap-6">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
+                      <Box className="h-6 w-6 text-rio-primary" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-prose">Base model</p>
+                      <p className="text-xs text-prose-light">Qwen 3 30B-A3B Thinking</p>
+                    </div>
+                  </div>
+                  <div className="h-8 w-0.5 bg-slate-200" />
+                </div>
+
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-3 rounded-2xl border border-rio-primary/50 bg-white px-4 py-3 shadow">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rio-primary/10">
+                      <Route className="h-6 w-6 text-rio-primary" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-prose">Router interleaved</p>
+                      <p className="text-xs text-prose-light">Reajusta pesos de RL, SFT e OPD por batch</p>
+                    </div>
+                  </div>
+                  <div className="h-8 w-0.5 bg-slate-200" />
+                  <div className="hidden h-0.5 w-full max-w-3xl bg-gradient-to-r from-transparent via-slate-200 to-transparent md:block" />
+                </div>
+
+                <div className="w-full max-w-3xl space-y-4 rounded-2xl border border-slate-200 bg-white/80 px-4 py-5 shadow-sm">
+                  <div className="grid gap-3 md:grid-cols-3">
+                    {TRAINING_MODES.map(({ title }) => {
+                      const weight = modeWeights[title] ?? 0.33;
+                      const percent = Math.round(weight * 100);
+                      return (
+                        <div key={`weight-${title}`} className="rounded-2xl border border-slate-200 bg-white/90 px-3 py-3 shadow-sm">
+                          <div className="h-2 rounded-full bg-slate-100">
+                            <div
+                              className="h-full rounded-full bg-rio-primary transition-[width] duration-700 ease-out"
+                              style={{ width: `${Math.max(percent, 8)}%` }}
+                            />
+                          </div>
+                          <p className="mt-3 text-center text-xs font-semibold tracking-[0.2em] text-slate-500">{percent}%</p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <div className="grid w-full gap-4 md:grid-cols-3">
+                  {TRAINING_MODES.map(({ Icon, title }) => (
+                    <div
+                      key={title}
+                      className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white/90 px-4 py-4 shadow-sm"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50">
+                          <Icon className="h-6 w-6 text-rio-primary" />
+                        </span>
+                        <div>
+                          <p className="text-sm font-semibold text-prose">{title}</p>
+                          <p className="text-xs text-prose-light">
+                            {MODE_TAGLINES[title] ?? 'Operação intercalada'}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400 text-center">
+                        {Math.round((modeWeights[title] ?? 0.33) * 100)}%
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-white px-4 py-3 shadow-md">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50">
+                      <Sparkles className="h-6 w-6 text-emerald-600" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-prose">Rio 2.5 Preview</p>
+                      <p className="text-xs text-prose-light">Checkpoint consolidado com raciocínio latente</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         </AnimateOnScroll>
