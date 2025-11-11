@@ -1,21 +1,22 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Model } from '../../types';
-import { ArrowLeft, ArrowUpRight, Bolt, Box, Dumbbell, Goal, Route, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Bolt, Box, Dumbbell, Goal, Library, Route, Sparkles } from 'lucide-react';
 import { DetailUseCases } from './DetailUseCases';
 import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { DetailSpecs } from './DetailSpecs';
 import { AnimateOnScroll } from '../AnimateOnScroll';
 
-interface Rio25PreviewDetailProps {
+interface Rio2014BDetailProps {
   model: Model;
   onBack: () => void;
 }
 
-const BENCHMARKS = [
-  { metric: 'AIME 2025', base: '85.0', preview: '93.3', latent: '95.0' },
-  { metric: 'HMMT 2025', base: '71.4', preview: '80.0', latent: '83.3' },
-  { metric: 'GPQA Diamond', base: '73.4', preview: '75.8', latent: '77.2' },
-  { metric: 'LiveCodeBench v6', base: '66.0', preview: '69.4', latent: '69.6' },
+const BENCHMARKS: Array<{ metric: string; score: string; note?: string }> = [
+  { metric: 'GPQA Diamond', score: '75.1' },
+  { metric: 'AIME 2025', score: '88.1' },
+  { metric: 'AIME 2024', score: '91.6' },
+  { metric: 'MMLU Pro', score: '76.9' },
+  { metric: 'HLE (text)', score: '12.8' },
 ];
 
 type ComparisonMetric = 'gpqa' | 'aime';
@@ -37,6 +38,9 @@ interface ConnectorLayout {
   height: number;
   baseBottom: number;
   baseCenter: number;
+  pretrainTop: number;
+  pretrainCenter: number;
+  pretrainBottom: number;
   routerTop: number;
   routerCenter: number;
   routerBottom: number;
@@ -56,7 +60,7 @@ const LABEL_POSITION_OVERRIDES: Partial<Record<string, LabelOverride>> = {
 const MODEL_COMPARISON: ModelComparisonDatum[] = [
   { model: 'Gemini 2.5 Pro', cost: 10, gpqa: 86.4, aime: 88, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5', cost: 10, gpqa: 85.7, aime: 94.6, color: '#9CA3AF', isRio: false },
-  { model: 'Rio 2.5 Preview', cost: 0.1, gpqa: 77.2, aime: 95, color: '#1E40AF', isRio: true },
+  { model: 'Rio 2.0 14B', cost: 0.15, gpqa: 75.1, aime: 88.1, color: '#1E40AF', isRio: true },
   { model: 'Gemini 2.5 Flash', cost: 2.5, gpqa: 79, aime: 78, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5 mini', cost: 2, gpqa: 82.3, aime: 91.1, color: '#9CA3AF', isRio: false },
   { model: 'Gemini 2.5 Flash-Lite', cost: 0.4, gpqa: 71, aime: 69, color: '#9CA3AF', isRio: false },
@@ -127,34 +131,6 @@ const generateModeWeights = () => {
     acc[mode.title] = samples[index] / total;
     return acc;
   }, {});
-};
-const parseScore = (value: string) => Number.parseFloat(value);
-const formatDelta = (value: string, base: string) => {
-  const delta = parseScore(value) - parseScore(base);
-  const sign = delta >= 0 ? '+' : '';
-  return `${sign}${delta.toFixed(1)}`;
-};
-const RAW_MIN = Math.min(...BENCHMARKS.map((row) => parseScore(row.base)));
-const RAW_MAX = Math.max(...BENCHMARKS.map((row) => parseScore(row.latent)));
-const SCALE_MIN = Math.max(0, Math.floor((RAW_MIN - 2) / 5) * 5);
-const SCALE_MAX = Math.ceil((RAW_MAX + 2) / 5) * 5;
-const scaleValue = (value: string) => {
-  if (SCALE_MAX === SCALE_MIN) return 0.5;
-  const ratio = (parseScore(value) - SCALE_MIN) / (SCALE_MAX - SCALE_MIN);
-  return Math.min(Math.max(ratio, 0), 1);
-};
-const positionStyle = (value: string) => ({
-  left: `${scaleValue(value) * 100}%`,
-});
-const segmentStyle = (start: string, end: string) => {
-  const startRatio = scaleValue(start);
-  const endRatio = scaleValue(end);
-  const width = Math.abs(endRatio - startRatio) * 100;
-  const left = Math.min(startRatio, endRatio) * 100;
-  return {
-    left: `${left}%`,
-    width: `${Math.max(width, 4)}%`,
-  };
 };
 const CHART_DIMENSIONS = { width: 720, height: 340 };
 const CHART_PADDING = { top: 20, right: 32, bottom: 60, left: 58 };
@@ -409,21 +385,22 @@ const ComparisonChart: React.FC<{
     </div>
   );
 };
-export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, onBack }) => {
+export const Rio2014BDetail: React.FC<Rio2014BDetailProps> = ({ model, onBack }) => {
   const [modeWeights, setModeWeights] = useState<Record<string, number>>(DEFAULT_MODE_WEIGHTS);
   const baseRef = useRef<HTMLDivElement | null>(null);
+  const pretrainRef = useRef<HTMLDivElement | null>(null);
   const connectorRef = useRef<HTMLDivElement | null>(null);
   const routerRef = useRef<HTMLDivElement | null>(null);
   const cardGridRef = useRef<HTMLDivElement | null>(null);
   const rioRef = useRef<HTMLDivElement | null>(null);
   const [connectorLayout, setConnectorLayout] = useState<ConnectorLayout | null>(null);
-  const huggingFaceWeightsUrl =
-    model.huggingFaceUrl ?? 'https://huggingface.co/krzonkalla/rio-2.5-preview-beta';
+  const huggingFaceWeightsUrl = model.huggingFaceUrl;
 
   const measureConnectorLayout = useCallback(() => {
     if (
       typeof window === 'undefined' ||
       !baseRef.current ||
+      !pretrainRef.current ||
       !connectorRef.current ||
       !routerRef.current ||
       !cardGridRef.current ||
@@ -434,6 +411,7 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
 
     const containerRect = connectorRef.current.getBoundingClientRect();
     const baseRect = baseRef.current.getBoundingClientRect();
+    const pretrainRect = pretrainRef.current.getBoundingClientRect();
     const routerRect = routerRef.current.getBoundingClientRect();
     const cardsRect = cardGridRef.current.getBoundingClientRect();
     const rioRect = rioRef.current.getBoundingClientRect();
@@ -455,6 +433,9 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
       height: containerRect.height,
       baseBottom: baseRect.bottom - containerRect.top,
       baseCenter: baseRect.left - containerRect.left + baseRect.width / 2,
+      pretrainTop: pretrainRect.top - containerRect.top,
+      pretrainCenter: pretrainRect.left - containerRect.left + pretrainRect.width / 2,
+      pretrainBottom: pretrainRect.bottom - containerRect.top,
       routerTop: routerRect.top - containerRect.top,
       routerCenter: routerRect.left - containerRect.left + routerRect.width / 2,
       routerBottom: routerRect.bottom - containerRect.top,
@@ -488,7 +469,11 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
     if (!connectorLayout || connectorLayout.cardCenters.length === 0) {
       return null;
     }
-    const centerX = connectorLayout.routerCenter ?? connectorLayout.baseCenter ?? connectorLayout.width / 2;
+    const centerX =
+      connectorLayout.routerCenter ??
+      connectorLayout.pretrainCenter ??
+      connectorLayout.baseCenter ??
+      connectorLayout.width / 2;
     const firstX = Math.min(...connectorLayout.cardCenters);
     const lastX = Math.max(...connectorLayout.cardCenters);
     const topGap = Math.max(connectorLayout.cardTop - connectorLayout.routerBottom, 24);
@@ -498,9 +483,14 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
     const baseLine = {
       x: connectorLayout.baseCenter ?? centerX,
       startY: connectorLayout.baseBottom,
+      endY: connectorLayout.pretrainTop,
+    };
+    const pretrainLine = {
+      x: connectorLayout.pretrainCenter ?? centerX,
+      startY: connectorLayout.pretrainBottom,
       endY: connectorLayout.routerTop,
     };
-    return { centerX, firstX, lastX, topRailY, bottomRailY, baseLine };
+    return { centerX, firstX, lastX, topRailY, bottomRailY, baseLine, pretrainLine };
   }, [connectorLayout]);
 
   return (
@@ -579,55 +569,23 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
                   Benchmarks oficiais
                 </p>
                 <p className="mt-2 text-sm text-prose-light">
-                  Os gráficos mostram como refinamos o Qwen 3 30B-A3B utilizando Reinforcement Learning e o mecanismo
-                  de pensamento latente.
+                  Como o Rio 2.0 não tem um controlador de esforço de pensamento, definimos o uso de budget forcing como
+                  seu modo high, de maneira a fazer uma comparação fiel a modelos com tais mecanismos.
+                  <br />
+                  Em nossos testes, a quantidade de tokens de raciocínio é similar a modelos como o gpt oss 20b (high).
                 </p>
               </div>
             </div>
 
-            <div className="mt-10 space-y-6">
+            <div className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
               {BENCHMARKS.map((row) => (
                 <div
                   key={row.metric}
                   className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm"
                 >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rio-primary">
-                      {row.metric}
-                    </p>
-                  </div>
-                  <div className="relative mt-4 h-3 rounded-full bg-slate-100">
-                    <div
-                      className="absolute inset-y-[3px] rounded-full bg-gradient-to-r from-rio-primary via-rio-primary/70 to-emerald-500"
-                      style={segmentStyle(row.base, row.latent)}
-                      aria-hidden="true"
-                    />
-                    <div className="absolute inset-0">
-                      {[
-                        { label: 'Base', value: row.base, className: 'text-slate-600', showValue: true },
-                        { label: '+RL', value: row.preview, className: 'text-rio-primary', showValue: false },
-                        { label: '+Latente', value: row.latent, className: 'text-emerald-600', showValue: true },
-                      ].map((mark) => (
-                        <div
-                          key={mark.label}
-                          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-[11px] font-semibold"
-                          style={positionStyle(mark.value)}
-                        >
-                          <div className="relative flex items-center justify-center">
-                            {mark.showValue && (
-                              <span
-                                className={`absolute -top-7 left-1/2 -translate-x-1/2 rounded-full bg-white/80 px-2 py-0.5 shadow ${mark.className}`}
-                              >
-                                {mark.value}
-                              </span>
-                            )}
-                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-slate-500 shadow">
-                              {mark.label}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <p className="text-base font-semibold text-prose">{row.metric}</p>
+                    <span className="text-3xl font-bold text-prose">{row.score}</span>
                   </div>
                 </div>
               ))}
@@ -652,7 +610,9 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
               <div className="flex flex-col gap-2">
                 <h3 className="text-xl font-semibold text-prose">Pipeline de Treinamento</h3>
                 <p className="text-sm text-prose-light max-w-4xl">
-                  O diagrama demonstra como o Rio 2.5 simultaneamente maximiza três objetivos: RL, SFT e OPD,
+                  Primeiro, o modelo passa por RLPT, onde sua base de conhecimento é fortalecida de maneira ampla.
+                  <br />
+                  O diagrama demonstra como o Rio 2.0 14B simultaneamente maximiza três objetivos: RL, SFT e OPD,
                   <br />
                   com um router adaptativo equilibrando os pesos dados a cada método.
                 </p>
@@ -687,6 +647,31 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
                           <circle
                             cx={connectorMetrics.baseLine.x}
                             cy={connectorMetrics.baseLine.endY}
+                            r={3}
+                            fill="currentColor"
+                          />
+                        </>
+                      )}
+                      {connectorMetrics.pretrainLine && (
+                        <>
+                          <line
+                            x1={connectorMetrics.pretrainLine.x}
+                            y1={connectorMetrics.pretrainLine.startY}
+                            x2={connectorMetrics.pretrainLine.x}
+                            y2={connectorMetrics.pretrainLine.endY}
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                            strokeLinecap="round"
+                          />
+                          <circle
+                            cx={connectorMetrics.pretrainLine.x}
+                            cy={connectorMetrics.pretrainLine.startY}
+                            r={3}
+                            fill="currentColor"
+                          />
+                          <circle
+                            cx={connectorMetrics.pretrainLine.x}
+                            cy={connectorMetrics.pretrainLine.endY}
                             r={3}
                             fill="currentColor"
                           />
@@ -761,16 +746,30 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
                       <div>
                         <p className="text-sm font-semibold text-prose">Base model</p>
                       </div>
-                    </div>
-                    <div className="h-8 w-0.5 bg-slate-200 md:hidden" />
                   </div>
+                  <div className="h-8 w-0.5 bg-slate-200 md:hidden" />
+                </div>
 
-                  <div ref={routerRef} className="relative z-10 flex flex-col items-center gap-2">
-                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow">
-                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rio-primary/10">
-                        <Route className="h-6 w-6 text-rio-primary" />
-                      </span>
-                      <div>
+                <div ref={pretrainRef} className="relative z-10 flex flex-col items-center gap-2">
+                  <div className="h-8 w-0.5 bg-slate-200 md:hidden" />
+                  <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rio-primary/10">
+                      <Library className="h-6 w-6 text-rio-primary" />
+                    </span>
+                    <div>
+                      <p className="text-sm font-semibold text-prose">Reinforcement Learning Pre-Training</p>
+                    </div>
+                  </div>
+                  <div className="h-8 w-0.5 bg-slate-200 md:hidden" />
+                </div>
+
+                <div ref={routerRef} className="relative z-10 flex flex-col items-center gap-2">
+                  <div className="h-8 w-0.5 bg-slate-200 md:hidden" />
+                  <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rio-primary/10">
+                      <Route className="h-6 w-6 text-rio-primary" />
+                    </span>
+                    <div>
                         <p className="text-sm font-semibold text-prose">THOR Router</p>
                       </div>
                     </div>
@@ -820,7 +819,7 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
                         <Sparkles className="h-6 w-6 text-emerald-600" />
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-prose">Rio 2.5 Preview</p>
+                        <p className="text-sm font-semibold text-prose">Rio 2.0 14B</p>
                       </div>
                     </div>
                   </div>
@@ -845,14 +844,3 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
-

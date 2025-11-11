@@ -13,6 +13,11 @@ export interface CodeSnippet {
   Icon: LucideIcon;
 }
 
+export interface DatasetLink {
+  label: string;
+  url: string;
+}
+
 export interface Model {
   name: string;
   description: string;
@@ -24,9 +29,12 @@ export interface Model {
   
   // Detailed view fields
   baseModel?: string;
+  baseModelUrl?: string;
   parameters?: string;
   license?: string;
+  licenseUrl?: string;
   datasets?: string[];
+  datasetLinks?: DatasetLink[];
   useCases?: UseCase[];
   codeSnippets?: CodeSnippet[];
   huggingFaceUrl?: string;

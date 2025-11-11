@@ -43,9 +43,21 @@ export const RIO_MODELS: Model[] = [
     tags: ['Open Source', 'CC BY 4.0', '30B Parâmetros', 'Research Preview'],
     isOpenSource: true,
     baseModel: 'Qwen 3 30B-A3B 2507 Thinking',
+    baseModelUrl: 'https://huggingface.co/Qwen/Qwen3-30B-A3B-Thinking-2507',
     parameters: '30 Bilhões (3B ativados)',
     license: 'Creative Commons Attribution 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/deed.en',
     datasets: ['nvidia/OpenScienceReasoning-2', 'nvidia/Nemotron-Post-Training-Dataset-v1'],
+    datasetLinks: [
+      {
+        label: 'nvidia/OpenScienceReasoning-2',
+        url: 'https://huggingface.co/datasets/nvidia/OpenScienceReasoning-2',
+      },
+      {
+        label: 'nvidia/Nemotron-Post-Training-Dataset-v1',
+        url: 'https://huggingface.co/datasets/nvidia/Nemotron-Post-Training-Dataset-v1',
+      },
+    ],
     huggingFaceUrl: 'https://huggingface.co/IPLANRIO/rio-2.5-preview',
     codeSnippets: [
       {
@@ -79,31 +91,23 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-preview")
     Icon: GitBranch,
     tags: ['Open Source', 'CC BY 4.0', '14B Parâmetros'],
     isOpenSource: true,
-    baseModel: 'Qwen 2.5 14B',
+    baseModel: 'Qwen 2.5 14B Instruct',
+    baseModelUrl: 'https://huggingface.co/Qwen/Qwen2.5-14B-Instruct',
     parameters: '14 Bilhões',
     license: 'Creative Commons Attribution 4.0 (CC BY 4.0)',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/deed.en',
     datasets: ['nvidia/OpenScienceReasoning-2', 'nvidia/Nemotron-Post-Training-Dataset-v1'],
-    huggingFaceUrl: 'https://huggingface.co/IPLANRIO/rio-2.0-14b',
-    useCases: [
+    datasetLinks: [
       {
-        title: 'Pesquisa Acadêmica',
-        description:
-          'Ideal para pesquisadores que precisam de um modelo poderoso e acessível para experimentação em português.',
-        Icon: GraduationCap,
+        label: 'nvidia/OpenScienceReasoning-2',
+        url: 'https://huggingface.co/datasets/nvidia/OpenScienceReasoning-2',
       },
       {
-        title: 'Prototipagem Rápida',
-        description:
-          'Permite que startups e desenvolvedores criem e testem novas aplicações de IA com baixo custo de entrada.',
-        Icon: Hammer,
-      },
-      {
-        title: 'Ferramentas Internas',
-        description:
-          'Pode ser ajustado e implantado para criar assistentes de código, chatbots de suporte e outras ferramentas customizadas.',
-        Icon: FlaskConical,
+        label: 'nvidia/Nemotron-Post-Training-Dataset-v1',
+        url: 'https://huggingface.co/datasets/nvidia/Nemotron-Post-Training-Dataset-v1',
       },
     ],
+    huggingFaceUrl: 'https://huggingface.co/IPLANRIO/rio-2.0-14b',
     codeSnippets: [
       {
         lang: 'Python',
