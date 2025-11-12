@@ -10,6 +10,7 @@ import { AnimateOnScroll } from './AnimateOnScroll';
 import { ArrowUpRight } from 'lucide-react';
 import { Rio25PreviewDetail } from './detail/Rio25PreviewDetail';
 import { Rio2014BDetail } from './detail/Rio2014BDetail';
+import { Rio2032BDetail } from './detail/Rio2032BDetail';
 
 interface ModelDetailViewProps {
   model: Model;
@@ -23,6 +24,10 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
 
   if (model.name === 'Rio 2.0 14B') {
     return <Rio2014BDetail model={model} onBack={onBack} />;
+  }
+
+  if (model.name === 'Rio 2.0 32B') {
+    return <Rio2032BDetail model={model} onBack={onBack} />;
   }
 
   return (

@@ -6,17 +6,17 @@ import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { DetailSpecs } from './DetailSpecs';
 import { AnimateOnScroll } from '../AnimateOnScroll';
 
-interface Rio2014BDetailProps {
+interface Rio2032BDetailProps {
   model: Model;
   onBack: () => void;
 }
 
 const BENCHMARKS: Array<{ metric: string; score: string; note?: string }> = [
-  { metric: 'GPQA Diamond', score: '75.1' },
-  { metric: 'AIME 2025', score: '88.1' },
-  { metric: 'AIME 2024', score: '91.6' },
-  { metric: 'MMLU Pro', score: '76.9' },
-  { metric: 'HLE (text)', score: '12.8' },
+  { metric: 'GPQA Diamond', score: '77,1' },
+  { metric: 'AIME 2025', score: '91,2' },
+  { metric: 'AIME 2024', score: '94,0' },
+  { metric: 'MMLU Pro', score: '81,4' },
+  { metric: 'HLE (text)', score: '14,1' },
 ];
 
 type ComparisonMetric = 'gpqa' | 'aime';
@@ -60,7 +60,7 @@ const LABEL_POSITION_OVERRIDES: Partial<Record<string, LabelOverride>> = {
 const MODEL_COMPARISON: ModelComparisonDatum[] = [
   { model: 'Gemini 2.5 Pro', cost: 10, gpqa: 86.4, aime: 88, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5', cost: 10, gpqa: 85.7, aime: 94.6, color: '#9CA3AF', isRio: false },
-  { model: 'Rio 2.0 14B', cost: 0.15, gpqa: 75.1, aime: 88.1, color: '#1E40AF', isRio: true },
+  { model: 'Rio 2.0 32B', cost: 0.3, gpqa: 77.1, aime: 91.2, color: '#1E40AF', isRio: true },
   { model: 'Gemini 2.5 Flash', cost: 2.5, gpqa: 79, aime: 78, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5 mini', cost: 2, gpqa: 82.3, aime: 91.1, color: '#9CA3AF', isRio: false },
   { model: 'Gemini 2.5 Flash-Lite', cost: 0.4, gpqa: 71, aime: 69, color: '#9CA3AF', isRio: false },
@@ -71,7 +71,7 @@ const MODEL_COMPARISON: ModelComparisonDatum[] = [
 
 const COST_TICKS = [0.1, 1, 10];
 const COST_DOMAIN = {
-  min: 0.05,
+  min: 0.1,
   max: 30,
 };
 const DEFAULT_Y_MIN = 65;
@@ -385,7 +385,7 @@ const ComparisonChart: React.FC<{
     </div>
   );
 };
-export const Rio2014BDetail: React.FC<Rio2014BDetailProps> = ({ model, onBack }) => {
+export const Rio2032BDetail: React.FC<Rio2032BDetailProps> = ({ model, onBack }) => {
   const [modeWeights, setModeWeights] = useState<Record<string, number>>(DEFAULT_MODE_WEIGHTS);
   const baseRef = useRef<HTMLDivElement | null>(null);
   const pretrainRef = useRef<HTMLDivElement | null>(null);
@@ -612,7 +612,7 @@ export const Rio2014BDetail: React.FC<Rio2014BDetailProps> = ({ model, onBack })
                 <p className="text-sm text-prose-light max-w-4xl">
                   Primeiro, o modelo passa por RLPT, onde sua base de conhecimento é fortalecida de maneira ampla.
                   <br />
-                  O diagrama demonstra como o Rio 2.0 14B simultaneamente maximiza três objetivos: RL, SFT e OPD,
+                  O diagrama demonstra como o Rio 2.0 32B simultaneamente maximiza três objetivos: RL, SFT e OPD,
                   <br />
                   com um router adaptativo equilibrando os pesos dados a cada método.
                 </p>
@@ -819,7 +819,7 @@ export const Rio2014BDetail: React.FC<Rio2014BDetailProps> = ({ model, onBack })
                         <Sparkles className="h-6 w-6 text-emerald-600" />
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-prose">Rio 2.0 14B</p>
+                        <p className="text-sm font-semibold text-prose">Rio 2.0 32B</p>
                       </div>
                     </div>
                   </div>

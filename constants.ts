@@ -33,6 +33,23 @@ export const RIO_MODELS: Model[] = [
     category: 'Linguagem',
     Icon: Cpu,
     tags: ['Linguagem', '32B Parâmetros'],
+    baseModel: 'Qwen 2.5 32B Instruct',
+    baseModelUrl: 'https://huggingface.co/Qwen/Qwen2.5-32B-Instruct',
+    parameters: '32 Bilhões',
+    license: 'Uso proprietário (não open source)',
+    codeSnippets: [
+      {
+        lang: 'cURL',
+        Icon: Terminal,
+        code: `curl -X POST https://api.iplan.rio/v1/chat/completions \\
+-H "Authorization: Bearer $RIO_API_KEY" \\
+-H "Content-Type: application/json" \\
+-d '{
+  "model": "rio-2.0-32b",
+  "messages": [{"role": "user", "content": "Resuma o plano diretor de mobilidade do Rio."}]
+}'`,
+      },
+    ],
   },
   {
     name: 'Rio 2.5 Preview',
