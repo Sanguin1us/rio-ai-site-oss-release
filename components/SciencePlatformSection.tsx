@@ -13,7 +13,7 @@ export const SciencePlatformSection = () => {
 
           <AnimateOnScroll delay={200} className="mt-12 lg:mt-0">
             <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
-              Rio 2.0 Evolve: laboratório evolutivo com o Rio 2.0 32B Omni
+              Rio 2.0 Evolve: laboratório evolutivo com o Rio 2.0 Omni
             </h2>
             <p className="mt-4 text-lg text-prose-light">
               O Rio 2.0 Evolve é o motor de experimentos da prefeitura. Ele transforma um pedido em português simples
@@ -44,7 +44,7 @@ export const SciencePlatformSection = () => {
                   </p>
                 </dt>
                 <dd className="mt-1 text-base text-prose-light">
-                  O Rio 2.0 32B Omni usa soluções campeãs anteriores como semente e cria variações explicadas, com custo
+                  O Rio 2.0 Omni usa soluções campeãs anteriores como semente e cria variações explicadas, com custo
                   estimado e indicadores de resultado.
                 </dd>
               </div>

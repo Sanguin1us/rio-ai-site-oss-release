@@ -60,7 +60,7 @@ const LABEL_POSITION_OVERRIDES: Partial<Record<string, LabelOverride>> = {
 const MODEL_COMPARISON: ModelComparisonDatum[] = [
   { model: 'Gemini 3 Pro', cost: 12, gpqa: 91.9, aime: 95.0, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5.1', cost: 10, gpqa: 88.1, aime: 94.0, color: '#9CA3AF', isRio: false },
-  { model: 'Rio 2.0 14B', cost: 0.15, gpqa: 75.1, aime: 88.1, color: '#1E40AF', isRio: true },
+  { model: 'Rio 2.0 Preview', cost: 0.15, gpqa: 75.1, aime: 88.1, color: '#1E40AF', isRio: true },
   { model: 'Gemini 2.5 Flash', cost: 2.5, gpqa: 79, aime: 78, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5 mini', cost: 2, gpqa: 82.3, aime: 91.1, color: '#9CA3AF', isRio: false },
   { model: 'Gemini 2.5 Flash-Lite', cost: 0.4, gpqa: 71, aime: 69, color: '#9CA3AF', isRio: false },
@@ -612,7 +612,7 @@ export const Rio2014BDetail: React.FC<Rio2014BDetailProps> = ({ model, onBack })
                 <p className="text-sm text-prose-light max-w-4xl">
                   Primeiro, o modelo passa por RLPT, onde sua base de conhecimento é fortalecida de maneira ampla.
                   <br />
-                  O diagrama demonstra como o Rio 2.0 14B simultaneamente maximiza três objetivos: RL, SFT e OPD,
+                  O diagrama demonstra como o Rio 2.0 Preview simultaneamente maximiza três objetivos: RL, SFT e OPD,
                   <br />
                   com um router adaptativo equilibrando os pesos dados a cada método.
                 </p>
@@ -819,7 +819,7 @@ export const Rio2014BDetail: React.FC<Rio2014BDetailProps> = ({ model, onBack })
                         <Sparkles className="h-6 w-6 text-emerald-600" />
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-prose">Rio 2.0 14B</p>
+                        <p className="text-sm font-semibold text-prose">Rio 2.0 Preview</p>
                       </div>
                     </div>
                   </div>

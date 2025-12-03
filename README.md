@@ -13,7 +13,7 @@ Portal institucional da Prefeitura do Rio/Escritório de Dados para apresentar a
 - **Home / Catálogo** — hero com CTA, filtro por categoria e cartões clicáveis que descrevem cada modelo.
 - **Detalhe do modelo** — visões de casos de uso, snippets com highlight, specs formatadas e playground embutido quando `supportsChat` é verdadeiro.
 - **Comparativos externos** — Rio 2.5 Preview ganhou dois gráficos de dispersão (AIME 2025 e GPQA-Diamond) com escala logarítmica, marcações customizáveis e destaque visual para o próprio modelo.
-- **Chat Rio 2.0 32B Omni** — suporta Markdown, GFM, KaTeX, realce de código, edição de mensagens e cópia rápida.
+- **Chat Rio 2.0 Omni** — suporta Markdown, GFM, KaTeX, realce de código, edição de mensagens e cópia rápida.
 - **Open Source** – lista modelos com `isOpenSource`, destacando licenças CC BY 4.0 e atalhos para Hugging Face.
 - **Plataforma Evolve** – storytelling sobre fluxo evolutivo com terminal animado e etapas descritas em bullet points.
 

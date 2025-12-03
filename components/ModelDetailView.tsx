@@ -22,11 +22,15 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
     return <Rio25PreviewDetail model={model} onBack={onBack} />;
   }
 
-  if (model.name === 'Rio 2.0 14B') {
+  if (model.name === 'Rio 2.0 Preview') {
     return <Rio2014BDetail model={model} onBack={onBack} />;
   }
 
-  if (model.name === 'Rio 2.0 32B') {
+  if (model.name === 'Rio 2.5') {
+    return <Rio2032BDetail model={model} onBack={onBack} />;
+  }
+
+  if (model.name === 'Rio 2.0') {
     return <Rio2032BDetail model={model} onBack={onBack} />;
   }
 
@@ -83,7 +87,7 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
                 <div className="rounded-lg border border-slate-200 bg-white p-6">
                   <h3 className="text-lg font-semibold text-prose">Demo interativa indisponível</h3>
                   <p className="mt-2 text-sm text-prose-light">
-                    O chat ao vivo está disponível apenas para o modelo flagship Rio 2.0 32B Omni.
+                    O chat ao vivo está disponível apenas para o modelo flagship Rio 2.0 Omni.
                   </p>
                 </div>
               )}

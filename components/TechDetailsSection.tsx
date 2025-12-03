@@ -28,10 +28,10 @@ export const TechDetailsSection = () => {
               </p>
               <ul className="mt-4 space-y-2 text-sm text-slate-700">
                 <li>
-                  <span className="font-semibold text-rio-primary">Rio 2.0 32B:</span> Pós-treinado do Qwen 2.5 32B
+                  <span className="font-semibold text-rio-primary">Rio 2.0:</span> Pós-treinado do Qwen 2.5 32B
                 </li>
                 <li>
-                  <span className="font-semibold text-rio-primary">Rio 2.0 14B:</span> Pós-treinado do Qwen 2.5 14B
+                  <span className="font-semibold text-rio-primary">Rio 2.0 Preview:</span> Pós-treinado do Qwen 2.5 14B
                 </li>
               </ul>
             </div>

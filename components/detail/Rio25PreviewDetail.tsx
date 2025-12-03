@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Model } from '../../types';
-import { ArrowLeft, ArrowUpRight, Bolt, Box, Dumbbell, Goal, Route, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowUpRight, Bolt, Box, Dumbbell, Goal, Library, Route, Sparkles } from 'lucide-react';
 import { DetailUseCases } from './DetailUseCases';
 import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { DetailSpecs } from './DetailSpecs';
@@ -37,6 +37,9 @@ interface ConnectorLayout {
   height: number;
   baseBottom: number;
   baseCenter: number;
+  pretrainTop: number;
+  pretrainCenter: number;
+  pretrainBottom: number;
   routerTop: number;
   routerCenter: number;
   routerBottom: number;
@@ -412,6 +415,7 @@ const ComparisonChart: React.FC<{
 export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, onBack }) => {
   const [modeWeights, setModeWeights] = useState<Record<string, number>>(DEFAULT_MODE_WEIGHTS);
   const baseRef = useRef<HTMLDivElement | null>(null);
+  const pretrainRef = useRef<HTMLDivElement | null>(null);
   const connectorRef = useRef<HTMLDivElement | null>(null);
   const routerRef = useRef<HTMLDivElement | null>(null);
   const cardGridRef = useRef<HTMLDivElement | null>(null);
@@ -421,22 +425,24 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
     model.huggingFaceUrl ?? 'https://huggingface.co/krzonkalla/rio-2.5-preview-beta';
 
   const measureConnectorLayout = useCallback(() => {
-    if (
-      typeof window === 'undefined' ||
-      !baseRef.current ||
-      !connectorRef.current ||
-      !routerRef.current ||
-      !cardGridRef.current ||
-      !rioRef.current
-    ) {
+  if (
+    typeof window === 'undefined' ||
+    !baseRef.current ||
+    !pretrainRef.current ||
+    !connectorRef.current ||
+    !routerRef.current ||
+    !cardGridRef.current ||
+    !rioRef.current
+  ) {
       return;
     }
 
-    const containerRect = connectorRef.current.getBoundingClientRect();
-    const baseRect = baseRef.current.getBoundingClientRect();
-    const routerRect = routerRef.current.getBoundingClientRect();
-    const cardsRect = cardGridRef.current.getBoundingClientRect();
-    const rioRect = rioRef.current.getBoundingClientRect();
+  const containerRect = connectorRef.current.getBoundingClientRect();
+  const baseRect = baseRef.current.getBoundingClientRect();
+  const pretrainRect = pretrainRef.current.getBoundingClientRect();
+  const routerRect = routerRef.current.getBoundingClientRect();
+  const cardsRect = cardGridRef.current.getBoundingClientRect();
+  const rioRect = rioRef.current.getBoundingClientRect();
     const cardNodes = Array.from(
       cardGridRef.current.querySelectorAll<HTMLElement>('[data-connector-card="true"]'),
     );
@@ -455,6 +461,9 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
       height: containerRect.height,
       baseBottom: baseRect.bottom - containerRect.top,
       baseCenter: baseRect.left - containerRect.left + baseRect.width / 2,
+      pretrainTop: pretrainRect.top - containerRect.top,
+      pretrainCenter: pretrainRect.left - containerRect.left + pretrainRect.width / 2,
+      pretrainBottom: pretrainRect.bottom - containerRect.top,
       routerTop: routerRect.top - containerRect.top,
       routerCenter: routerRect.left - containerRect.left + routerRect.width / 2,
       routerBottom: routerRect.bottom - containerRect.top,
@@ -498,9 +507,14 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
     const baseLine = {
       x: connectorLayout.baseCenter ?? centerX,
       startY: connectorLayout.baseBottom,
+      endY: connectorLayout.pretrainTop,
+    };
+    const pretrainLine = {
+      x: connectorLayout.pretrainCenter ?? centerX,
+      startY: connectorLayout.pretrainBottom,
       endY: connectorLayout.routerTop,
     };
-    return { centerX, firstX, lastX, topRailY, bottomRailY, baseLine };
+    return { centerX, firstX, lastX, topRailY, bottomRailY, baseLine, pretrainLine };
   }, [connectorLayout]);
 
   return (
@@ -692,6 +706,31 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
                           />
                         </>
                       )}
+                      {connectorMetrics.pretrainLine && (
+                        <>
+                          <line
+                            x1={connectorMetrics.pretrainLine.x}
+                            y1={connectorMetrics.pretrainLine.startY}
+                            x2={connectorMetrics.pretrainLine.x}
+                            y2={connectorMetrics.pretrainLine.endY}
+                            stroke="currentColor"
+                            strokeWidth={1.5}
+                            strokeLinecap="round"
+                          />
+                          <circle
+                            cx={connectorMetrics.pretrainLine.x}
+                            cy={connectorMetrics.pretrainLine.startY}
+                            r={3}
+                            fill="currentColor"
+                          />
+                          <circle
+                            cx={connectorMetrics.pretrainLine.x}
+                            cy={connectorMetrics.pretrainLine.endY}
+                            r={3}
+                            fill="currentColor"
+                          />
+                        </>
+                      )}
                       <line
                         x1={connectorMetrics.centerX}
                         y1={connectorLayout.routerBottom}
@@ -760,6 +799,18 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
                       </span>
                       <div>
                         <p className="text-sm font-semibold text-prose">Base model</p>
+                      </div>
+                    </div>
+                    <div className="h-8 w-0.5 bg-slate-200 md:hidden" />
+                  </div>
+
+                  <div ref={pretrainRef} className="relative z-10 flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow">
+                      <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rio-primary/10">
+                        <Library className="h-6 w-6 text-rio-primary" />
+                      </span>
+                      <div>
+                        <p className="text-sm font-semibold text-prose">Reinforcement Learning Pre-Training</p>
                       </div>
                     </div>
                     <div className="h-8 w-0.5 bg-slate-200 md:hidden" />
@@ -845,13 +896,6 @@ export const Rio25PreviewDetail: React.FC<Rio25PreviewDetailProps> = ({ model, o
     </div>
   );
 };
-
-
-
-
-
-
-
 
 
 

@@ -11,12 +11,22 @@ interface Rio2032BDetailProps {
   onBack: () => void;
 }
 
-const BENCHMARKS: Array<{ metric: string; score: string; note?: string }> = [
+const BENCHMARKS_RIO20: Array<{ metric: string; score: string; note?: string }> = [
   { metric: 'GPQA Diamond', score: '77,1' },
   { metric: 'AIME 2025', score: '91,2' },
   { metric: 'AIME 2024', score: '94,0' },
   { metric: 'MMLU Pro', score: '81,4' },
   { metric: 'HLE (text)', score: '14,1' },
+];
+
+const BENCHMARKS_RIO25: Array<{ metric: string; score: string; note?: string }> = [
+  { metric: 'AIME 2025', score: '95,4' },
+  { metric: 'GPQA Diamond', score: '84,1' },
+  { metric: 'HMMT 2025', score: '94,2' },
+  { metric: 'BrowseComp', score: '63,0' },
+  { metric: 'HLE (text with search)', score: '47,4' },
+  { metric: 'SWE-bench Verified', score: '70,2' },
+  { metric: 'LiveCodeBench v6', score: '85,0' },
 ];
 
 type ComparisonMetric = 'gpqa' | 'aime';
@@ -57,10 +67,22 @@ const LABEL_POSITION_OVERRIDES: Partial<Record<string, LabelOverride>> = {
   'Gemini 2.5 Flash-Lite': { gpqa: 'bottom-right' },
 };
 
-const MODEL_COMPARISON: ModelComparisonDatum[] = [
+const MODEL_COMPARISON_RIO20: ModelComparisonDatum[] = [
   { model: 'Gemini 3 Pro', cost: 12, gpqa: 91.9, aime: 95.0, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5.1', cost: 10, gpqa: 88.1, aime: 94.0, color: '#9CA3AF', isRio: false },
-  { model: 'Rio 2.0 32B', cost: 0.3, gpqa: 77.1, aime: 91.2, color: '#1E40AF', isRio: true },
+  { model: 'Rio 2.0', cost: 0.3, gpqa: 77.1, aime: 91.2, color: '#1E40AF', isRio: true },
+  { model: 'Gemini 2.5 Flash', cost: 2.5, gpqa: 79, aime: 78, color: '#9CA3AF', isRio: false },
+  { model: 'GPT-5 mini', cost: 2, gpqa: 82.3, aime: 91.1, color: '#9CA3AF', isRio: false },
+  { model: 'Gemini 2.5 Flash-Lite', cost: 0.4, gpqa: 71, aime: 69, color: '#9CA3AF', isRio: false },
+  { model: 'GPT-5 nano', cost: 0.4, gpqa: 71.2, aime: 85.2, color: '#9CA3AF', isRio: false },
+  { model: 'Claude Sonnet 4.5', cost: 15, gpqa: 83.4, aime: 87, color: '#9CA3AF', isRio: false },
+  { model: 'Claude Haiku 4.5', cost: 5, gpqa: 73, aime: 80.7, color: '#9CA3AF', isRio: false },
+];
+
+const MODEL_COMPARISON_RIO25: ModelComparisonDatum[] = [
+  { model: 'Gemini 3 Pro', cost: 12, gpqa: 91.9, aime: 95.0, color: '#9CA3AF', isRio: false },
+  { model: 'GPT-5.1', cost: 10, gpqa: 88.1, aime: 94.0, color: '#9CA3AF', isRio: false },
+  { model: 'Rio 2.5', cost: 0.15, gpqa: 84.1, aime: 95.4, color: '#1E40AF', isRio: true },
   { model: 'Gemini 2.5 Flash', cost: 2.5, gpqa: 79, aime: 78, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5 mini', cost: 2, gpqa: 82.3, aime: 91.1, color: '#9CA3AF', isRio: false },
   { model: 'Gemini 2.5 Flash-Lite', cost: 0.4, gpqa: 71, aime: 69, color: '#9CA3AF', isRio: false },
@@ -140,7 +162,8 @@ const ComparisonChart: React.FC<{
   label: string;
   yTicks: number[];
   minY?: number;
-}> = ({ metric, label, yTicks, minY }) => {
+  data: ModelComparisonDatum[];
+}> = ({ metric, label, yTicks, minY, data }) => {
   const [hovered, setHovered] = React.useState<ModelComparisonDatum | null>(null);
   const { width, height } = CHART_DIMENSIONS;
   const { top, right, bottom, left } = CHART_PADDING;
@@ -148,7 +171,7 @@ const ComparisonChart: React.FC<{
   const plotHeight = height - top - bottom;
   const logMin = Math.log10(COST_DOMAIN.min);
   const logMax = Math.log10(COST_DOMAIN.max);
-  const metricValues = MODEL_COMPARISON.map((item) => item[metric]);
+  const metricValues = data.map((item) => item[metric]);
   const domainMinBase = minY ?? DEFAULT_Y_MIN;
   const domainMin = Math.min(domainMinBase, ...metricValues, yTicks[0]);
   const domainMax = Math.max(Math.max(...metricValues), yTicks[yTicks.length - 1]);
@@ -279,7 +302,7 @@ const ComparisonChart: React.FC<{
           >
             Custo por 1M tokens (USD)
           </text>
-          {MODEL_COMPARISON.map((item) => {
+          {data.map((item) => {
             const x = getX(item.cost);
             const y = getY(item[metric]);
             const defaultAnchor = x > left + plotWidth * 0.6 ? 'end' : 'start';
@@ -395,6 +418,15 @@ export const Rio2032BDetail: React.FC<Rio2032BDetailProps> = ({ model, onBack })
   const rioRef = useRef<HTMLDivElement | null>(null);
   const [connectorLayout, setConnectorLayout] = useState<ConnectorLayout | null>(null);
   const huggingFaceWeightsUrl = model.huggingFaceUrl;
+  const isRio25 = model.name === 'Rio 2.5';
+  const benchmarks = useMemo(
+    () => (isRio25 ? BENCHMARKS_RIO25 : BENCHMARKS_RIO20),
+    [isRio25]
+  );
+  const comparisonData = useMemo(
+    () => (isRio25 ? MODEL_COMPARISON_RIO25 : MODEL_COMPARISON_RIO20),
+    [isRio25]
+  );
 
   const measureConnectorLayout = useCallback(() => {
     if (
@@ -551,7 +583,7 @@ export const Rio2032BDetail: React.FC<Rio2032BDetailProps> = ({ model, onBack })
                 </div>
                 <div className="grid gap-4 lg:grid-cols-2">
                   {METRIC_CONFIGS.map((config) => (
-                    <ComparisonChart key={config.metric} {...config} />
+                    <ComparisonChart key={config.metric} {...config} data={comparisonData} />
                   ))}
                 </div>
               </div>
@@ -569,7 +601,7 @@ export const Rio2032BDetail: React.FC<Rio2032BDetailProps> = ({ model, onBack })
                   Benchmarks oficiais
                 </p>
                 <p className="mt-2 text-sm text-prose-light">
-                  Como o Rio 2.0 não tem um controlador de esforço de pensamento, definimos o uso de budget forcing como
+                  Como o modelo não tem um controlador de esforço de pensamento, definimos o uso de budget forcing como
                   seu modo high, de maneira a fazer uma comparação fiel a modelos com tais mecanismos.
                   <br />
                   Em nossos testes, a quantidade de tokens de raciocínio é comparável a modelos como o gpt-oss 20b (high).
@@ -578,7 +610,7 @@ export const Rio2032BDetail: React.FC<Rio2032BDetailProps> = ({ model, onBack })
             </div>
 
             <div className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {BENCHMARKS.map((row) => (
+              {benchmarks.map((row) => (
                 <div
                   key={row.metric}
                   className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm"
@@ -612,7 +644,7 @@ export const Rio2032BDetail: React.FC<Rio2032BDetailProps> = ({ model, onBack })
                 <p className="text-sm text-prose-light max-w-4xl">
                   Primeiro, o modelo passa por RLPT, onde sua base de conhecimento é fortalecida de maneira ampla.
                   <br />
-                  O diagrama demonstra como o Rio 2.0 32B simultaneamente maximiza três objetivos: RL, SFT e OPD,
+                  O diagrama demonstra como o Rio 2.0 simultaneamente maximiza três objetivos: RL, SFT e OPD,
                   <br />
                   com um router adaptativo equilibrando os pesos dados a cada método.
                 </p>
@@ -819,7 +851,7 @@ export const Rio2032BDetail: React.FC<Rio2032BDetailProps> = ({ model, onBack })
                         <Sparkles className="h-6 w-6 text-emerald-600" />
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-prose">Rio 2.0 32B</p>
+                        <p className="text-sm font-semibold text-prose">Rio 2.0</p>
                       </div>
                     </div>
                   </div>

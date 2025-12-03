@@ -18,7 +18,7 @@ import {
 
 export const RIO_MODELS: Model[] = [
   {
-    name: 'Rio 2.0 32B Omni',
+    name: 'Rio 2.0 Omni',
     description:
       'Nosso modelo flagship multimodal, unindo as capacidades de Transcrição, ML, Search e Visão em uma única e poderosa IA.',
     category: 'Flagship',
@@ -27,7 +27,16 @@ export const RIO_MODELS: Model[] = [
     supportsChat: true,
   },
   {
-    name: 'Rio 2.0 32B',
+    name: 'Rio 2.5 Omni',
+    description:
+      'Nosso modelo flagship multimodal, unindo as capacidades de Transcrição, ML, Search e Visão em uma única e poderosa IA.',
+    category: 'Flagship',
+    Icon: Bot,
+    tags: ['Flagship', 'Multimodal', 'State-of-the-art'],
+    supportsChat: true,
+  },
+  {
+    name: 'Rio 2.0',
     description:
       'Modelo de linguagem de grande escala pós-treinado a partir do Qwen 2.5 32B para alta performance em tarefas complexas.',
     category: 'Linguagem',
@@ -46,6 +55,31 @@ export const RIO_MODELS: Model[] = [
 -H "Content-Type: application/json" \\
 -d '{
   "model": "rio-2.0-32b",
+  "messages": [{"role": "user", "content": "Resuma o plano diretor de mobilidade do Rio."}]
+}'`,
+      },
+    ],
+  },
+  {
+    name: 'Rio 2.5',
+    description:
+      'Modelo de linguagem de grande escala pós-treinado a partir do Qwen3-Next para alta performance em tarefas complexas.',
+    category: 'Linguagem',
+    Icon: Cpu,
+    tags: ['Linguagem', '80B Parâmetros'],
+    baseModel: 'Qwen3-Next',
+    baseModelUrl: 'https://huggingface.co/Qwen/Qwen3-Next',
+    parameters: '80 Bilhões (3B ativados)',
+    license: 'Uso proprietário (não open source)',
+    codeSnippets: [
+      {
+        lang: 'cURL',
+        Icon: Terminal,
+        code: `curl -X POST https://api.iplan.rio/v1/chat/completions \\
+-H "Authorization: Bearer $RIO_API_KEY" \\
+-H "Content-Type: application/json" \\
+-d '{
+  "model": "rio-2.5",
   "messages": [{"role": "user", "content": "Resuma o plano diretor de mobilidade do Rio."}]
 }'`,
       },
@@ -101,7 +135,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-preview")
     ],
   },
   {
-    name: 'Rio 2.0 14B',
+    name: 'Rio 2.0 Preview',
     description:
       'Versão open source de alta performance, pós-treinada a partir do Qwen 2.5 14B, ideal para pesquisa e desenvolvimento.',
     category: 'Open Source',
@@ -152,13 +186,21 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
   {
     name: 'Rio 2.0 Search',
     description:
-      'Variante do Rio 2.0 32B otimizada para pesquisas na web, oferecendo respostas rápidas e custo-eficientes.',
+      'Variante do Rio 2.0 otimizada para pesquisas na web, oferecendo respostas rápidas e custo-eficientes.',
     category: 'Busca',
     Icon: ScanSearch,
     tags: ['Busca na Web', 'Rápido', 'Custo-eficiente'],
   },
   {
-    name: 'Rio 2.0 Nano Visão',
+    name: 'Rio 2.5 Search',
+    description:
+      'Variante do Rio 2.5 otimizada para pesquisas na web, oferecendo respostas rápidas e custo-eficientes.',
+    category: 'Busca',
+    Icon: ScanSearch,
+    tags: ['Busca na Web', 'Rápido', 'Custo-eficiente'],
+  },
+  {
+    name: 'Rio 2.0 Visão',
     description:
       'Especializado em visão computacional, com foco em OCR e VQA para documentos em português do Brasil.',
     category: 'Visão',
@@ -166,7 +208,23 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     tags: ['Visão', 'OCR', 'VQA', 'PT-BR'],
   },
   {
-    name: 'Rio 2.0 Nano Grounding',
+    name: 'Rio 2.5 Visão',
+    description:
+      'Especializado em visão computacional, com foco em OCR e VQA para documentos em português do Brasil.',
+    category: 'Visão',
+    Icon: Aperture,
+    tags: ['Visão', 'OCR', 'VQA', 'PT-BR'],
+  },
+  {
+    name: 'Rio 2.0 Grounding',
+    description:
+      'Treinado para detectar e localizar objetos em imagens com precisão, utilizando bounding boxes e pontos.',
+    category: 'Visão',
+    Icon: BoxSelect,
+    tags: ['Visão', 'Detecção de Objetos', 'Grounding'],
+  },
+  {
+    name: 'Rio 2.5 Grounding',
     description:
       'Treinado para detectar e localizar objetos em imagens com precisão, utilizando bounding boxes e pontos.',
     category: 'Visão',
@@ -182,6 +240,14 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     tags: ['Áudio', 'Transcrição', 'State-of-the-art', 'PT-BR'],
   },
   {
+    name: 'Rio 2.5 Transcrição',
+    description:
+      'State-of-the-art em transcrição de áudio para texto, com especialização em português do Brasil e inglês.',
+    category: 'Áudio',
+    Icon: Mic,
+    tags: ['Áudio', 'Transcrição', 'State-of-the-art', 'PT-BR'],
+  },
+  {
     name: 'Rio 2.0 Voz',
     description:
       'Gera áudio natural e realista a partir de texto, considerado state-of-the-art para sotaques brasileiros.',
@@ -190,7 +256,23 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     tags: ['Áudio', 'Text-to-Speech', 'Sotaques Brasileiros'],
   },
   {
+    name: 'Rio 2.5 Voz',
+    description:
+      'Gera áudio natural e realista a partir de texto, considerado state-of-the-art para sotaques brasileiros.',
+    category: 'Áudio',
+    Icon: Volume2,
+    tags: ['Áudio', 'Text-to-Speech', 'Sotaques Brasileiros'],
+  },
+  {
     name: 'Rio 2.0 ML',
+    description:
+      'Especializado em programação, com foco em machine learning e desenvolvimento de kernels de alta performance.',
+    category: 'Código',
+    Icon: Code2,
+    tags: ['Código', 'Machine Learning', 'Kaggle'],
+  },
+  {
+    name: 'Rio 2.5 ML',
     description:
       'Especializado em programação, com foco em machine learning e desenvolvimento de kernels de alta performance.',
     category: 'Código',
