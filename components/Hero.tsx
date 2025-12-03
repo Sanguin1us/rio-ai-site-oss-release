@@ -12,7 +12,7 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate }) => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <AnimateOnScroll>
           <h1 className="text-5xl font-black tracking-tight text-rio-primary sm:text-6xl md:text-7xl lg:text-8xl drop-shadow-[0_15px_35px_rgba(0,43,127,0.15)]">
-            Rio 2
+            Rio 2.5
           </h1>
         </AnimateOnScroll>
         <AnimateOnScroll delay={200}>

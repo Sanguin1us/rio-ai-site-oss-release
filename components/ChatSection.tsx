@@ -8,33 +8,13 @@ import remarkBreaks from 'remark-breaks';
 import rehypeKatex from 'rehype-katex';
 import 'katex/dist/katex.min.css';
 import { AnimateOnScroll } from './AnimateOnScroll';
+import { ThinkingAnimation } from './ThinkingAnimation';
 import { ChatMessage, useRioChat } from '../hooks/useRioChat';
 import { normalizeMathDelimiters } from '../lib/markdown';
 
 const codeTheme = themes.nightOwl;
 
-const ThinkingIndicator = () => (
-  <div className="flex justify-center">
-    <div className="inline-flex items-center gap-3 rounded-full border border-white/60 bg-white/80 px-4 py-2 shadow-[0_10px_28px_rgba(15,23,42,0.12)] backdrop-blur">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.35em] text-slate-500">
-        Rio 2
-      </span>
-      <span className="flex items-center gap-1.5">
-        <span
-          className="h-2 w-2 rounded-full bg-rio-primary/85 animate-[pulse_1.6s_ease-in-out_infinite]"
-        />
-        <span
-          className="h-2 w-2 rounded-full bg-rio-secondary/80 animate-[pulse_1.6s_ease-in-out_infinite]"
-          style={{ animationDelay: '0.25s' }}
-        />
-        <span
-          className="h-2 w-2 rounded-full bg-rio-accent/75 animate-[pulse_1.6s_ease-in-out_infinite]"
-          style={{ animationDelay: '0.5s' }}
-        />
-      </span>
-    </div>
-  </div>
-);
+
 
 const getNodeText = (node: React.ReactNode): string => {
   if (typeof node === 'string' || typeof node === 'number') {
@@ -221,127 +201,124 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onEdit, disableActions
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`flex max-w-[80%] flex-col gap-1 ${
-          isUser ? 'items-end text-left' : 'items-start text-left'
-        }`}
+        className={`flex max-w-[80%] flex-col gap-1 ${isUser ? 'items-end text-left' : 'items-start text-left'
+          }`}
       >
         <div
-          className={`group relative rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm transition ${
-            isUser ? 'bg-rio-primary/10 text-rio-primary' : 'bg-slate-100 text-prose'
-          }`}
+          className={`group relative rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm transition ${isUser ? 'bg-rio-primary/10 text-rio-primary' : 'bg-slate-100 text-prose'
+            }`}
         >
-        <div className="max-w-none whitespace-normal break-words text-[14px] leading-relaxed text-prose [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&>*+*]:mt-3">
-          <ReactMarkdown
-            remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]}
-            rehypePlugins={[rehypeKatex]}
-            components={{
-              a: ({ node, ...anchorProps }) => (
-                <a {...anchorProps} rel="noopener noreferrer" target="_blank" />
-              ),
-              code: CodeBlock,
-              blockquote: ({ node, className, children, ...blockquoteProps }) => (
-                <blockquote
-                  className={[
-                    className,
-                    'border-l-4 border-slate-300/70 bg-slate-100/60 px-4 py-2 italic text-prose-light',
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  {...blockquoteProps}
-                >
-                  {children}
-                </blockquote>
-              ),
-              ul: ({ node, className, ...listProps }) => (
-                <ul
-                  className={['list-disc space-y-2 pl-5', className].filter(Boolean).join(' ')}
-                  {...listProps}
-                />
-              ),
-              ol: ({ node, className, ...listProps }) => (
-                <ol
-                  className={['list-decimal space-y-2 pl-5', className].filter(Boolean).join(' ')}
-                  {...listProps}
-                />
-              ),
-              li: ({ node, className, ...itemProps }) => (
-                <li
-                  className={[
-                    'leading-relaxed',
-                    'marker:text-rio-primary/80',
-                    '[&>p:first-child]:mt-0',
-                    '[&>p:first-child]:mb-1',
-                    '[&>p:last-child]:mb-0',
-                    className,
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  {...itemProps}
-                />
-              ),
-              table: ({ node, className, children, ...tableProps }) => (
-                <div className="my-4 overflow-x-auto">
-                  <table
+          <div className="max-w-none whitespace-normal break-words text-[14px] leading-relaxed text-prose [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&>*+*]:mt-3">
+            <ReactMarkdown
+              remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]}
+              rehypePlugins={[rehypeKatex]}
+              components={{
+                a: ({ node, ...anchorProps }) => (
+                  <a {...anchorProps} rel="noopener noreferrer" target="_blank" />
+                ),
+                code: CodeBlock,
+                blockquote: ({ node, className, children, ...blockquoteProps }) => (
+                  <blockquote
                     className={[
-                      'min-w-full border-collapse text-left text-sm',
+                      className,
+                      'border-l-4 border-slate-300/70 bg-slate-100/60 px-4 py-2 italic text-prose-light',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    {...blockquoteProps}
+                  >
+                    {children}
+                  </blockquote>
+                ),
+                ul: ({ node, className, ...listProps }) => (
+                  <ul
+                    className={['list-disc space-y-2 pl-5', className].filter(Boolean).join(' ')}
+                    {...listProps}
+                  />
+                ),
+                ol: ({ node, className, ...listProps }) => (
+                  <ol
+                    className={['list-decimal space-y-2 pl-5', className].filter(Boolean).join(' ')}
+                    {...listProps}
+                  />
+                ),
+                li: ({ node, className, ...itemProps }) => (
+                  <li
+                    className={[
+                      'leading-relaxed',
+                      'marker:text-rio-primary/80',
+                      '[&>p:first-child]:mt-0',
+                      '[&>p:first-child]:mb-1',
+                      '[&>p:last-child]:mb-0',
                       className,
                     ]
                       .filter(Boolean)
                       .join(' ')}
-                    {...tableProps}
-                  >
-                    {children}
-                  </table>
-                </div>
-              ),
-              thead: ({ node, className, ...theadProps }) => (
-                <thead className={['bg-slate-200/80', className].filter(Boolean).join(' ')} {...theadProps} />
-              ),
-              tbody: ({ node, className, ...tbodyProps }) => (
-                <tbody className={['divide-y divide-slate-200', className].filter(Boolean).join(' ')} {...tbodyProps} />
-              ),
-              tr: ({ node, className, ...trProps }) => (
-                <tr className={[className, 'odd:bg-white even:bg-slate-50'].filter(Boolean).join(' ')} {...trProps} />
-              ),
-              th: ({ node, className, ...thProps }) => (
-                <th
-                  className={['px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600', className]
+                    {...itemProps}
+                  />
+                ),
+                table: ({ node, className, children, ...tableProps }) => (
+                  <div className="my-4 overflow-x-auto">
+                    <table
+                      className={[
+                        'min-w-full border-collapse text-left text-sm',
+                        className,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      {...tableProps}
+                    >
+                      {children}
+                    </table>
+                  </div>
+                ),
+                thead: ({ node, className, ...theadProps }) => (
+                  <thead className={['bg-slate-200/80', className].filter(Boolean).join(' ')} {...theadProps} />
+                ),
+                tbody: ({ node, className, ...tbodyProps }) => (
+                  <tbody className={['divide-y divide-slate-200', className].filter(Boolean).join(' ')} {...tbodyProps} />
+                ),
+                tr: ({ node, className, ...trProps }) => (
+                  <tr className={[className, 'odd:bg-white even:bg-slate-50'].filter(Boolean).join(' ')} {...trProps} />
+                ),
+                th: ({ node, className, ...thProps }) => (
+                  <th
+                    className={['px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600', className]
+                      .filter(Boolean)
+                      .join(' ')}
+                    {...thProps}
+                  />
+                ),
+                td: ({ node, className, ...tdProps }) => (
+                  <td
+                    className={['px-3 py-2 align-top text-sm text-slate-700', className].filter(Boolean).join(' ')}
+                    {...tdProps}
+                  />
+                ),
+                hr: () => <hr className="my-4 border border-slate-300/70" />,
+                p: ({ node, className, ...paragraphProps }) => {
+                  const paragraphClasses = [
+                    className,
+                    'mt-2',
+                    'mb-2',
+                    'first:mt-0',
+                    'last:mb-0',
+                    'leading-relaxed',
+                  ]
                     .filter(Boolean)
-                    .join(' ')}
-                  {...thProps}
-                />
-              ),
-              td: ({ node, className, ...tdProps }) => (
-                <td
-                  className={['px-3 py-2 align-top text-sm text-slate-700', className].filter(Boolean).join(' ')}
-                  {...tdProps}
-                />
-              ),
-              hr: () => <hr className="my-4 border border-slate-300/70" />,
-              p: ({ node, className, ...paragraphProps }) => {
-                const paragraphClasses = [
-                  className,
-                  'mt-2',
-                  'mb-2',
-                  'first:mt-0',
-                  'last:mb-0',
-                  'leading-relaxed',
-                ]
-                  .filter(Boolean)
-                  .join(' ');
-                return <p className={paragraphClasses} {...paragraphProps} />;
-              },
-            }}
-          >
-            {markdownContent}
-          </ReactMarkdown>
+                    .join(' ');
+                  return <p className={paragraphClasses} {...paragraphProps} />;
+                },
+              }}
+            >
+              {markdownContent}
+            </ReactMarkdown>
+          </div>
+          <span className="pointer-events-none absolute inset-0 rounded-2xl border border-white/0 transition group-hover:border-white/40" />
         </div>
-        <span className="pointer-events-none absolute inset-0 rounded-2xl border border-white/0 transition group-hover:border-white/40" />
-      </div>
         <div
-          className={`flex items-center gap-1 text-xs font-medium ${
-            isUser ? 'justify-end text-rio-primary' : 'justify-start text-slate-500'
-          }`}
+          className={`flex items-center gap-1 text-xs font-medium ${isUser ? 'justify-end text-rio-primary' : 'justify-start text-slate-500'
+            }`}
         >
           <button
             type="button"
@@ -450,7 +427,7 @@ export const ChatSection = () => {
     <section id="chat" className="bg-white py-20 sm:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">Converse com o Rio 2.0</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">Converse com o Rio 2.5</h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-prose-light">
             Faça uma pergunta para nosso modelo flagship.
           </p>
@@ -466,7 +443,7 @@ export const ChatSection = () => {
                   onEdit={msg.role === 'user' ? () => handleEditMessage(index) : undefined}
                 />
               ))}
-              {isLoading && <ThinkingIndicator />}
+              {isLoading && <ThinkingAnimation />}
               <div ref={chatEndRef} />
             </div>
             <div className="border-t border-slate-200 bg-white p-4">
