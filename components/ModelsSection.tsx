@@ -41,11 +41,10 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ${
-                selectedCategory === category
+              className={`rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 ${selectedCategory === category
                   ? 'bg-rio-primary text-white shadow'
                   : 'bg-white text-prose hover:bg-slate-100 border border-slate-200'
-              }`}
+                }`}
             >
               {category}
             </button>
@@ -54,7 +53,7 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {filteredModels.map((model, index) => (
-            <AnimateOnScroll key={model.name} delay={index * 100}>
+            <AnimateOnScroll key={model.name} delay={index * 50} duration="duration-500">
               <ModelCard model={model} onSelectModel={onSelectModel} />
             </AnimateOnScroll>
           ))}

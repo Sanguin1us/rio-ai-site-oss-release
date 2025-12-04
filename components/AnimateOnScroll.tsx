@@ -5,13 +5,15 @@ interface AnimateOnScrollProps {
   className?: string;
   delay?: number;
   threshold?: number;
+  duration?: string;
 }
 
-export const AnimateOnScroll: React.FC<AnimateOnScrollProps> = ({ 
-  children, 
-  className = '', 
+export const AnimateOnScroll: React.FC<AnimateOnScrollProps> = ({
+  children,
+  className = '',
   delay = 0,
-  threshold = 0.1
+  threshold = 0.1,
+  duration = 'duration-700'
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -45,9 +47,8 @@ export const AnimateOnScroll: React.FC<AnimateOnScrollProps> = ({
   return (
     <div
       ref={ref}
-      className={`${className} transition-all duration-700 ${
-        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-      }`}
+      className={`${className} transition-all ${duration} ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+        }`}
       style={{ transitionDelay: `${delay}ms` }}
     >
       {children}
