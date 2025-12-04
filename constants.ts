@@ -189,7 +189,8 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
       'Variante do Rio 2.0 otimizada para pesquisas na web, oferecendo respostas rápidas e custo-eficientes.',
     category: 'Busca',
     Icon: ScanSearch,
-    tags: ['Busca na Web', 'Rápido', 'Custo-eficiente'],
+    tags: ['Busca na Web', 'Rápido', 'Custo-eficiente', 'Open Source'],
+    isOpenSource: true,
   },
   {
     name: 'Rio 2.5 Search',
@@ -197,7 +198,8 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
       'Variante do Rio 2.5 otimizada para pesquisas na web, oferecendo respostas rápidas e custo-eficientes.',
     category: 'Busca',
     Icon: ScanSearch,
-    tags: ['Busca na Web', 'Rápido', 'Custo-eficiente'],
+    tags: ['Busca na Web', 'Rápido', 'Custo-eficiente', 'Open Source'],
+    isOpenSource: true,
   },
   {
     name: 'Rio 2.0 Visão',
