@@ -26,7 +26,7 @@ export interface Model {
   tags: string[];
   isOpenSource?: boolean;
   supportsChat?: boolean;
-  
+
   // Detailed view fields
   baseModel?: string;
   baseModelUrl?: string;
@@ -38,4 +38,13 @@ export interface Model {
   useCases?: UseCase[];
   codeSnippets?: CodeSnippet[];
   huggingFaceUrl?: string;
+}
+
+export interface ResearchPost {
+  id: string;
+  title: string;
+  summary: string;
+  date: string;
+  imageUrl: string;
+  tags: string[];
 }

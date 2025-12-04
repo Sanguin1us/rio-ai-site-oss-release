@@ -1,7 +1,7 @@
 import React from 'react';
 import { Twitter, Youtube, Github, Bot, MessageSquare, Search } from 'lucide-react';
 
-type View = 'home' | 'chat' | 'opensource';
+type View = 'home' | 'chat' | 'opensource' | 'research';
 
 interface HeaderProps {
   onNavigate: (view: View) => void;
@@ -49,6 +49,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentView }) => {
     { name: 'Home', view: 'home' },
     { name: 'Chat', view: 'chat' },
     { name: 'Open Source', view: 'opensource' },
+    { name: 'Research', view: 'research' },
   ];
 
   return (
@@ -68,9 +69,8 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentView }) => {
                   <li key={link.view}>
                     <button
                       onClick={() => onNavigate(link.view)}
-                      className={`text-sm font-medium transition-colors duration-200 ${
-                        currentView === link.view ? 'text-rio-primary' : 'text-prose hover:text-rio-primary'
-                      }`}
+                      className={`text-sm font-medium transition-colors duration-200 ${currentView === link.view ? 'text-rio-primary' : 'text-prose hover:text-rio-primary'
+                        }`}
                     >
                       {link.name}
                     </button>

@@ -5,13 +5,14 @@ import { ChatSection } from './components/ChatSection';
 import { ModelsSection } from './components/ModelsSection';
 import { OpenSourceSection } from './components/OpenSourceSection';
 import { SciencePlatformSection } from './components/SciencePlatformSection';
+import { ResearchSection } from './components/ResearchSection';
 import { TechDetailsSection } from './components/TechDetailsSection';
 import { Footer } from './components/Footer';
 import { ModelDetailView } from './components/ModelDetailView';
 import type { Model } from './types';
 import { RIO_MODELS } from './constants';
 
-type View = 'home' | 'chat' | 'opensource';
+type View = 'home' | 'chat' | 'opensource' | 'research';
 
 function App() {
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
@@ -45,6 +46,8 @@ function App() {
       case 'opensource':
         const openSourceModels = RIO_MODELS.filter(m => m.isOpenSource);
         return openSourceModels.length > 0 ? <OpenSourceSection models={openSourceModels} onSelectModel={handleSelectModel} /> : null;
+      case 'research':
+        return <ResearchSection />;
       case 'home':
       default:
         return (
