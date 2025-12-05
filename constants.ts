@@ -14,6 +14,18 @@ import {
   GraduationCap,
   Hammer,
   Terminal,
+  Sparkles,
+  Brain,
+  Globe,
+  Eye,
+  Scan,
+  AudioLines,
+  Binary,
+  Atom,
+  Music,
+  Palette,
+  Box,
+  Map,
 } from 'lucide-react';
 
 export const RIO_MODELS: Model[] = [
@@ -22,7 +34,7 @@ export const RIO_MODELS: Model[] = [
     description:
       'Nosso modelo flagship multimodal, unindo as capacidades de Transcrição, ML, Search e Visão em uma única e poderosa IA.',
     category: 'Flagship',
-    Icon: Bot,
+    Icon: Sparkles,
     tags: ['Flagship', 'Multimodal', 'State-of-the-art'],
     supportsChat: true,
   },
@@ -31,7 +43,7 @@ export const RIO_MODELS: Model[] = [
     description:
       'Nosso modelo flagship multimodal, unindo as capacidades de Transcrição, ML, Search e Visão em uma única e poderosa IA.',
     category: 'Flagship',
-    Icon: Bot,
+    Icon: Sparkles,
     tags: ['Flagship', 'Multimodal', 'State-of-the-art'],
     supportsChat: true,
   },
@@ -40,7 +52,7 @@ export const RIO_MODELS: Model[] = [
     description:
       'Modelo de linguagem de grande escala pós-treinado a partir do Qwen 2.5 32B para alta performance em tarefas complexas.',
     category: 'Linguagem',
-    Icon: Cpu,
+    Icon: Brain,
     tags: ['Linguagem', '32B Parâmetros'],
     baseModel: 'Qwen 2.5 32B Instruct',
     baseModelUrl: 'https://huggingface.co/Qwen/Qwen2.5-32B-Instruct',
@@ -65,7 +77,7 @@ export const RIO_MODELS: Model[] = [
     description:
       'Modelo de linguagem de grande escala pós-treinado a partir do Qwen3-Next para alta performance em tarefas complexas.',
     category: 'Linguagem',
-    Icon: Cpu,
+    Icon: Brain,
     tags: ['Linguagem', '80B Parâmetros'],
     baseModel: 'Qwen3-Next',
     baseModelUrl: 'https://huggingface.co/Qwen/Qwen3-Next',
@@ -90,7 +102,7 @@ export const RIO_MODELS: Model[] = [
     description:
       'Uma prévia do futuro. Este modelo open source, baseado no Qwen 3, oferece um equilíbrio excepcional entre performance e eficiência.',
     category: 'Open Source',
-    Icon: Cpu,
+    Icon: FlaskConical,
     tags: ['Open Source', 'CC BY 4.0', '30B Parâmetros', 'Research Preview'],
     isOpenSource: true,
     baseModel: 'Qwen 3 30B-A3B 2507 Thinking',
@@ -139,7 +151,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-preview")
     description:
       'Versão open source de alta performance, pós-treinada a partir do Qwen 2.5 14B, ideal para pesquisa e desenvolvimento.',
     category: 'Open Source',
-    Icon: GitBranch,
+    Icon: FlaskConical,
     tags: ['Open Source', 'CC BY 4.0', '14B Parâmetros'],
     isOpenSource: true,
     baseModel: 'Qwen 2.5 14B Instruct',
@@ -188,7 +200,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'Variante do Rio 2.0 otimizada para pesquisas na web, oferecendo respostas rápidas e custo-eficientes.',
     category: 'Busca',
-    Icon: ScanSearch,
+    Icon: Globe,
     tags: ['Busca na Web', 'Rápido', 'Custo-eficiente', 'Open Source'],
     isOpenSource: true,
   },
@@ -197,7 +209,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'Variante do Rio 2.5 otimizada para pesquisas na web, oferecendo respostas rápidas e custo-eficientes.',
     category: 'Busca',
-    Icon: ScanSearch,
+    Icon: Globe,
     tags: ['Busca na Web', 'Rápido', 'Custo-eficiente', 'Open Source'],
     isOpenSource: true,
   },
@@ -206,7 +218,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'Especializado em visão computacional, com foco em OCR e VQA para documentos em português do Brasil.',
     category: 'Visão',
-    Icon: Aperture,
+    Icon: Eye,
     tags: ['Visão', 'OCR', 'VQA', 'PT-BR'],
   },
   {
@@ -214,7 +226,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'Especializado em visão computacional, com foco em OCR e VQA para documentos em português do Brasil.',
     category: 'Visão',
-    Icon: Aperture,
+    Icon: Eye,
     tags: ['Visão', 'OCR', 'VQA', 'PT-BR'],
   },
   {
@@ -222,7 +234,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'Treinado para detectar e localizar objetos em imagens com precisão, utilizando bounding boxes e pontos.',
     category: 'Visão',
-    Icon: BoxSelect,
+    Icon: Scan,
     tags: ['Visão', 'Detecção de Objetos', 'Grounding'],
   },
   {
@@ -230,7 +242,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'Treinado para detectar e localizar objetos em imagens com precisão, utilizando bounding boxes e pontos.',
     category: 'Visão',
-    Icon: BoxSelect,
+    Icon: Scan,
     tags: ['Visão', 'Detecção de Objetos', 'Grounding'],
   },
   {
@@ -238,7 +250,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'State-of-the-art em transcrição de áudio para texto, com especialização em português do Brasil e inglês.',
     category: 'Áudio',
-    Icon: Mic,
+    Icon: AudioLines,
     tags: ['Áudio', 'Transcrição', 'State-of-the-art', 'PT-BR'],
   },
   {
@@ -246,7 +258,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'State-of-the-art em transcrição de áudio para texto, com especialização em português do Brasil e inglês.',
     category: 'Áudio',
-    Icon: Mic,
+    Icon: AudioLines,
     tags: ['Áudio', 'Transcrição', 'State-of-the-art', 'PT-BR'],
   },
   {
@@ -270,7 +282,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'Especializado em programação, com foco em machine learning e desenvolvimento de kernels de alta performance.',
     category: 'Código',
-    Icon: Code2,
+    Icon: Binary,
     tags: ['Código', 'Machine Learning', 'Kaggle'],
   },
   {
@@ -278,7 +290,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.0-14b")
     description:
       'Especializado em programação, com foco em machine learning e desenvolvimento de kernels de alta performance.',
     category: 'Código',
-    Icon: Code2,
+    Icon: Binary,
     tags: ['Código', 'Machine Learning', 'Kaggle'],
   },
 ];

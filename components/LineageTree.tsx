@@ -185,9 +185,12 @@ export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel }) => {
                         onClick={() => node.model && onSelectModel(node.model)}
                     >
                         <div className="flex items-center gap-3">
-                            {node.model?.Icon && (
-                                <node.model.Icon className={`w-5 h-5 ${isOmni ? 'text-blue-400' : 'text-slate-500'}`} />
-                            )}
+                            {(() => {
+                                const Icon = node.icon || node.model?.Icon;
+                                return Icon && (
+                                    <Icon className={`w-5 h-5 ${isOmni ? 'text-blue-400' : 'text-slate-500'}`} />
+                                );
+                            })()}
                             <span className={`font-medium text-sm ${isOmni ? 'text-white' : 'text-slate-700'}`}>
                                 {node.label}
                             </span>
