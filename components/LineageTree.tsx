@@ -68,6 +68,17 @@ export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel }) => {
                         <polygon points="0 0, 12 4.2, 0 8.4" fill="#cbd5e1" />
                     </marker>
                     <marker
+                        id="arrowhead-faded"
+                        markerWidth="12"
+                        markerHeight="8.4"
+                        refX="11"
+                        refY="4.2"
+                        orient="auto"
+                        markerUnits="userSpaceOnUse"
+                    >
+                        <polygon points="0 0, 12 4.2, 0 8.4" fill="#cbd5e1" fillOpacity="0.1" />
+                    </marker>
+                    <marker
                         id="arrowhead-active"
                         markerWidth="22"
                         markerHeight="15.4"
@@ -125,7 +136,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel }) => {
                                 width,
                                 opacity,
                                 isActive,
-                                marker: isActive ? 'arrowhead-active' : 'arrowhead'
+                                marker: isActive ? 'arrowhead-active' : (isFaded ? 'arrowhead-faded' : 'arrowhead')
                             };
                         })
                     ).filter(Boolean) as any[];
