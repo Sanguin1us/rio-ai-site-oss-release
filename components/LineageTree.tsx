@@ -1,13 +1,13 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LINEAGE_NODES } from './lineage-data';
+import type { LineageNode } from './lineage-data';
 import type { Model } from '../types';
-import { AnimateOnScroll } from './AnimateOnScroll';
 
 interface LineageTreeProps {
     onSelectModel: (model: Model) => void;
+    nodes: LineageNode[];
 }
 
-export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel }) => {
+export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel, nodes }) => {
     const [hoveredNode, setHoveredNode] = useState<string | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -92,15 +92,19 @@ export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel }) => {
                 </defs>
                 {(() => {
                     // 1. Calculate all connections first
-                    const connections = LINEAGE_NODES.flatMap((node) =>
+                    const connections = nodes.flatMap((node) =>
                         node.parents.map((parentId) => {
-                            const parent = LINEAGE_NODES.find((n) => n.id === parentId);
+                            const parent = nodes.find((n) => n.id === parentId);
                             if (!parent) return null;
 
                             const startPos = getNodePosition(parent.x, parent.y);
                             const endPos = getNodePosition(node.x, node.y);
 
-                            const startX = startPos.left + NODE_WIDTH;
+                            // If parent is hovered, it scales up (scale-105). Adjust startX to avoid overlap.
+                            const isParentHovered = hoveredNode === parent.id;
+                            const scaleOffset = isParentHovered ? 6 : 0; // Approx 4px for scale + 2px gap
+
+                            const startX = startPos.left + NODE_WIDTH + scaleOffset;
                             const startY = startPos.top + NODE_HEIGHT / 2;
                             // Shorten the end position to prevent arrow clipping
                             const endX = endPos.left - 6;
@@ -162,7 +166,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel }) => {
             </svg>
 
             {/* Nodes Layer */}
-            {LINEAGE_NODES.map((node) => {
+            {nodes.map((node) => {
                 const pos = getNodePosition(node.x, node.y);
                 const isActive = hoveredNode === node.id;
                 const isOmni = node.id === 'rio-omni';
@@ -191,7 +195,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel }) => {
                                     <Icon className={`w-5 h-5 ${isOmni ? 'text-blue-400' : 'text-slate-500'}`} />
                                 );
                             })()}
-                            <span className={`font-medium text-sm ${isOmni ? 'text-white' : 'text-slate-700'}`}>
+                            <span className={`font-medium text-sm truncate ${isOmni ? 'text-white' : 'text-slate-700'}`}>
                                 {node.label}
                             </span>
                         </div>
@@ -199,14 +203,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel }) => {
                 );
             })}
 
-            {/* Labels for Columns (Optional, for context) */}
-            <div className="absolute top-0 w-full flex text-xs font-bold text-slate-400 uppercase tracking-wider text-center">
-                <div style={{ width: '20%' }}>Origem</div>
-                <div style={{ width: '20%' }}>Capacidades</div>
-                <div style={{ width: '20%' }}>Especialistas</div>
-                <div style={{ width: '20%' }}>Avançados</div>
-                <div style={{ width: '20%' }}>Flagship</div>
-            </div>
+
         </div>
     );
 };

@@ -4,13 +4,22 @@ import { ModelCard } from './ModelCard';
 import { AnimateOnScroll } from './AnimateOnScroll';
 import { LineageTree } from './LineageTree';
 import type { Model } from '../types';
+import {
+  RIO_1_NODES,
+  RIO_1_5_NODES,
+  RIO_2_NODES,
+  RIO_2_5_NODES
+} from './lineage-data';
 
 interface ModelsSectionProps {
   onSelectModel: (model: Model) => void;
 }
 
+type Generation = '1.0' | '1.5' | '2.0' | '2.5';
+
 export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) => {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
+  const [selectedGeneration, setSelectedGeneration] = useState<Generation>('2.5');
 
   const categories = useMemo(
     () => ['Todos', ...new Set(RIO_MODELS.map((model) => model.category))],
@@ -24,6 +33,16 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
         : RIO_MODELS.filter((model) => model.category === selectedCategory),
     [selectedCategory]
   );
+
+  const currentNodes = useMemo(() => {
+    switch (selectedGeneration) {
+      case '1.0': return RIO_1_NODES;
+      case '1.5': return RIO_1_5_NODES;
+      case '2.0': return RIO_2_NODES;
+      case '2.5': return RIO_2_5_NODES;
+      default: return RIO_2_5_NODES;
+    }
+  }, [selectedGeneration]);
 
   return (
     <section id="modelos" className="bg-light-bg py-20 sm:py-24">
@@ -39,8 +58,29 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
 
         {/* Interactive Tree Visualization */}
         <AnimateOnScroll delay={100} className="mt-12 mb-16 hidden md:block">
+          {/* Generation Tabs */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex items-center p-1 bg-white border border-slate-200 rounded-full shadow-sm">
+              {(['1.0', '1.5', '2.0', '2.5'] as Generation[]).map((gen) => (
+                <button
+                  key={gen}
+                  onClick={() => setSelectedGeneration(gen)}
+                  className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${selectedGeneration === gen
+                    ? 'text-white shadow-md'
+                    : 'text-slate-500 hover:text-prose hover:bg-slate-50'
+                    }`}
+                >
+                  {selectedGeneration === gen && (
+                    <div className="absolute inset-0 bg-rio-primary rounded-full" />
+                  )}
+                  <span className="relative z-10">Rio {gen}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="bg-slate-50/50 rounded-3xl border border-slate-100 p-8 overflow-hidden">
-            <LineageTree onSelectModel={onSelectModel} />
+            <LineageTree onSelectModel={onSelectModel} nodes={currentNodes} />
           </div>
         </AnimateOnScroll>
 
