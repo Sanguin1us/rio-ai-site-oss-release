@@ -448,9 +448,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onEdit, onRegenerate, 
 };
 
 type EditingState = {
-  index: number;
-  userMessage: ChatMessage;
-  assistantMessage?: ChatMessage;
+  messageId: string;
+  originalContent: string;
 };
 
 type FeedbackState = {
@@ -470,8 +469,8 @@ export const ChatSection = () => {
     isLoading,
     handleSubmit,
     regenerate,
-    removeMessageAt,
-    insertMessageAt
+    navigateMessage,
+    editAndResubmit,
   } = useRioChat({
     model: currentModel,
   });
@@ -490,51 +489,33 @@ export const ChatSection = () => {
   }, [messages, isLoading]);
 
   const handleEditMessage = useCallback(
-    (index: number) => {
+    (messageId: string, content: string) => {
       if (isLoading) return;
-      const targetMessage = messages[index];
-      if (!targetMessage || targetMessage.role !== 'user') {
-        return;
-      }
-
-      const possibleAssistantReply =
-        index + 1 < messages.length && messages[index + 1]?.role === 'assistant'
-          ? messages[index + 1]
-          : undefined;
-
       setEditingState({
-        index,
-        userMessage: targetMessage,
-        assistantMessage: possibleAssistantReply,
+        messageId,
+        originalContent: content,
       });
-      setInput(targetMessage.content);
-
-      if (possibleAssistantReply) {
-        removeMessageAt(index + 1);
-      }
-      removeMessageAt(index);
+      setInput(content);
     },
-    [isLoading, messages, removeMessageAt, setInput]
+    [isLoading, setInput]
   );
 
   const handleCancelEdit = useCallback(() => {
     if (!editingState) return;
-
-    insertMessageAt(editingState.index, editingState.userMessage);
-    if (editingState.assistantMessage) {
-      insertMessageAt(editingState.index + 1, editingState.assistantMessage);
-    }
     setEditingState(null);
     setInput('');
-  }, [editingState, insertMessageAt, setInput]);
+  }, [editingState, setInput]);
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!input.trim() || isLoading) return;
 
-    handleSubmit();
     if (editingState) {
+      // Create a new branch with the edited content
+      editAndResubmit(editingState.messageId, input);
       setEditingState(null);
+    } else {
+      handleSubmit();
     }
   };
 
@@ -565,7 +546,7 @@ export const ChatSection = () => {
             <div className="flex-1 space-y-6 overflow-y-auto p-6">
               {messages.map((msg, index) => (
                 <ChatBubble
-                  key={`${index}-${msg.role}`}
+                  key={msg.id}
                   message={msg}
                   disableActions={isLoading}
                   onRegenerate={
@@ -575,7 +556,8 @@ export const ChatSection = () => {
                         ? () => regenerate(index - 1)
                         : undefined
                   }
-                  onEdit={msg.role === 'user' ? () => handleEditMessage(index) : undefined}
+                  onEdit={msg.role === 'user' ? () => handleEditMessage(msg.id, msg.content) : undefined}
+                  onNavigate={(direction) => navigateMessage(msg.id, direction)}
                   onFeedback={handleFeedback}
                 />
               ))}
