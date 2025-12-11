@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { Send, Copy, Check, Edit3, X, Zap, Sparkles, RefreshCw } from 'lucide-react';
+import { Send, Copy, Check, Edit3, X, Zap, Sparkles, RefreshCw, ThumbsUp, ThumbsDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Highlight, Language, themes } from 'prism-react-renderer';
 import remarkMath from 'remark-math';
@@ -11,6 +11,7 @@ import { AnimateOnScroll } from './AnimateOnScroll';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ChatMessage, useRioChat } from '../hooks/useRioChat';
 import { normalizeMathDelimiters } from '../lib/markdown';
+import { FeedbackModal, FeedbackType, FeedbackData } from './FeedbackModal';
 
 const codeTheme = themes.nightOwl;
 
@@ -33,10 +34,11 @@ interface ChatBubbleProps {
   message: ChatMessage;
   onEdit?: () => void;
   onRegenerate?: () => void;
+  onFeedback?: (type: FeedbackType, message: ChatMessage) => void;
   disableActions?: boolean;
 }
 
-const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onEdit, onRegenerate, disableActions }) => {
+const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onEdit, onRegenerate, onFeedback, disableActions }) => {
   const isUser = message.role === 'user';
   const [copiedBubble, setCopiedBubble] = useState(false);
   const bubbleCopyTimeoutRef = useRef<number | null>(null);
@@ -320,9 +322,34 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onEdit, onRegenerate, 
         <div
           className={`flex items-center gap-1 text-xs font-medium transition-opacity duration-200 ${isUser
             ? 'justify-end text-rio-primary opacity-0 group-hover:opacity-100'
-            : 'justify-start text-slate-500'
+            : 'justify-start text-slate-500 opacity-0 group-hover:opacity-100'
             }`}
         >
+          {!isUser && onFeedback && (
+            <>
+              <button
+                type="button"
+                onClick={() => onFeedback('positive', message)}
+                disabled={disableActions}
+                className={actionButtonClass}
+                aria-label="Dar feedback positivo"
+                title="Dar feedback positivo"
+              >
+                <ThumbsUp className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => onFeedback('negative', message)}
+                disabled={disableActions}
+                className={actionButtonClass}
+                aria-label="Dar feedback negativo"
+                title="Dar feedback negativo"
+              >
+                <ThumbsDown className="h-4 w-4" />
+              </button>
+            </>
+          )}
+
           {isUser && onRegenerate ? (
             <button
               type="button"
@@ -371,6 +398,12 @@ type EditingState = {
   assistantMessage?: ChatMessage;
 };
 
+type FeedbackState = {
+  isOpen: boolean;
+  type: FeedbackType;
+  message?: ChatMessage;
+};
+
 export const ChatSection = () => {
   const [isFastModel, setIsFastModel] = useState(false);
   const currentModel = isFastModel ? 'rio-2.5-fast' : 'rio-2.5';
@@ -383,11 +416,16 @@ export const ChatSection = () => {
     handleSubmit,
     removeMessageAt,
     insertMessageAt,
+    regenerate,
   } = useRioChat({
     model: currentModel,
   });
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [editingState, setEditingState] = useState<EditingState | null>(null);
+  const [feedbackState, setFeedbackState] = useState<FeedbackState>({
+    isOpen: false,
+    type: 'positive',
+  });
 
   useEffect(() => {
     if (messages.length === 0 && !isLoading) {
@@ -500,10 +538,6 @@ export const ChatSection = () => {
         // I will stick to "Edit" behavior but maybe just leave it as "Edit" if "Regenerate" is too complex?
         // No, requested "Tentar novamente".
 
-        // Let's use the `onEdit` logic but essentially it's "Resend".
-        // I will make it: Populates input (like edit) but maybe focuses input?
-        // "Regenerate" usually implies keeping the prompt effectively.
-
         // Let's pass a specialized handler.
       };
     },
@@ -537,6 +571,19 @@ export const ChatSection = () => {
     handleEditMessage(index);
   };
 
+  const handleFeedback = (type: FeedbackType, message: ChatMessage) => {
+    setFeedbackState({
+      isOpen: true,
+      type,
+      message,
+    });
+  };
+
+  const handleFeedbackSubmit = (data: FeedbackData) => {
+    console.log('Feedback submitted:', data, feedbackState.message);
+    setFeedbackState((prev) => ({ ...prev, isOpen: false }));
+  };
+
   return (
     <section id="chat" className="bg-white py-20 sm:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -554,8 +601,9 @@ export const ChatSection = () => {
                   key={`${index}-${msg.role}`}
                   message={msg}
                   disableActions={isLoading}
-                  onRegenerate={msg.role === 'user' ? () => handleEditMessage(index) : undefined}
+                  onRegenerate={msg.role === 'user' ? () => regenerate(index) : undefined}
                   onEdit={msg.role === 'user' ? () => handleEditMessage(index) : undefined}
+                  onFeedback={handleFeedback}
                 />
               ))}
               {isLoading && <ThinkingAnimation />}
@@ -645,7 +693,13 @@ export const ChatSection = () => {
             </div>
           </div>
         </AnimateOnScroll>
-      </div >
-    </section >
+      </div>
+      <FeedbackModal
+        isOpen={feedbackState.isOpen}
+        onClose={() => setFeedbackState((prev) => ({ ...prev, isOpen: false }))}
+        onSubmit={handleFeedbackSubmit}
+        type={feedbackState.type}
+      />
+    </section>
   );
 };

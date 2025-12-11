@@ -139,6 +139,75 @@ export function useRioChat(options: UseRioChatOptions = {}) {
     }
   };
 
+  const regenerate = useCallback(
+    async (index: number) => {
+      if (isLoading) return;
+
+      const messageToRetain = messages[index];
+      if (!messageToRetain) return;
+
+      const truncatedMessages = messages.slice(0, index + 1);
+      setMessages(truncatedMessages);
+      setIsLoading(true);
+
+      const historySlice =
+        typeof historyLimit === 'number' && historyLimit >= 0
+          ? truncatedMessages.slice(-historyLimit)
+          : truncatedMessages;
+
+      const payloadMessages = [
+        ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
+        ...historySlice,
+      ];
+
+      try {
+        const response = await fetch(targetApiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model,
+            messages: payloadMessages,
+            stream: false,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`API error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const assistantMessage: ChatMessage = {
+          role: 'assistant',
+          content: data.choices?.[0]?.message?.content?.trim() ?? '',
+        };
+
+        if (assistantMessage.content) {
+          setMessages((prev) => [...prev, assistantMessage]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch from Rio API', error);
+        const failureMessage: ChatMessage = {
+          role: 'assistant',
+          content: errorMessage,
+        };
+        setMessages((prev) => [...prev, failureMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [
+      isLoading,
+      messages,
+      historyLimit,
+      systemPrompt,
+      targetApiUrl,
+      model,
+      errorMessage,
+    ]
+  );
+
   return {
     messages,
     input,
@@ -147,5 +216,6 @@ export function useRioChat(options: UseRioChatOptions = {}) {
     removeMessageAt,
     insertMessageAt,
     handleSubmit,
+    regenerate,
   };
 }
