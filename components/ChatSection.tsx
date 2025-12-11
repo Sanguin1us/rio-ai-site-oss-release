@@ -114,7 +114,7 @@ const CodeBlock: React.FC<{
   }
 
   return (
-    <div className="group relative mt-3 overflow-hidden rounded-2xl border border-slate-800/80 bg-[radial-gradient(circle_at_top,_#172036,_#090b12)] text-white shadow-[0_18px_40px_-24px_rgba(8,10,20,0.9)]">
+    <div className="group relative mt-3 w-full overflow-x-auto rounded-2xl border border-slate-800/80 bg-[radial-gradient(circle_at_top,_#172036,_#090b12)] text-white shadow-[0_18px_40px_-24px_rgba(8,10,20,0.9)]">
       <div className="absolute top-1.5 left-4 right-4 flex items-center justify-between text-[11px] font-semibold text-white/70">
         <span className="inline-flex items-center rounded-full bg-white/8 px-2.5 py-1 backdrop-blur">
           {displayLanguage}
@@ -204,14 +204,14 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({ message, onEdit, onRegenerate, 
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
       <div
-        className={`group flex max-w-[80%] flex-col gap-1 ${isUser ? 'items-end text-left' : 'items-start text-left'
+        className={`group flex max-w-[80%] min-w-0 flex-col gap-1 ${isUser ? 'items-end text-left' : 'items-start text-left'
           }`}
       >
         <div
-          className={`relative rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm transition ${isUser ? 'bg-rio-primary/10 text-rio-primary' : 'bg-slate-100 text-prose'
+          className={`relative min-w-0 max-w-full overflow-hidden rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm transition ${isUser ? 'bg-rio-primary/10 text-rio-primary' : 'bg-slate-100 text-prose'
             }`}
         >
-          <div className="max-w-none whitespace-normal break-words text-[14px] leading-relaxed text-prose [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&>*+*]:mt-3">
+          <div className="min-w-0 max-w-full whitespace-normal break-words text-[14px] leading-relaxed text-prose [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&>*+*]:mt-3">
             <ReactMarkdown
               remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]}
               rehypePlugins={[rehypeKatex]}
@@ -544,7 +544,7 @@ export const ChatSection = () => {
         </AnimateOnScroll>
         <AnimateOnScroll delay={200} className="mt-12 max-w-3xl mx-auto">
           <div className="flex h-[500px] flex-col rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div className="flex-1 space-y-6 overflow-y-auto p-6">
+            <div className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-6">
               {messages.map((msg, index) => (
                 <ChatBubble
                   key={msg.id}
