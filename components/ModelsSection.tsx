@@ -92,8 +92,8 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
           {/* Button Toggle Wrapper */}
           <div
             className={`flex justify-center transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isCatalogOpen
-                ? 'max-h-0 opacity-0 scale-90 overflow-hidden'
-                : 'max-h-40 opacity-100 scale-100 py-8'
+              ? 'max-h-0 opacity-0 scale-90 overflow-hidden'
+              : 'max-h-40 opacity-100 scale-100 py-8'
               }`}
           >
             <button
@@ -117,8 +117,8 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
           {/* Expandable Content Wrapper */}
           <div
             className={`grid transition-[grid-template-rows,opacity,transform] duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCatalogOpen
-                ? 'grid-rows-[1fr] opacity-100 translate-y-0'
-                : 'grid-rows-[0fr] opacity-0 translate-y-8'
+              ? 'grid-rows-[1fr] opacity-100 translate-y-0'
+              : 'grid-rows-[0fr] opacity-0 translate-y-8'
               }`}
           >
             <div className="overflow-hidden min-h-0">
@@ -135,14 +135,14 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
                   </button>
 
                   {/* Category Filter */}
-                  <div className="flex gap-2 overflow-x-auto pb-2 w-full sm:w-auto no-scrollbar justify-center sm:justify-start">
+                  <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/80 rounded-xl backdrop-blur-sm">
                     {categories.map((category) => (
                       <button
                         key={category}
                         onClick={() => setSelectedCategory(category)}
-                        className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition-all duration-300 transform hover:scale-105 ${selectedCategory === category
-                            ? 'bg-rio-primary text-white shadow-md ring-2 ring-rio-primary ring-offset-2'
-                            : 'bg-white text-slate-600 hover:bg-slate-50 border border-slate-200 hover:border-rio-primary/30'
+                        className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${selectedCategory === category
+                            ? 'bg-white text-rio-primary shadow-sm'
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                           }`}
                       >
                         {category}
