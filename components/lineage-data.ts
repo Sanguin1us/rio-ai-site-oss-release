@@ -23,6 +23,7 @@ export interface LineageNode {
   x: number;
   y: number;
   parents: string[];
+  externalUrl?: string;
 }
 
 // Helper to find model by name (fuzzy match ignoring version)
@@ -42,8 +43,24 @@ const findModel = (name: string) => {
 // X=4: Omni
 
 export const LINEAGE_NODES: LineageNode[] = [
-  // --- Root ---
-  { id: 'qwen', label: 'Qwen 3 Next', x: 0, y: 3.5, parents: [], model: undefined },
+  {
+    id: 'qwen-30b',
+    label: 'Qwen 3 30B',
+    x: 0,
+    y: 0,
+    parents: [],
+    model: undefined,
+    externalUrl: 'https://huggingface.co/Qwen/Qwen3-30B-A3B-Thinking-2507',
+  },
+  {
+    id: 'qwen',
+    label: 'Qwen 3 Next',
+    x: 0,
+    y: 3.5,
+    parents: [],
+    model: undefined,
+    externalUrl: 'https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Thinking',
+  },
 
   // --- Generation 1 (Direct from Qwen) ---
   {
@@ -52,7 +69,7 @@ export const LINEAGE_NODES: LineageNode[] = [
     x: 1,
     y: 1,
     parents: ['qwen'],
-    model: findModel('Rio Thinking'),
+    model: RIO_MODELS.find((m) => m.name === 'Rio 2.5'),
     icon: Brain,
   },
   {
@@ -90,7 +107,7 @@ export const LINEAGE_NODES: LineageNode[] = [
     model: undefined,
     icon: Map,
   },
-  { id: 'rio-open', label: 'Rio Open', x: 1, y: 0, parents: ['qwen'], model: findModel('Open') },
+  { id: 'rio-open', label: 'Rio Open', x: 1, y: 0, parents: ['qwen-30b'], model: findModel('Open') },
 
   // --- Generation 2 ---
   // From Thinking -> Code
@@ -118,9 +135,17 @@ export const LINEAGE_NODES: LineageNode[] = [
     id: 'rio-grounding',
     label: 'Rio Grounding',
     x: 2,
-    y: 3.833,
+    y: 4.5,
     parents: ['rio-visao'],
     model: findModel('Grounding'),
+  },
+  {
+    id: 'rio-video',
+    label: 'Rio Vídeo',
+    x: 2,
+    y: 3.833,
+    parents: ['rio-visao'],
+    model: findModel('Rio Vídeo'),
   },
   {
     id: 'rio-ocr',
@@ -134,9 +159,9 @@ export const LINEAGE_NODES: LineageNode[] = [
   {
     id: 'rio-desenho',
     label: 'Rio Desenho',
-    x: 2,
-    y: 2.5,
-    parents: ['rio-visao'],
+    x: 3,
+    y: 4.5,
+    parents: ['rio-video'],
     model: undefined,
     icon: Palette,
   },
@@ -144,7 +169,7 @@ export const LINEAGE_NODES: LineageNode[] = [
     id: 'rio-3d',
     label: 'Rio 3D',
     x: 2,
-    y: 4.5,
+    y: 2.5,
     parents: ['rio-visao'],
     model: undefined,
     icon: Box,
@@ -180,7 +205,7 @@ export const LINEAGE_NODES: LineageNode[] = [
     id: 'rio-robotica',
     label: 'Rio Robótica',
     x: 3,
-    y: 5,
+    y: 5.5,
     parents: ['rio-grounding', 'rio-voz'],
     model: undefined,
     icon: Bot,
@@ -214,6 +239,11 @@ export const LINEAGE_NODES: LineageNode[] = [
       'rio-voz',
       'rio-code',
       'rio-ml',
+      'rio-video',
+      'rio-3d',
+      'rio-cientista',
+      'rio-musica',
+      'rio-robotica',
     ],
     model: findModel('Omni'),
   },
@@ -228,6 +258,7 @@ export const RIO_1_NODES: LineageNode[] = [
     y: 3.5,
     parents: [],
     model: undefined,
+    externalUrl: 'https://huggingface.co/collections/Qwen/qwen25',
   },
   {
     id: 'rio-1',
@@ -255,8 +286,18 @@ export const RIO_1_5_NODES: LineageNode[] = [
     y: 2,
     parents: [],
     model: undefined,
+    externalUrl: 'https://huggingface.co/collections/Qwen/qwen25',
   },
-  { id: 'qwen-2.5-vl', label: 'Qwen 2.5 VL', x: 0, y: 5, parents: [], model: undefined, icon: Eye },
+  {
+    id: 'qwen-2.5-vl',
+    label: 'Qwen 2.5 VL',
+    x: 0,
+    y: 5,
+    parents: [],
+    model: undefined,
+    icon: Eye,
+    externalUrl: 'https://huggingface.co/collections/Qwen/qwen25-vl',
+  },
 
   // Primary
   {
@@ -316,8 +357,18 @@ export const RIO_2_NODES: LineageNode[] = [
     y: 2,
     parents: [],
     model: undefined,
+    externalUrl: 'https://huggingface.co/collections/Qwen/qwen25',
   },
-  { id: 'qwen-2.5-vl', label: 'Qwen 2.5 VL', x: 0, y: 6, parents: [], model: undefined, icon: Eye },
+  {
+    id: 'qwen-2.5-vl',
+    label: 'Qwen 2.5 VL',
+    x: 0,
+    y: 6,
+    parents: [],
+    model: undefined,
+    icon: Eye,
+    externalUrl: 'https://huggingface.co/collections/Qwen/qwen25-vl',
+  },
 
   // Gen 1
   {
@@ -352,7 +403,7 @@ export const RIO_2_NODES: LineageNode[] = [
     x: 1,
     y: 2.5,
     parents: ['qwen-2.5-instruct'],
-    model: findModel('Rio Thinking'),
+    model: RIO_MODELS.find((m) => m.name === 'Rio 2.0'),
   },
   {
     id: 'rio-tool-use',

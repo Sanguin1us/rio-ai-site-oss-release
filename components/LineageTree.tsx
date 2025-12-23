@@ -193,7 +193,13 @@ export const LineageTree: React.FC<LineageTreeProps> = ({ onSelectModel, nodes }
             }}
             onMouseEnter={() => setHoveredNode(node.id)}
             onMouseLeave={() => setHoveredNode(null)}
-            onClick={() => node.model && onSelectModel(node.model)}
+            onClick={() => {
+              if (node.externalUrl) {
+                window.open(node.externalUrl, '_blank');
+              } else if (node.model) {
+                onSelectModel(node.model);
+              }
+            }}
           >
             <div className="flex items-center gap-3">
               {(() => {
