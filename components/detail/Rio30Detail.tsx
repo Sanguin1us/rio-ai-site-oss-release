@@ -679,7 +679,7 @@ export const Rio30Detail: React.FC<Rio30DetailProps> = ({ model, onBack }) => {
                                     return (
                                         <div
                                             ref={containerRef}
-                                            className="hidden md:block relative h-[520px] overflow-hidden rounded-3xl bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"
+                                            className="hidden md:block relative h-[520px] overflow-hidden rounded-3xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900"
                                         >
                                             {/* Background Effects */}
                                             <div
