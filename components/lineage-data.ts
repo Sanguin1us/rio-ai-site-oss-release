@@ -539,24 +539,57 @@ export const RIO_2_5_NODES = [...LINEAGE_NODES];
 
 // --- Generation 3.0 Data ---
 // Deepthink Internalization Merging: 10 Rio 2.5 Omni instances converge into Rio 3 Preview
+// Deepthink Internalization Merging: Rio 2.5 Omni acts as a central source, creating 10 specialized experts that converge into Rio 3 Preview
+// Deepthink Internalization Merging: Experts from Rio 3.0 Lineage
+import {
+  Sparkles,
+  Bot,
+  Brain,
+  Code,
+  Sigma,
+  Languages,
+  Microscope,
+  GraduationCap,
+  Lightbulb,
+  Eye,
+  BarChart3,
+  Stethoscope,
+} from 'lucide-react';
+
 export const RIO_3_NODES: LineageNode[] = [
-  // The 10 Rio 2.5 Omni instances (arranged in 2 rows of 5)
-  ...Array.from({ length: 10 }, (_, i) => ({
-    id: `rio-2.5-omni-${i + 1}`,
-    label: `Rio 2.5 Omni #${i + 1}`,
-    x: i < 5 ? i : i - 5,
-    y: i < 5 ? 0 : 1,
-    parents: [] as string[],
+  // 1. The Source: Rio 2.5 Omni (Standard Style)
+  {
+    id: 'rio-2.5-omni-source',
+    label: 'Rio 2.5 Omni',
+    x: 2,
+    y: 1,
+    parents: [],
     model: RIO_MODELS.find((m) => m.name === 'Rio 2.5 Omni'),
     icon: Sparkles,
-  })),
-  // The merged Rio 3 Preview
+  },
+
+  // 2. The 10 Specialized Experts (Matching Rio30Detail.tsx)
+  { id: 'expert-logica', label: 'Lógica', x: 0, y: 0, parents: ['rio-2.5-omni-source'], model: undefined, icon: Brain },
+  { id: 'expert-codigo', label: 'Código', x: 1, y: 0, parents: ['rio-2.5-omni-source'], model: undefined, icon: Code },
+  { id: 'expert-matematica', label: 'Matemática', x: 2, y: 0, parents: ['rio-2.5-omni-source'], model: undefined, icon: Sigma },
+  { id: 'expert-linguagem', label: 'Linguagem', x: 3, y: 0, parents: ['rio-2.5-omni-source'], model: undefined, icon: Languages },
+  { id: 'expert-ciencia', label: 'Ciência', x: 4, y: 0, parents: ['rio-2.5-omni-source'], model: undefined, icon: Microscope },
+  { id: 'expert-aprendizado', label: 'Aprendizado', x: 0, y: 2, parents: ['rio-2.5-omni-source'], model: undefined, icon: GraduationCap },
+  { id: 'expert-criatividade', label: 'Criatividade', x: 1, y: 2, parents: ['rio-2.5-omni-source'], model: undefined, icon: Lightbulb },
+  { id: 'expert-visao', label: 'Visão', x: 2, y: 2, parents: ['rio-2.5-omni-source'], model: undefined, icon: Eye },
+  { id: 'expert-analise', label: 'Análise', x: 3, y: 2, parents: ['rio-2.5-omni-source'], model: undefined, icon: BarChart3 },
+  { id: 'expert-saude', label: 'Saúde', x: 4, y: 2, parents: ['rio-2.5-omni-source'], model: undefined, icon: Stethoscope },
+
+  // 3. The Result: Rio 3 Preview
   {
     id: 'rio-3.0-preview',
     label: 'Rio 3 Preview',
     x: 2,
     y: 3,
-    parents: Array.from({ length: 10 }, (_, i) => `rio-2.5-omni-${i + 1}`),
+    parents: [
+      'expert-logica', 'expert-codigo', 'expert-matematica', 'expert-linguagem', 'expert-ciencia',
+      'expert-aprendizado', 'expert-criatividade', 'expert-visao', 'expert-analise', 'expert-saude'
+    ],
     model: RIO_MODELS.find((m) => m.name === 'Rio 3 Preview'),
     icon: Sparkles,
   },

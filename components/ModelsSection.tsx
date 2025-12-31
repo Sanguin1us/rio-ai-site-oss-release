@@ -70,8 +70,8 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
                   key={gen}
                   onClick={() => setSelectedGeneration(gen)}
                   className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${selectedGeneration === gen
-                      ? 'text-white shadow-md'
-                      : 'text-slate-500 hover:text-prose hover:bg-slate-50'
+                    ? 'text-white shadow-md'
+                    : 'text-slate-500 hover:text-prose hover:bg-slate-50'
                     }`}
                 >
                   {selectedGeneration === gen && (
@@ -84,7 +84,11 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
           </div>
 
           <div className="bg-slate-50/50 rounded-3xl border border-slate-100 p-8 overflow-hidden">
-            <LineageTree onSelectModel={onSelectModel} nodes={currentNodes} />
+            <LineageTree
+              onSelectModel={onSelectModel}
+              nodes={currentNodes}
+              variant={selectedGeneration === '3.0' ? '3d-ring' : 'tree'}
+            />
           </div>
         </AnimateOnScroll>
 
@@ -94,8 +98,8 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
           {/* Button Toggle Wrapper */}
           <div
             className={`flex justify-center transition-all duration-700 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${isCatalogOpen
-                ? 'max-h-0 opacity-0 scale-90 overflow-hidden'
-                : 'max-h-40 opacity-100 scale-100 py-8'
+              ? 'max-h-0 opacity-0 scale-90 overflow-hidden'
+              : 'max-h-40 opacity-100 scale-100 py-8'
               }`}
           >
             <button
@@ -121,8 +125,8 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
           {/* Expandable Content Wrapper */}
           <div
             className={`grid transition-[grid-template-rows,opacity,transform] duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)] ${isCatalogOpen
-                ? 'grid-rows-[1fr] opacity-100 translate-y-0'
-                : 'grid-rows-[0fr] opacity-0 translate-y-8'
+              ? 'grid-rows-[1fr] opacity-100 translate-y-0'
+              : 'grid-rows-[0fr] opacity-0 translate-y-8'
               }`}
           >
             <div className="overflow-hidden min-h-0">
@@ -145,8 +149,8 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
                         key={category}
                         onClick={() => setSelectedCategory(category)}
                         className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-all duration-300 ${selectedCategory === category
-                            ? 'bg-white text-rio-primary shadow-sm'
-                            : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
+                          ? 'bg-white text-rio-primary shadow-sm'
+                          : 'text-slate-500 hover:text-slate-700 hover:bg-white/50'
                           }`}
                       >
                         {category}
