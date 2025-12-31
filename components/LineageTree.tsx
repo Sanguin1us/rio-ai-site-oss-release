@@ -256,9 +256,33 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
                 const nodeLayout = layoutMap.get(node.id);
                 if (!parentLayout || !nodeLayout) return null;
 
+                const expertNodeId =
+                  variant === '3d-ring'
+                    ? [parentId, node.id].find(
+                      (id) =>
+                        id !== 'rio-2.5-omni-source' && id !== 'rio-3.0-preview'
+                    )
+                    : null;
+
+                let baseOpacity = 0.3;
+                let activeOpacity = 0.8;
+
+                if (variant === '3d-ring' && expertNodeId) {
+                  const layout = layoutMap.get(expertNodeId);
+                  if (layout) {
+                    // layout.opacity ranges from ~0.6 (back) to 1.0 (front)
+                    // Normalize this to 0..1 for easier mapping
+                    const normalized = Math.max(0, (layout.opacity - 0.6) / 0.4);
+                    // Map to desired opacity range: faint (0.1) to distinct (0.6)
+                    baseOpacity = 0.1 + normalized * 0.5;
+                    // Active range: 0.3 (back) to 1.0 (front)
+                    activeOpacity = 0.3 + normalized * 0.7;
+                  }
+                }
+
                 const isActive = isConnectionActive(parent.id, node.id);
                 const isFaded = hoveredNode && !isActive;
-                const opacity = isFaded ? 0.05 : isActive ? 0.8 : 0.3; // Lower opacity for 3d ring base lines
+                const opacity = isFaded ? 0.05 : isActive ? activeOpacity : baseOpacity; // Dynamic opacity for 3d ring
                 const color = isActive ? '#0070f3' : '#cbd5e1';
                 const width = isActive ? 3 : 1.5;
 
@@ -389,7 +413,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
               fill="none"
               stroke={conn.color}
               strokeWidth={conn.width}
-              strokeOpacity={conn.opacity}
+              opacity={conn.opacity}
               markerEnd={`url(#${conn.marker})`}
               className="transition-all duration-300"
               style={{ zIndex: conn.zIndex }}
