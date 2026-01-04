@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --color-rio-primary: #002B7F;
+  --color-rio-secondary: #00A859;
+  --color-rio-accent: #FFC72C;
+  --color-light-bg: #F8F9FA;
+  --color-prose: #212529;
+  --color-prose-light: #6C757D;
+  
+  --font-sans: "Inter", sans-serif;
+
+  @keyframes slide-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  --animate-slide-in: slide-in 0.5s ease-out forwards;
+}
