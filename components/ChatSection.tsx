@@ -598,16 +598,19 @@ export const ChatSection = () => {
       id: 'rio-2.5' as const,
       name: 'Rio 2.5',
       description: 'Alta precisão',
+      subtitle: 'Converse com nosso antigo modelo flagship.',
     },
     {
       id: 'rio-2.5-fast' as const,
       name: 'Rio 2.5 Flash',
       description: 'Respostas rápidas',
+      subtitle: 'Converse com nosso antigo modelo para tarefas rápidas.',
     },
     {
       id: 'rio-3.0-preview' as const,
       name: 'Rio 3',
       description: 'Estado da arte',
+      subtitle: 'Experimente o futuro com nosso modelo mais avançado até agora.',
     },
   ];
 
@@ -906,9 +909,7 @@ export const ChatSection = () => {
             Converse com o {currentModelData.name}
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-prose-light">
-            {selectedModelId === 'rio-3.0-preview'
-              ? 'Experimente o futuro com nosso modelo mais avançado até agora.'
-              : 'Faça uma pergunta para nosso modelo flagship.'}
+            {currentModelData.subtitle}
           </p>
         </AnimateOnScroll>
         <AnimateOnScroll delay={200} className="mt-12 max-w-3xl mx-auto">
