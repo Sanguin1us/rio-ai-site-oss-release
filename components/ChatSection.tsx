@@ -717,39 +717,78 @@ export const ChatSection = () => {
     }
   }, [selectedModelId]);
 
-  useEffect(() => {
-    if (messages.length === 0 && !isLoading) {
-      return;
-    }
+  // Track previous state to detect transitions
+  const prevIsLoadingRef = useRef(isLoading);
+  const prevMessageCountRef = useRef(messages.length);
 
+  useEffect(() => {
     const chatContainer = chatEndRef.current?.parentElement;
     if (!chatContainer) return;
 
-    // When loading (awaiting response), scroll so the last user message is at the top
-    // This creates space below for the AI response, like Claude's UX
-    if (isLoading) {
-      const lastUserMessageIndex = messages.findLastIndex(m => m.role === 'user');
-      if (lastUserMessageIndex !== -1) {
-        const messageElements = chatContainer.querySelectorAll('[data-message-id]');
-        const lastUserMessageEl = messageElements?.[lastUserMessageIndex] as HTMLElement | undefined;
+    const wasLoading = prevIsLoadingRef.current;
+    const prevMessageCount = prevMessageCountRef.current;
+    const messageCountChanged = messages.length !== prevMessageCount;
 
-        if (lastUserMessageEl) {
-          // Calculate the scroll position to put the message at the top of the container
-          const messageTop = lastUserMessageEl.offsetTop;
-          chatContainer.scrollTo({
-            top: messageTop - 16, // 16px padding from top
-            behavior: 'smooth'
-          });
-          return;
-        }
-      }
+    // Update refs for next render
+    prevIsLoadingRef.current = isLoading;
+    prevMessageCountRef.current = messages.length;
+
+    // When there are no messages, do nothing
+    if (messages.length === 0) {
+      return;
     }
 
-    // Default: scroll to bottom with smooth animation
-    chatContainer.scrollTo({
-      top: chatContainer.scrollHeight,
-      behavior: 'smooth'
-    });
+    // When a new user message is added (user just sent a message)
+    // This is detected by: messageCount increased AND the last user message was just added
+    const lastUserMessageIndex = messages.findLastIndex(m => m.role === 'user');
+    const userJustSentMessage = messageCountChanged &&
+      lastUserMessageIndex === messages.length - 1 &&
+      messages[lastUserMessageIndex]?.role === 'user';
+
+    if (userJustSentMessage) {
+      // Scroll to position the user's message at the top
+      const messageElements = chatContainer.querySelectorAll('[data-message-id]');
+      const lastUserMessageEl = messageElements?.[lastUserMessageIndex] as HTMLElement | undefined;
+
+      if (lastUserMessageEl) {
+        const messageTop = lastUserMessageEl.offsetTop;
+        chatContainer.scrollTo({
+          top: messageTop - 16, // 16px padding from top
+          behavior: 'smooth'
+        });
+      }
+      return;
+    }
+
+    // When loading just started (isLoading became true) and we have messages, ensure the last user message is visible at top
+    if (isLoading && !wasLoading && lastUserMessageIndex !== -1) {
+      const messageElements = chatContainer.querySelectorAll('[data-message-id]');
+      const lastUserMessageEl = messageElements?.[lastUserMessageIndex] as HTMLElement | undefined;
+
+      if (lastUserMessageEl) {
+        const messageTop = lastUserMessageEl.offsetTop;
+        chatContainer.scrollTo({
+          top: messageTop - 16,
+          behavior: 'smooth'
+        });
+      }
+      return;
+    }
+
+    // When response finishes (isLoading goes false), do NOT scroll - maintain position
+    // This prevents the jarring jump when the spacer would have shrunk in the old implementation
+    if (!isLoading && wasLoading) {
+      // Intentionally do nothing - keep the scroll position stable
+      return;
+    }
+
+    // For other cases (like message navigation), scroll to bottom smoothly
+    if (messageCountChanged && messages.length > 0) {
+      chatContainer.scrollTo({
+        top: chatContainer.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   }, [messages, isLoading]);
 
   const handleEditMessage = useCallback(
@@ -856,8 +895,8 @@ export const ChatSection = () => {
                 />
               ))}
               {isLoading && <ThinkingAnimation modelName={currentModelData.name} />}
-              {/* Spacer to allow scrolling the last message to the top during loading */}
-              <div ref={chatEndRef} className={isLoading ? 'min-h-[300px]' : ''} />
+              {/* Spacer to allow scrolling the last message to the top - always present to prevent layout shift */}
+              <div ref={chatEndRef} className="min-h-[calc(100%-80px)] shrink-0" />
             </div>
             <div className="border-t border-slate-200 bg-white p-4">
               {selectedFiles.length > 0 && (
