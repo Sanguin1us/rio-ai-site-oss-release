@@ -712,14 +712,20 @@ export const ChatSection = () => {
         if (lastUserMessageEl) {
           // Calculate the scroll position to put the message at the top of the container
           const messageTop = lastUserMessageEl.offsetTop;
-          chatContainer.scrollTop = messageTop - 16; // 16px padding from top
+          chatContainer.scrollTo({
+            top: messageTop - 16, // 16px padding from top
+            behavior: 'smooth'
+          });
           return;
         }
       }
     }
 
-    // Default: scroll to bottom
-    chatContainer.scrollTop = chatContainer.scrollHeight;
+    // Default: scroll to bottom with smooth animation
+    chatContainer.scrollTo({
+      top: chatContainer.scrollHeight,
+      behavior: 'smooth'
+    });
   }, [messages, isLoading]);
 
   const handleEditMessage = useCallback(
