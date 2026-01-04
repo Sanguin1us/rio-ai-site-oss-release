@@ -17,8 +17,6 @@ import {
   Brain,
   Paperclip,
   FileText,
-  ImageIcon,
-  XCircle,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Highlight, Language, themes } from 'prism-react-renderer';
@@ -600,28 +598,16 @@ export const ChatSection = () => {
     {
       id: 'rio-2.5' as const,
       name: 'Rio 2.5',
-      label: 'Flagship',
-      icon: Sparkles,
-      color: 'text-rio-primary',
-      bgColor: 'bg-rio-primary/10',
       description: 'Alta precisão',
     },
     {
       id: 'rio-2.5-fast' as const,
       name: 'Rio 2.5 Flash',
-      label: 'Veloz',
-      icon: Zap,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-100',
       description: 'Respostas rápidas',
     },
     {
       id: 'rio-3.0-preview' as const,
       name: 'Rio 3',
-      label: 'Preview',
-      icon: Brain,
-      color: 'text-indigo-600',
-      bgColor: 'bg-indigo-100',
       description: 'Estado da arte',
     },
   ];
@@ -820,8 +806,6 @@ export const ChatSection = () => {
               <div ref={chatEndRef} className={isLoading ? 'min-h-[300px]' : ''} />
             </div>
             <div className="border-t border-slate-200 bg-white p-4">
-
-
               {selectedFiles.length > 0 && (
                 <div className="mb-3 flex flex-wrap gap-2">
                   {selectedFiles.map((file) => (
@@ -901,11 +885,7 @@ export const ChatSection = () => {
                       }
                     }
                   }}
-                  placeholder={
-                    editingState
-                      ? 'Edite sua mensagem...'
-                      : `Perguntar para o ${currentModelData.name}...`
-                  }
+                  placeholder={`Perguntar para o ${currentModelData.name}...`}
                   rows={1}
                   className="flex-1 border-none bg-transparent px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 resize-none max-h-[200px] overflow-y-auto"
                   style={{ minHeight: '40px' }}
