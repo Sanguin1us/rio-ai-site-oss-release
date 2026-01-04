@@ -843,16 +843,32 @@ export const ChatSection = () => {
                   </button>
                 )}
 
-                <input
-                  type="text"
+                <textarea
                   value={input}
-                  onChange={(e) => setInput(e.target.value)}
+                  onChange={(e) => {
+                    setInput(e.target.value);
+                    // Auto-resize the textarea
+                    e.target.style.height = 'auto';
+                    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+                  }}
+                  onKeyDown={(e) => {
+                    // Submit on Enter (without Shift)
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      if ((input.trim() || selectedFiles.length > 0) && !isLoading) {
+                        const form = e.currentTarget.closest('form');
+                        if (form) form.requestSubmit();
+                      }
+                    }
+                  }}
                   placeholder={
                     editingState
                       ? 'Edite sua mensagem...'
                       : `Perguntar para o ${currentModelData.name}...`
                   }
-                  className="flex-1 border-none bg-transparent px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0"
+                  rows={1}
+                  className="flex-1 border-none bg-transparent px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 resize-none max-h-[200px] overflow-y-auto"
+                  style={{ minHeight: '40px' }}
                 />
 
                 {isLoading ? (
