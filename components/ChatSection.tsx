@@ -15,6 +15,7 @@ import {
   Paperclip,
   FileText,
   Loader2,
+  Trash2,
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Highlight, Language, themes } from 'prism-react-renderer';
@@ -624,6 +625,7 @@ export const ChatSection = () => {
     navigateMessage,
     editAndResubmit,
     stop,
+    clearChat,
   } = useRioChat({
     model: currentModel,
   });
@@ -633,6 +635,19 @@ export const ChatSection = () => {
     isOpen: false,
     type: 'positive',
   });
+  const [isClearing, setIsClearing] = useState(false);
+
+  const handleClearChat = useCallback(() => {
+    if (messages.length === 0) return;
+    setIsClearing(true);
+    setTimeout(() => {
+      clearChat();
+      // Small delay to allow tree update before showing again
+      requestAnimationFrame(() => {
+        setIsClearing(false);
+      });
+    }, 300);
+  }, [clearChat, messages.length]);
 
   const [selectedFiles, setSelectedFiles] = useState<Attachment[]>([]);
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
@@ -852,7 +867,7 @@ export const ChatSection = () => {
         </AnimateOnScroll>
         <AnimateOnScroll delay={200} className="mt-12 max-w-3xl mx-auto">
           <div
-            className={`relative flex min-h-[400px] max-h-[70vh] h-[500px] flex-col rounded-lg border bg-white shadow-sm transition-all duration-300 ${isDraggingOver && selectedModelId === 'rio-3.0-preview'
+            className={`group relative flex min-h-[400px] max-h-[70vh] h-[500px] flex-col rounded-lg border bg-white shadow-sm transition-all duration-300 ${isDraggingOver && selectedModelId === 'rio-3.0-preview'
               ? 'border-indigo-400 ring-4 ring-indigo-500/20'
               : 'border-slate-200'
               }`}
@@ -862,14 +877,18 @@ export const ChatSection = () => {
           >
             {/* Drag overlay */}
             {isDraggingOver && selectedModelId === 'rio-3.0-preview' && (
-              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-indigo-50/90 backdrop-blur-sm">
+              <div className="absolute inset-0 z-30 flex items-center justify-center rounded-lg bg-indigo-50/90 backdrop-blur-sm">
                 <div className="flex flex-col items-center gap-2 text-indigo-600">
                   <Paperclip className="h-8 w-8" />
                   <span className="text-sm font-medium">Solte o arquivo aqui</span>
                 </div>
               </div>
             )}
-            <div className="flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-6">
+
+            <div
+              className={`flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-6 transition-all duration-300 ease-out ${isClearing ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'
+                }`}
+            >
               {messages.map((msg, index) => (
                 <ChatBubble
                   key={msg.id}
@@ -940,6 +959,18 @@ export const ChatSection = () => {
                     : 'border-slate-200 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
                   }`}
               >
+                <div className={`transition-all duration-300 ease-in-out ${messages.length > 0 && !isLoading && !isClearing ? 'w-8 opacity-100 mr-1' : 'w-0 opacity-0 mr-0 overflow-hidden'}`}>
+                  <button
+                    type="button"
+                    onClick={handleClearChat}
+                    disabled={messages.length === 0 || isLoading || isClearing}
+                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+                    title="Limpar conversa"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
+
                 <input
                   type="file"
                   ref={fileInputRef}

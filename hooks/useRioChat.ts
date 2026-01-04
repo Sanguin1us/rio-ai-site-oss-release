@@ -568,5 +568,25 @@ export function useRioChat(options: UseRioChatOptions = {}) {
     editMessage,
     editAndResubmit,
     stop,
+    clearChat: useCallback(() => {
+      let t = createEmptyTree();
+      let parentId: string | null = null;
+      const path: string[] = [];
+
+      for (const msg of initialMessages) {
+        const { newTree, newNodeId } = addNode(t, msg.role, msg.content, parentId);
+        t = newTree;
+        path.push(newNodeId);
+        parentId = newNodeId;
+      }
+
+      setTree({ ...t, selectedPath: path });
+      setInput('');
+      setIsLoading(false);
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+        abortControllerRef.current = null;
+      }
+    }, [initialMessages]),
   };
 }
