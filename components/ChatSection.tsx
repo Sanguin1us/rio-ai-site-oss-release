@@ -12,6 +12,7 @@ import {
   ThumbsDown,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   Square,
   Brain,
   Paperclip,
@@ -862,66 +863,6 @@ export const ChatSection = () => {
                     : 'border-slate-200 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
                   }`}
               >
-                <div className="flex items-center">
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-                      className={`flex items-center gap-2 rounded-xl py-1.5 pl-2 pr-3 text-xs font-medium transition-all duration-300 hover:bg-slate-100 ${currentModelData.color}`}
-                      title="Mudar de modelo"
-                    >
-                      <div
-                        className={`relative flex h-6 w-6 items-center justify-center rounded-lg transition-all duration-500 ${currentModelData.bgColor}`}
-                      >
-                        <currentModelData.icon className="h-3.5 w-3.5 animate-in zoom-in duration-300" />
-                      </div>
-                      <div className="flex flex-col items-start leading-none transition-all duration-300">
-                        <span className="mb-0.5 text-[10px] font-bold uppercase tracking-wider opacity-60">
-                          Modelo
-                        </span>
-                        <span className="font-semibold">{currentModelData.name}</span>
-                      </div>
-                      <div className="ml-1 h-3 w-[1px] bg-slate-200" />
-                    </button>
-
-                    {isModelMenuOpen && (
-                      <>
-                        <div
-                          className="fixed inset-0 z-10"
-                          onClick={() => setIsModelMenuOpen(false)}
-                        />
-                        <div className="absolute bottom-full left-0 z-20 mb-2 w-48 overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
-                          {chatModels.map((m) => (
-                            <button
-                              key={m.id}
-                              type="button"
-                              onClick={() => {
-                                setSelectedModelId(m.id);
-                                setIsModelMenuOpen(false);
-                              }}
-                              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-50 ${selectedModelId === m.id ? 'bg-slate-50' : ''
-                                }`}
-                            >
-                              <div
-                                className={`flex h-8 w-8 items-center justify-center rounded-lg ${m.bgColor}`}
-                              >
-                                <m.icon className={`h-4 w-4 ${m.color}`} />
-                              </div>
-                              <div className="flex flex-col">
-                                <span className="text-xs font-bold text-slate-700">{m.name}</span>
-                                <span className="text-[10px] text-slate-500">{m.description}</span>
-                              </div>
-                              {selectedModelId === m.id && (
-                                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-rio-primary" />
-                              )}
-                            </button>
-                          ))}
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </div>
-
                 <input
                   type="file"
                   ref={fileInputRef}
@@ -969,6 +910,50 @@ export const ChatSection = () => {
                   className="flex-1 border-none bg-transparent px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 resize-none max-h-[200px] overflow-y-auto"
                   style={{ minHeight: '40px' }}
                 />
+
+                {/* Model selector on the right, Claude-style */}
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+                    className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-slate-600 transition hover:bg-slate-100"
+                    title="Mudar de modelo"
+                  >
+                    <span className="font-medium">{currentModelData.name}</span>
+                    <ChevronDown className={`h-4 w-4 transition-transform ${isModelMenuOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {isModelMenuOpen && (
+                    <>
+                      <div
+                        className="fixed inset-0 z-10"
+                        onClick={() => setIsModelMenuOpen(false)}
+                      />
+                      <div className="absolute bottom-full right-0 z-20 mb-2 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+                        {chatModels.map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedModelId(m.id);
+                              setIsModelMenuOpen(false);
+                            }}
+                            className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-50 ${selectedModelId === m.id ? 'bg-slate-50' : ''
+                              }`}
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-sm font-semibold text-slate-800">{m.name}</span>
+                              <span className="text-xs text-slate-500">{m.description}</span>
+                            </div>
+                            {selectedModelId === m.id && (
+                              <Check className="h-4 w-4 text-rio-primary shrink-0" />
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
 
                 {isLoading ? (
                   <button
