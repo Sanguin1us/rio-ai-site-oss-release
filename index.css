@@ -22,6 +22,13 @@
   }
 
   --animate-slide-in: slide-in 0.5s ease-out forwards;
+
+  @keyframes thinking-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  --animate-thinking-pulse: thinking-pulse 1.8s ease-in-out infinite;
 }
 
 /* Custom chat scrollbar - hidden by default, shows on user scroll */
