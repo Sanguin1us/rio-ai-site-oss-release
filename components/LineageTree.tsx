@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import type { LineageNode } from './lineage-data';
 import type { Model } from '../types/index';
 import { ChevronRight, ExternalLink } from 'lucide-react';
@@ -7,6 +8,7 @@ interface LineageTreeProps {
   onSelectModel: (model: Model) => void;
   nodes: LineageNode[];
   variant?: 'tree' | '3d-ring';
+  direction?: 'forward' | 'backward';
 }
 
 interface NodeLayout {
@@ -56,6 +58,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
   onSelectModel,
   nodes,
   variant = 'tree',
+  direction = 'forward',
 }) => {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -207,9 +210,17 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
         .animate-gradient-xy {
           animation: gradient-xy 3s ease infinite;
         }
+        .node-glass {
+          background: rgba(255, 255, 255, 0.7);
+          backdrop-filter: blur(8px);
+          -webkit-backdrop-filter: blur(8px);
+        }
       `}</style>
       {/* SVG Layer for Connections */}
-      <svg className="absolute inset-0 pointer-events-none w-full h-full z-0">
+      <svg
+        key={`svg-${nodes.map(n => n.id).join('-')}`}
+        className="absolute inset-0 pointer-events-none w-full h-full z-0"
+      >
         <defs>
           <marker
             id="arrowhead"
@@ -265,8 +276,8 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
                     )
                     : null;
 
-                let baseOpacity = 0.3;
-                let activeOpacity = 0.8;
+                let baseOpacity = 0.4;
+                let activeOpacity = 0.85;
 
                 if (variant === '3d-ring' && expertNodeId) {
                   const layout = layoutMap.get(expertNodeId);
@@ -274,10 +285,10 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
                     // layout.opacity ranges from ~0.6 (back) to 1.0 (front)
                     // Normalize this to 0..1 for easier mapping
                     const normalized = Math.max(0, (layout.opacity - 0.6) / 0.4);
-                    // Map to desired opacity range: faint (0.1) to distinct (0.6)
-                    baseOpacity = 0.1 + normalized * 0.5;
-                    // Active range: 0.3 (back) to 1.0 (front)
-                    activeOpacity = 0.3 + normalized * 0.7;
+                    // Map to desired opacity range: faint (0.2) to distinct (0.7)
+                    baseOpacity = 0.2 + normalized * 0.5;
+                    // Active range: 0.4 (back) to 1.0 (front)
+                    activeOpacity = 0.4 + normalized * 0.6;
                   }
                 }
 
@@ -390,6 +401,20 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
                   path = `M ${startX} ${startY} C ${cp1X} ${cp1Y}, ${cp2X} ${cp2Y}, ${curveEndX} ${endY} L ${endX} ${endY}`;
                 }
 
+                // Calculate cascade delay based on connection type and position
+                let cascadeDelay = 0.16;
+                if (variant === '3d-ring') {
+                  // Source→Expert connections draw first, Expert→Sink draw after
+                  if (parentId === 'rio-2.5-omni-source') {
+                    cascadeDelay = 0.25; // First wave
+                  } else {
+                    cascadeDelay = 0.75; // Second wave (after experts appear)
+                  }
+                } else {
+                  // Tree view: delay based on parent's horizontal position (left→right flow)
+                  cascadeDelay = 0.16 + (parent.x || 0) * 0.125;
+                }
+
                 return {
                   key: `${parent.id}-${node.id}`,
                   path,
@@ -398,7 +423,8 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
                   opacity,
                   isActive,
                   marker: isActive ? 'arrowhead-active' : isFaded ? 'arrowhead-faded' : 'arrowhead',
-                  zIndex: isActive ? 100 : 0
+                  zIndex: isActive ? 100 : 0,
+                  cascadeDelay
                 };
               })
             )
@@ -408,7 +434,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
           connections.sort((a, b) => (a.isActive === b.isActive ? 0 : a.isActive ? 1 : -1));
 
           return connections.map((conn) => (
-            <path
+            <motion.path
               key={conn.key}
               d={conn.path}
               fill="none"
@@ -416,7 +442,20 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
               strokeWidth={conn.width}
               opacity={conn.opacity}
               markerEnd={`url(#${conn.marker})`}
-              className="transition-all duration-300"
+              initial={{ pathLength: 0, opacity: 0 }}
+              animate={{
+                pathLength: 1,
+                opacity: conn.opacity,
+                stroke: conn.color,
+                strokeWidth: conn.width
+              }}
+              transition={{
+                pathLength: { type: 'tween', duration: 0.8, ease: 'linear', delay: conn.cascadeDelay },
+                opacity: { duration: 0.15 },
+                stroke: { duration: 0.15 },
+                strokeWidth: { duration: 0.15 }
+              }}
+              className="transition-none"
               style={{ zIndex: conn.zIndex }}
             />
           ));
@@ -424,109 +463,124 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
       </svg>
 
       {/* Nodes Layer */}
-      {nodes.map((node) => {
-        const layout = layoutMap.get(node.id);
-        if (!layout) return null;
+      <AnimatePresence mode="popLayout">
+        {nodes.map((node, index) => {
+          const layout = layoutMap.get(node.id);
+          if (!layout) return null;
 
-        const isActive = hoveredNode === node.id;
-        const hasDetailPage = node.hasDetailPage;
-        const hasExternalUrl = !!node.externalUrl;
-        const isClickable = hasDetailPage || hasExternalUrl;
-        // For 3D ring, don't treat nodes as info-only (they have their own opacity system)
-        const isInfoOnly = variant !== '3d-ring' && !hasDetailPage;
+          const isActive = hoveredNode === node.id;
+          const hasDetailPage = node.hasDetailPage;
+          const hasExternalUrl = !!node.externalUrl;
+          const isClickable = hasDetailPage || hasExternalUrl;
 
-        // Computed styles based on layout + interaction
-        // Info-only nodes get minimal scale on hover, detail nodes get full scale
-        const hoverScale = isInfoOnly ? 1.02 : 1.05;
-        const finalScale = layout.scale * (isActive ? hoverScale : 1);
-        const finalZIndex = layout.zIndex + (isActive ? 100 : 0);
+          const finalScale = layout.scale * (isActive ? 1.03 : 1);
+          const finalZIndex = layout.zIndex + (isActive ? 100 : 0);
 
-        return (
-          <div
-            key={node.id}
-            className={`absolute flex items-center justify-center p-3 sm:p-4 rounded-xl border transition-all duration-300
-              ${isClickable ? 'cursor-pointer' : 'cursor-default'}
-              ${isInfoOnly
-                ? 'bg-slate-50/80 border-slate-200/50'
-                : 'bg-white shadow-sm border-slate-200'
-              }
-              ${isActive
-                ? isInfoOnly
-                  ? 'border-slate-300 bg-slate-100/80'
-                  : 'border-rio-primary shadow-md ring-2 ring-rio-primary/20'
-                : isInfoOnly
-                  ? 'hover:bg-slate-100/60 hover:border-slate-200'
-                  : 'hover:border-rio-primary/40 hover:shadow-md'
-              }
-            `}
-            style={{
-              left: layout.left,
-              top: layout.top,
-              width: layout.width,
-              height: layout.height,
-              zIndex: finalZIndex,
-              opacity: layout.opacity,
-              transform: `scale(${finalScale})`,
-            }}
-            onMouseEnter={() => setHoveredNode(node.id)}
-            onMouseLeave={() => setHoveredNode(null)}
-            onClick={() => {
-              if (node.externalUrl) {
-                window.open(node.externalUrl, '_blank');
-              } else if (node.model && node.hasDetailPage) {
-                onSelectModel(node.model);
-              }
-            }}
-          >
-            <div className="flex items-center gap-2 sm:gap-3 w-full overflow-hidden">
-              {(() => {
-                const Icon = node.icon || node.model?.Icon;
-                return (
-                  Icon && (
-                    <Icon
-                      className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-colors duration-300
-                        ${isInfoOnly
-                          ? 'text-slate-400'
-                          : isActive
-                            ? 'text-rio-primary'
-                            : 'text-slate-500'
-                        }`}
-                    />
-                  )
-                );
-              })()}
-              <span
-                className={`text-xs sm:text-sm flex-1 transition-colors duration-300
-                  ${isInfoOnly
-                    ? 'font-normal text-slate-500'
-                    : 'font-medium text-slate-700'
-                  }`}
-              >
-                {node.label}
-              </span>
-              {/* Action indicator icons */}
-              {hasDetailPage && (
-                <ChevronRight
-                  className={`w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-all duration-300 
-                    ${isActive
-                      ? 'translate-x-0.5 text-rio-primary opacity-100'
-                      : 'text-slate-300 opacity-70 group-hover:opacity-100'
-                    }`}
-                />
-              )}
-              {hasExternalUrl && (
-                <ExternalLink
-                  className={`w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-all duration-300 
-                    ${isActive
-                      ? 'text-rio-primary opacity-100'
-                      : 'text-slate-400 opacity-60'
-                    }`}
-                />
-              )}
-            </div>
-          </div>
-        );
-      })}
+          const xOffset = direction === 'forward' ? 40 : -40;
+
+          return (
+            <motion.div
+              layout
+              key={node.id}
+              initial={{
+                opacity: 0,
+                scale: 0.6,
+                x: layout.left + xOffset,
+                y: layout.top,
+                rotateX: -10
+              }}
+              animate={{
+                opacity: layout.opacity,
+                scale: finalScale,
+                x: layout.left,
+                y: layout.top,
+                rotateX: 0,
+                rotateY: 0,
+              }}
+              exit={{ opacity: 0, scale: 0.4, transition: { duration: 0.2 } }}
+              whileHover={isClickable ? {
+                z: 20,
+                rotateX: -2,
+                rotateY: 2,
+                scale: finalScale * 1.02,
+                transition: { duration: 0.12 }
+              } : {}}
+              transition={{
+                layout: { type: 'spring', stiffness: 200, damping: 25 },
+                opacity: { duration: 0.4, delay: index * 0.04 },
+                scale: { type: 'spring', stiffness: 400, damping: 25, delay: index * 0.04 },
+                x: { type: 'spring', stiffness: 200, damping: 22, delay: index * 0.04 },
+              }}
+              className={`absolute flex items-center justify-center p-3 sm:p-4 rounded-xl border transition-colors duration-150
+                ${isClickable ? 'cursor-pointer' : 'cursor-default'}
+                bg-white/90 backdrop-blur-sm shadow-sm border-slate-200
+                ${isActive
+                  ? 'border-rio-primary/60 shadow-md ring-2 ring-rio-primary/15'
+                  : 'hover:border-slate-300 hover:shadow-md'
+                }
+              `}
+              style={{
+                width: layout.width,
+                height: layout.height,
+                zIndex: finalZIndex,
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                transformStyle: 'preserve-3d',
+                perspective: '1000px'
+              }}
+              onMouseEnter={() => setHoveredNode(node.id)}
+              onMouseLeave={() => setHoveredNode(null)}
+              onClick={() => {
+                if (node.externalUrl) {
+                  window.open(node.externalUrl, '_blank');
+                } else if (node.model && node.hasDetailPage) {
+                  onSelectModel(node.model);
+                }
+              }}
+            >
+              <div className="flex items-center gap-2 sm:gap-3 w-full overflow-hidden" style={{ transform: 'translateZ(10px)' }}>
+                {(() => {
+                  const Icon = node.icon || node.model?.Icon;
+                  return (
+                    Icon && (
+                      <Icon
+                        className={`w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0 transition-colors duration-150
+                          ${isActive ? 'text-rio-primary' : 'text-slate-500'}`}
+                      />
+                    )
+                  );
+                })()}
+                <span
+                  className={`text-xs sm:text-sm flex-1 font-medium transition-colors duration-150
+                    ${isActive ? 'text-slate-800' : 'text-slate-600'}`}
+                >
+                  {node.label}
+                </span>
+                {/* Action indicator icons */}
+                {hasDetailPage && (
+                  <ChevronRight
+                    className={`w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-all duration-300 
+                      ${isActive
+                        ? 'translate-x-0.5 text-rio-primary opacity-100'
+                        : 'text-slate-300 opacity-70 group-hover:opacity-100'
+                      }`}
+                  />
+                )}
+                {hasExternalUrl && (
+                  <ExternalLink
+                    className={`w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-all duration-300 
+                      ${isActive
+                        ? 'text-rio-primary opacity-100'
+                        : 'text-slate-400 opacity-60'
+                      }`}
+                  />
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
     </div>
   );
 };

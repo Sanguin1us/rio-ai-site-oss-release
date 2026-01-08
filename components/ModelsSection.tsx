@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { RIO_1_NODES, RIO_1_5_NODES, RIO_2_NODES, RIO_2_5_NODES, RIO_3_NODES } from './lineage-data';
 import { AnimateOnScroll } from './AnimateOnScroll';
 import { LineageTree } from './LineageTree';
@@ -12,6 +13,15 @@ type Generation = '1.0' | '1.5' | '2.0' | '2.5' | '3.0';
 
 export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) => {
   const [selectedGeneration, setSelectedGeneration] = useState<Generation>('3.0');
+  const [direction, setDirection] = useState<'forward' | 'backward'>('forward');
+
+  const handleGenerationChange = (gen: Generation) => {
+    const gens: Generation[] = ['1.0', '1.5', '2.0', '2.5', '3.0'];
+    const oldIndex = gens.indexOf(selectedGeneration);
+    const newIndex = gens.indexOf(gen);
+    setDirection(newIndex > oldIndex ? 'forward' : 'backward');
+    setSelectedGeneration(gen);
+  };
 
   const currentNodes = useMemo(() => {
     switch (selectedGeneration) {
@@ -50,7 +60,7 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
               {(['1.0', '1.5', '2.0', '2.5', '3.0'] as Generation[]).map((gen) => (
                 <button
                   key={gen}
-                  onClick={() => setSelectedGeneration(gen)}
+                  onClick={() => handleGenerationChange(gen)}
                   className={`relative px-6 py-2 rounded-full text-sm font-medium transition-all duration-300 ${selectedGeneration === gen
                     ? 'text-white shadow-md'
                     : 'text-slate-500 hover:text-prose hover:bg-slate-50'
@@ -65,13 +75,18 @@ export const ModelsSection: React.FC<ModelsSectionProps> = ({ onSelectModel }) =
             </div>
           </div>
 
-          <div className="bg-slate-50/50 rounded-3xl border border-slate-100 p-8 overflow-hidden">
+          <motion.div
+            layout
+            className="bg-slate-50/50 rounded-3xl border border-slate-100 p-8 overflow-hidden"
+            transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+          >
             <LineageTree
               onSelectModel={onSelectModel}
               nodes={currentNodes}
               variant={selectedGeneration === '3.0' ? '3d-ring' : 'tree'}
+              direction={direction}
             />
-          </div>
+          </motion.div>
         </AnimateOnScroll>
 
         {/* Mobile Fallback / Detailed Grid View is being removed as requested */}
