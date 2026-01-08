@@ -226,7 +226,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
             id="arrowhead"
             markerWidth="12"
             markerHeight="8.4"
-            refX="11"
+            refX="9"
             refY="4.2"
             orient="auto"
             markerUnits="userSpaceOnUse"
@@ -237,7 +237,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
             id="arrowhead-faded"
             markerWidth="12"
             markerHeight="8.4"
-            refX="11"
+            refX="9"
             refY="4.2"
             orient="auto"
             markerUnits="userSpaceOnUse"
@@ -248,7 +248,7 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
             id="arrowhead-active"
             markerWidth="22"
             markerHeight="15.4"
-            refX="21"
+            refX="17"
             refY="7.7"
             orient="auto"
             markerUnits="userSpaceOnUse"
@@ -298,6 +298,8 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
                 const color = isActive ? '#0070f3' : '#cbd5e1';
                 const width = isActive ? 3 : 1.5;
 
+                const tipOffset = isActive ? 5 : 3;
+
                 // Path Calculation
                 let path = '';
 
@@ -319,10 +321,11 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
                     );
 
                     // Calculate end point (intersection with Expert rect)
+                    // Offset by tipOffset to keep the arrow tip visible at the boundary
                     const end = getRectIntersection(
                       { x: targetCx, y: targetCy },
-                      nodeLayout.width,
-                      nodeLayout.height,
+                      nodeLayout.width + tipOffset * 2,
+                      nodeLayout.height + tipOffset * 2,
                       { x: sourceCx, y: sourceCy }
                     );
 
@@ -335,40 +338,22 @@ export const LineageTree: React.FC<LineageTreeProps> = ({
                     const sinkCx = nodeLayout.left + nodeLayout.width / 2;
                     const sinkCy = nodeLayout.top + nodeLayout.height / 2;
 
-                    // The original logic used:
-                    // const startX = expertCx;
-                    // const startY = expertCy;
-                    // const endX = sinkCx;
-                    // const endY = nodeLayout.top + 10;
-                    // const midY = (startY + endY) / 2;
-                    // path = `M ${startX} ${startY} Q ${startX} ${midY}, ${endX} ${endY}`;
-
-                    // New logic with clipping:
                     // 1. The curve leaves Expert vertically downwards.
-                    //    Start point should be bottom-center of Expert.
                     const start = {
                       x: expertCx,
                       y: expertCy + parentLayout.height / 2
                     };
 
-                    // 2. The curve approaches Sink. The control point is (start.x, midY).
-                    //    Tangent at endpoint is roughly distinct from vertical.
-                    //    We can treat the "incoming ray" as coming from the Control Point.
-                    //    Let's calculate approximate End point by intersecting Sink box 
-                    //    with the line from SinkCenter to ControlPoint.
-
-                    // Rough geometric control point Y used in previous logic was avg(start, end).
-                    // Let's preserve the shape but clip the end.
-
-                    const originalTargetY = nodeLayout.top + nodeLayout.height / 2; // Aiming for center visually for the curve calculation
+                    const originalTargetY = nodeLayout.top + nodeLayout.height / 2;
                     const midY = (expertCy + originalTargetY) / 2;
                     const controlPoint = { x: expertCx, y: midY };
 
                     // Intersect Sink Rect with ray from SinkCenter to ControlPoint
+                    // Offset by tipOffset to keep the arrow tip visible at the boundary
                     const end = getRectIntersection(
                       { x: sinkCx, y: sinkCy },
-                      nodeLayout.width,
-                      nodeLayout.height,
+                      nodeLayout.width + tipOffset * 2,
+                      nodeLayout.height + tipOffset * 2,
                       controlPoint
                     );
 
