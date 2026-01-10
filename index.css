@@ -31,6 +31,39 @@
   --animate-thinking-pulse: thinking-pulse 1.8s ease-in-out infinite;
 }
 
+html, :host {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* Custom scrollbar utility for code blocks and other elements */
+.custom-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #090b12;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #475569; /* slate-600 */
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b; /* slate-500 */
+}
+
+.custom-scrollbar::-webkit-scrollbar-corner {
+  background: #090b12;
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+  display: none;
+}
+
 /* Custom chat scrollbar - hidden by default, shows on user scroll */
 .chat-scroll-container {
   scrollbar-width: thin;
