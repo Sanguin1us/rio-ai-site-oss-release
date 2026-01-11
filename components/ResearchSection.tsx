@@ -614,7 +614,164 @@ export const ResearchSection: React.FC<{ onSelectPost?: (post: ResearchPost) => 
   return (
     <section className="bg-slate-50 py-24 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimateOnScroll className="mx-auto max-w-2xl text-center mb-16">
+        <AnimateOnScroll className="mx-auto max-w-4xl text-center mb-16">
+          {/* SUPER COOL Construction Banner */}
+          <div className="mb-12 relative overflow-hidden rounded-3xl animate-glow">
+            {/* Animated Stripes Background */}
+            <div
+              className="absolute inset-0 animate-stripes opacity-20"
+              style={{
+                background: 'repeating-linear-gradient(45deg, #f59e0b, #f59e0b 10px, #fbbf24 10px, #fbbf24 20px)',
+                backgroundSize: '40px 40px',
+              }}
+            />
+
+            {/* Main Content Container */}
+            <div className="relative bg-gradient-to-br from-amber-50/95 via-amber-100/90 to-yellow-50/95 backdrop-blur-sm border-2 border-amber-300 p-8 sm:p-10">
+              {/* Traffic Cones */}
+              <div className="absolute left-4 top-4 animate-cone origin-bottom">
+                <svg width="24" height="32" viewBox="0 0 24 32" fill="none">
+                  <path d="M12 0L20 28H4L12 0Z" fill="url(#cone-gradient)" />
+                  <rect x="2" y="28" width="20" height="4" rx="1" fill="#374151" />
+                  <rect x="8" y="6" width="8" height="3" fill="white" opacity="0.9" />
+                  <rect x="6" y="14" width="12" height="3" fill="white" opacity="0.9" />
+                  <defs>
+                    <linearGradient id="cone-gradient" x1="12" y1="0" x2="12" y2="28">
+                      <stop stopColor="#fb923c" />
+                      <stop offset="1" stopColor="#ea580c" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div className="absolute right-4 top-4 animate-cone origin-bottom [animation-delay:0.5s]">
+                <svg width="24" height="32" viewBox="0 0 24 32" fill="none">
+                  <path d="M12 0L20 28H4L12 0Z" fill="url(#cone-gradient2)" />
+                  <rect x="2" y="28" width="20" height="4" rx="1" fill="#374151" />
+                  <rect x="8" y="6" width="8" height="3" fill="white" opacity="0.9" />
+                  <rect x="6" y="14" width="12" height="3" fill="white" opacity="0.9" />
+                  <defs>
+                    <linearGradient id="cone-gradient2" x1="12" y1="0" x2="12" y2="28">
+                      <stop stopColor="#fb923c" />
+                      <stop offset="1" stopColor="#ea580c" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+
+              {/* Center Content */}
+              <div className="flex flex-col items-center justify-center gap-4 text-center">
+                <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-widest text-amber-600">
+                    Área em Obras
+                  </span>
+                  <div className="h-3 w-3 rounded-full bg-amber-500 animate-pulse [animation-delay:0.5s]" />
+                </div>
+
+                <h3 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-amber-900 drop-shadow-sm">
+                  🚧 Sob Construção 🚧
+                </h3>
+
+                <p className="text-amber-700 font-medium max-w-md">
+                  Os textos dos artigos são <span className="font-bold">placeholders informativos</span>.
+                  O conteúdo final está sendo preparado pela nossa equipe.
+                </p>
+
+                {/* Animated Road with Backhoe */}
+                <div className="relative w-full max-w-lg h-16 mt-4 rounded-xl overflow-hidden bg-gradient-to-b from-slate-600 to-slate-700 border-2 border-slate-500 shadow-inner">
+                  {/* Road Lines */}
+                  <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-1 flex flex-col gap-2 py-2">
+                    {[...Array(6)].map((_, i) => (
+                      <div key={i} className="w-full h-2 bg-yellow-400 rounded-full" />
+                    ))}
+                  </div>
+
+                  {/* Dust Particles */}
+                  <div className="absolute bottom-2 left-1/2 animate-dust [--dust-x:-20px] [animation-delay:0.2s]">
+                    <div className="w-2 h-2 rounded-full bg-amber-300/60" />
+                  </div>
+                  <div className="absolute bottom-2 left-1/2 animate-dust [--dust-x:15px] [animation-delay:0.6s]">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-200/50" />
+                  </div>
+                  <div className="absolute bottom-2 left-1/2 animate-dust [--dust-x:-10px] [animation-delay:1s]">
+                    <div className="w-2.5 h-2.5 rounded-full bg-amber-400/40" />
+                  </div>
+
+                  {/* Retroescavadeira */}
+                  <div className="absolute bottom-1 left-1/2 -translate-x-1/2 animate-backhoe-drive">
+                    <svg width="100" height="48" viewBox="-20 0 100 48" fill="none">
+                      {/* Back Wheel */}
+                      <circle cx="16" cy="40" r="7" fill="#1f2937" />
+                      <circle cx="16" cy="40" r="5" fill="#374151" />
+                      <circle cx="16" cy="40" r="2" fill="#4b5563" />
+
+                      {/* Front Wheel */}
+                      <circle cx="48" cy="40" r="7" fill="#1f2937" />
+                      <circle cx="48" cy="40" r="5" fill="#374151" />
+                      <circle cx="48" cy="40" r="2" fill="#4b5563" />
+
+                      {/* Chassis */}
+                      <rect x="10" y="28" width="44" height="8" rx="2" fill="#d97706" />
+
+                      {/* Engine Hood */}
+                      <rect x="36" y="20" width="18" height="10" rx="2" fill="#f59e0b" />
+                      <rect x="50" y="22" width="2" height="6" rx="0.5" fill="#374151" /> {/* Exhaust */}
+                      <rect x="38" y="22" width="8" height="2" fill="#fbbf24" /> {/* Grille */}
+                      <rect x="38" y="25" width="8" height="2" fill="#fbbf24" />
+
+                      {/* Cabin */}
+                      <rect x="22" y="12" width="16" height="18" rx="2" fill="#fbbf24" />
+                      <rect x="24" y="14" width="12" height="10" rx="1" fill="#7dd3fc" opacity="0.8" /> {/* Window */}
+                      <rect x="26" y="26" width="3" height="3" rx="0.5" fill="#374151" /> {/* Door Handle */}
+
+                      {/* Front Loader Arms */}
+                      <rect x="54" y="24" width="12" height="3" rx="1" fill="#b45309" />
+                      <rect x="54" y="30" width="12" height="3" rx="1" fill="#b45309" />
+
+                      {/* Front Loader Bucket */}
+                      <path d="M64 22 L72 26 L72 36 L64 36 Z" fill="#78716c" />
+                      <path d="M70 26 L72 26 L72 36 L70 36" fill="#57534e" />
+
+                      {/* Back Excavator Arm (animated) */}
+                      <g className="origin-[12px_28px] animate-arm-dig">
+                        {/* Kingpost (Pivot Base) */}
+                        <path d="M10 26 L14 26 L14 34 L10 34 Z" fill="#78350f" />
+
+                        {/* Boom (Main Arm - Curved) */}
+                        <path d="M12 28 C12 28 8 16 2 10 L-2 12 C4 18 8 28 10 32 Z" fill="#d97706" />
+                        <circle cx="12" cy="28" r="2" fill="#374151" /> {/* Joint */}
+
+                        {/* Stick (Dipper Arm) */}
+                        <path d="M0 11 L-10 22 L-8 24 L2 13 Z" fill="#b45309" />
+                        <circle cx="0" cy="11" r="1.5" fill="#374151" /> {/* Elbow Joint */}
+
+                        {/* Bucket Linkage */}
+                        <rect x="-9" y="20" width="4" height="1" fill="#1f2937" transform="rotate(-45)" />
+
+                        {/* Bucket */}
+                        <path d="M-9 23 C-13 23 -16 26 -16 30 L-12 32 C-12 28 -10 26 -8 25 Z" fill="#57534e" />
+                        {/* Bucket Teeth */}
+                        <path d="M-16 30 L-18 31 L-16 32 L-17 33" stroke="#44403c" strokeWidth="1.5" strokeLinecap="round" />
+                      </g>
+
+                      {/* Stabilizer Legs */}
+                      <rect x="6" y="34" width="3" height="8" rx="0.5" fill="#78350f" />
+                      <rect x="4" y="40" width="7" height="2" rx="0.5" fill="#374151" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Progress Indicator */}
+                <div className="flex items-center gap-2 mt-2 text-xs text-amber-600">
+                  <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  <span className="font-medium">Conteúdo sendo elaborado...</span>
+                </div>
+              </div>
+            </div>
+          </div>
           <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
             Pesquisa & Desenvolvimento
           </h2>
