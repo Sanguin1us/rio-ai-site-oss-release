@@ -8,26 +8,37 @@ import { SciencePlatformSection } from './components/SciencePlatformSection';
 import { ResearchSection } from './components/ResearchSection';
 import { Footer } from './components/Footer';
 import { ModelDetailView } from './components/ModelDetailView';
+import { ResearchDetailView } from './components/ResearchDetailView';
 import { ErrorBoundary, ChatErrorBoundary, SectionErrorBoundary } from './components/ErrorBoundary';
-import type { Model, View } from './types/index';
+import type { Model, View, ResearchPost } from './types/index';
 import { RIO_MODELS } from './constants';
 
 function App() {
   const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+  const [selectedResearchPost, setSelectedResearchPost] = useState<ResearchPost | null>(null);
   const [currentView, setCurrentView] = useState<View>('home');
 
   const handleSelectModel = (model: Model) => {
     setSelectedModel(model);
+    setSelectedResearchPost(null);
+    window.scrollTo(0, 0);
+  };
+
+  const handleSelectPost = (post: ResearchPost) => {
+    setSelectedResearchPost(post);
+    setSelectedModel(null);
     window.scrollTo(0, 0);
   };
 
   const handleBack = () => {
     setSelectedModel(null);
+    setSelectedResearchPost(null);
   };
 
   const handleNavigate = (view: View) => {
     setCurrentView(view);
-    setSelectedModel(null); // Deselect model when changing main views
+    setSelectedModel(null);
+    setSelectedResearchPost(null);
     window.scrollTo(0, 0);
   };
 
@@ -54,7 +65,7 @@ function App() {
         ) : null;
       }
       case 'research':
-        return <ResearchSection />;
+        return <ResearchSection onSelectPost={handleSelectPost} />;
       case 'home':
       default:
         return (
@@ -83,6 +94,10 @@ function App() {
           {selectedModel ? (
             <ErrorBoundary name="ModelDetail">
               <ModelDetailView model={selectedModel} onBack={handleBack} />
+            </ErrorBoundary>
+          ) : selectedResearchPost ? (
+            <ErrorBoundary name="ResearchDetail">
+              <ResearchDetailView post={selectedResearchPost} onBack={handleBack} />
             </ErrorBoundary>
           ) : (
             renderView()

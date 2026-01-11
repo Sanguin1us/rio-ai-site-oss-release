@@ -105,7 +105,7 @@ export interface ResearchPost {
   id: string;
   title: string;
   summary: string;
+  content?: string; // Markdown content
   date: string;
   imageUrl: string;
-  tags: string[];
 }
