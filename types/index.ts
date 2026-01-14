@@ -108,4 +108,5 @@ export interface ResearchPost {
   content?: string; // Markdown content
   date: string;
   imageUrl: string;
+  isFeatured?: boolean;
 }

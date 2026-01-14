@@ -2,6 +2,7 @@ import React from 'react';
 import { ChevronLeft, Calendar, Share2, Bookmark } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { TTABenchmarkChart } from './detail/TTABenchmarkChart';
 import type { ResearchPost } from '../types/index';
 
 interface ResearchDetailViewProps {
@@ -71,6 +72,14 @@ export const ResearchDetailView: React.FC<ResearchDetailViewProps> = ({ post, on
                         blockquote: ({ node, ...props }) => (
                             <blockquote className="border-l-4 border-rio-primary bg-slate-50 px-6 py-8 my-10 rounded-r-2xl italic text-slate-800 text-xl font-medium" {...props} />
                         ),
+                        // Custom components
+                        code: ({ node, inline, className, children, ...props }: any) => {
+                            const content = String(children).trim();
+                            if (!inline && content === 'TTA_BENCHMARK_CHART') {
+                                return <TTABenchmarkChart />;
+                            }
+                            return <code className={className} {...props}>{children}</code>;
+                        }
                     }}>
                         {post.content || post.summary}
                     </ReactMarkdown>

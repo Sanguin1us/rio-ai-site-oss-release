@@ -434,6 +434,7 @@ Estamos integrando o Elastic Vision em todos os nossos modelos multimodais da s�
     `,
     date: '11 Jan 2026',
     imageUrl: '/images/research/elastic-vision.png',
+    isFeatured: true,
   },
   {
     id: 'test-time-attention',
@@ -441,31 +442,17 @@ Estamos integrando o Elastic Vision em todos os nossos modelos multimodais da s�
     summary:
       'Uma análise técnica sobre como mecanismos de atenção adaptativos durante a inferência permitem que nossos modelos "pensem" mais profundamente antes de responder.',
     content: `
-# Test-Time Attention: Redefinindo a Inferência
+# Test-Time Attention: Scaling Performance
 
-A evolução dos Large Language Models (LLMs) tem se concentrado historicamente em duas fases: pré-treinamento e fine-tuning. No entanto, uma nova fronteira está emergindo: o **Test-Time Compute** e, especificamente, o **Test-Time Attention (TTA)**.
+Abaixo apresentamos os resultados de nossos benchmarks de recuperação (Needle In A Haystack) comparando as capacidades de escala do Rio 3 com o uso de Test-Time Attention (TTA) contra os principais modelos proprietários do mercado.
 
-Na nossa família de modelos Rio 3, implementamos uma forma avançada de TTA que permite ao modelo ajustar dinamicamente o foco de sua atenção com base na complexidade da tarefa durante a geração.
-
-## O que é Test-Time Attention?
-
-Tradicionalmente, os pesos de atenção de um modelo são fixos após o treinamento. O Test-Time Attention introduz uma camada de adaptabilidade onde o modelo pode realizar passagens adicionais de "reflexão" interna.
-
-### Principais Benefícios:
-1.  **Precisão em Raciocínio Complexo:** Melhora significativa em tarefas de matemática, lógica e programação.
-2.  **Redução de Alucinações:** Ao permitir que o modelo valide internamente suas premissas antes da geração final.
-3.  **Eficiência Adaptativa:** Tarefas simples usam menos recursos, enquanto problemas complexos ativam camadas mais profundas de processamento.
-
-## Implementação no Rio 3
-
-No Rio 3, o TTA funciona em conjunto com nossa arquitetura de internalização de "cadeia de pensamento". O modelo não apenas prevê o próximo token, mas otimiza sua própria representação latente durante a inferência para maximizar a coerência contextual.
-
-> "A inteligência não está apenas no que você sabe, mas em quão profundamente você consegue processar o que está à sua frente no momento."
-
-Estamos entusiasmados em compartilhar mais detalhes técnicos nos próximos meses conforme expandimos o Rio 3 para toda a infraestrutura da prefeitura.
-    `,
+\`\`\`
+TTA_BENCHMARK_CHART
+\`\`\`
+`,
     date: '10 Jan 2026',
     imageUrl: '/images/research/test-time-attention.png',
+    isFeatured: true,
   },
   {
     id: 'on-policy-distillation',
@@ -781,12 +768,77 @@ export const ResearchSection: React.FC<{ onSelectPost?: (post: ResearchPost) => 
           </p>
         </AnimateOnScroll>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {RESEARCH_POSTS.map((post, index) => (
-            <AnimateOnScroll key={post.id} delay={index * 100} duration="duration-700">
-              <ResearchCard post={post} onSelect={onSelectPost} />
-            </AnimateOnScroll>
-          ))}
+        {/* Featured Section */}
+        <div className="mb-20">
+          <div className="mb-8 flex items-end justify-between border-b border-slate-200 pb-4">
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900">Destaques</h3>
+              <p className="mt-1 text-slate-500">Nossas pesquisas mais importantes no momento.</p>
+            </div>
+            <div className="hidden h-1.5 w-32 rounded-full bg-rio-primary/10 sm:block">
+              <div className="h-full w-1/2 rounded-full bg-rio-primary animate-pulse" />
+            </div>
+          </div>
+          <div className="grid gap-8 md:grid-cols-2">
+            {RESEARCH_POSTS.filter(p => p.isFeatured).map((post, index) => (
+              <AnimateOnScroll key={post.id} delay={index * 100} duration="duration-700">
+                <div
+                  onClick={() => onSelectPost?.(post)}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl bg-white shadow-lg transition-all duration-500 hover:shadow-2xl hover:-translate-y-2 border border-blue-100 cursor-pointer h-[450px]"
+                >
+                  <div className="relative h-full w-full overflow-hidden">
+                    <img
+                      src={post.imageUrl}
+                      alt={post.title}
+                      className="h-full w-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
+
+                    <div className="absolute top-6 left-6">
+                      <div className="inline-flex items-center gap-2 rounded-full bg-rio-primary/90 px-4 py-1.5 text-xs font-bold uppercase tracking-widest text-white backdrop-blur-md shadow-lg border border-white/20">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                        </span>
+                        Destaque
+                      </div>
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 p-8 w-full">
+                      <div className="mb-3 flex items-center gap-2 text-xs font-medium text-blue-200/80">
+                        <Calendar className="h-4 w-4" />
+                        {post.date}
+                      </div>
+                      <h3 className="mb-4 text-3xl font-black text-white leading-tight group-hover:text-blue-200 transition-colors">
+                        {post.title}
+                      </h3>
+                      <p className="mb-6 text-sm leading-relaxed text-slate-100 line-clamp-2 opacity-90">
+                        {post.summary}
+                      </p>
+                      <div className="inline-flex items-center gap-3 rounded-xl bg-white/10 px-6 py-3 text-sm font-bold text-white backdrop-blur-md border border-white/20 transition-all group-hover:bg-white group-hover:text-rio-primary group-hover:gap-5">
+                        Ler Pesquisa Completa
+                        <ArrowRight className="h-5 w-5" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </AnimateOnScroll>
+            ))}
+          </div>
+        </div>
+
+        {/* Regular Posts Section */}
+        <div>
+          <div className="mb-8 border-b border-slate-200 pb-4">
+            <h3 className="text-2xl font-bold text-slate-900">Todos os Artigos</h3>
+          </div>
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {RESEARCH_POSTS.filter(p => !p.isFeatured).map((post, index) => (
+              <AnimateOnScroll key={post.id} delay={index * 100} duration="duration-700">
+                <ResearchCard post={post} onSelect={onSelectPost} />
+              </AnimateOnScroll>
+            ))}
+          </div>
         </div>
       </div>
     </section>
