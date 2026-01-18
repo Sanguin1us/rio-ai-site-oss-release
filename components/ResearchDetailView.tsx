@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ChevronLeft, Share2, Bookmark, Clock, ArrowRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { TTABenchmarkChart } from './detail/TTABenchmarkChart';
+import { AttentionAccuracyChart, ManyNeedlesChart, TTABenchmarkChart } from './detail/TTABenchmarkChart';
 import SpinningEarth from './SpinningEarth';
 import type { ResearchPost } from '../types/index';
 import { motion, useScroll, useSpring } from 'framer-motion';
@@ -49,10 +49,10 @@ export const ResearchDetailView: React.FC<ResearchDetailViewProps> = ({ post, on
 
             <article className="pt-16 md:pt-24">
                 {/* Standard Header */}
-                <header className="container mx-auto px-6 max-w-4xl mb-16">
+                <header className="container mx-auto px-6 max-w-4xl mb-8">
 
                     <h1
-                        className="text-4xl md:text-6xl font-extrabold text-slate-900 mb-8 leading-[1.1] tracking-tight"
+                        className="text-4xl md:text-7xl font-extrabold text-slate-900 mb-0 leading-[1.05] tracking-tight text-center"
                         dangerouslySetInnerHTML={{ __html: post.title }}
                     />
                 </header>
@@ -76,6 +76,12 @@ export const ResearchDetailView: React.FC<ResearchDetailViewProps> = ({ post, on
                                     const content = String(children).trim();
                                     if (!inline && content === 'TTA_BENCHMARK_CHART') {
                                         return <TTABenchmarkChart />;
+                                    }
+                                    if (!inline && content === 'ATTENTION_ACCURACY_CHART') {
+                                        return <AttentionAccuracyChart />;
+                                    }
+                                    if (!inline && content === 'MANY_NEEDLES_CHART') {
+                                        return <ManyNeedlesChart />;
                                     }
                                     if (!inline && content === 'SPINNING_EARTH_VISUALIZATION') {
                                         return <SpinningEarth />;

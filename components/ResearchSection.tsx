@@ -443,16 +443,20 @@ Estamos integrando o Elastic Vision em todos os nossos modelos multimodais da s�
       'Uma análise técnica sobre como mecanismos de atenção adaptativos durante a inferência permitem que nossos modelos "pensem" mais profundamente antes de responder.',
     content: `
 \`\`\`
-TTA_BENCHMARK_CHART
+ATTENTION_ACCURACY_CHART
+\`\`\`
+
+Em 12 de Setembro de 2024, a OpenAI introduziu o paradigma de raciocínio aos modelos de linguagem. A partir do o1 preview, as LLMs passaram a ser capazes de pensar sobre suas respostas, abrindo uma frente inteiramente nova de scaling. Hoje, trazemos o Rio 3.0 Preview, que desperta um novo eixo de aprendizado: a capacidade de pensar sobre e reler as perguntas ou, como chamamos essa técnica internamente, Test-Time Attention.
+
+Apesar dos grandes avanços em sua qualidade e sofisticação, todas as LLMs atuais sofrem com um grave problema que atrapalha seu uso no dia a dia: a incapacidade de lidar com textos longos com precisão similar aos curtos. Como podemos observar no gráfico abaixo, o mecanismo de Test-Time Attention permite que superemos esse impasse, relendo o texto múltiplas vezes para capturar cada detalhe e minúcia:
+
+\`\`\`
+MANY_NEEDLES_CHART
 \`\`\`
 
 \`\`\`
 SPINNING_EARTH_VISUALIZATION
 \`\`\`
-
-# Test-Time Attention: Scaling Performance
-
-Abaixo apresentamos os resultados de nossos benchmarks de recuperação (Needle In A Haystack) comparando as capacidades de escala do Rio 3 com o uso de Test-Time Attention (TTA) contra os principais modelos proprietários do mercado.
 `,
     date: '10 Jan 2026',
     imageUrl: '/images/research/test-time-attention.png',
