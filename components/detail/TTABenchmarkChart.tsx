@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { TTA_BENCHMARK_DATA, TTABenchmarkPoint } from '../../data/research-data';
+import { TTA_BENCHMARK_DATA, TTABenchmarkPoint, TRAINING_COMPUTE_DATA } from '../../data/research-data';
 
 // Color palette - muted for baselines, vibrant gradient for Rio
 const BASELINE_COLORS: Record<string, string> = {
-    'Claude Opus 4.5': '#A78BFA',
-    'DeepSeek v3.2': '#F472B6',
-    'GPT-5.2 xhigh': '#34D399',
-    'Gemini 3 Pro': '#FBBF24',
+    'Claude Opus 4.5': '#D97757',  // Anthropic Orange
+    'DeepSeek v3.2': '#4CC9F0',     // DeepSeek Cyan-Blue
+    'GPT-5.2 xhigh': '#10B981',     // OpenAI Green
+    'Gemini 3 Pro': '#8B5CF6',      // Google Gemini Purple
 };
 
 // Rio uses a blue gradient from light to dark based on TTA count
@@ -34,6 +34,9 @@ const RIO_MODELS = Object.keys(RIO_COLORS);
 export const TTABenchmarkChart: React.FC = () => {
     const [hoveredModel, setHoveredModel] = useState<string | null>(null);
     const [hoveredContext, setHoveredContext] = useState<number | null>(null);
+    const [lockedContext, setLockedContext] = useState<number | null>(null);
+
+    const displayContext = hoveredContext ?? lockedContext;
 
     // Calculate AUC data dynamically
     const aucScalingData = useMemo(() => {
@@ -63,12 +66,12 @@ export const TTABenchmarkChart: React.FC = () => {
     // Dimensions optimized for full-width impact
     const width = 1000;
     const height = 800;
-    const padding = { top: 60, right: 80, bottom: 90, left: 80 };
+    const padding = { top: 60, right: 80, bottom: 120, left: 80 };
     const plotWidth = width - padding.left - padding.right;
     const plotHeight = height - padding.top - padding.bottom;
 
     // AUC Plot Dimensions
-    const aucHeight = 700;
+    const aucHeight = 780;
     const aucPlotHeight = aucHeight - padding.top - padding.bottom;
 
     // Domain
@@ -148,7 +151,7 @@ export const TTABenchmarkChart: React.FC = () => {
             return hoveredModel === model ? 1 : 0.12;
         }
         if (isRio(model)) return isHeroLine(model) ? 1 : 0.7;
-        return 0.5;
+        return 0.7;
     };
 
     // Get stroke width
@@ -192,7 +195,7 @@ export const TTABenchmarkChart: React.FC = () => {
                     <div className="text-center z-10 mb-[-20px]">
                         <h4 className="text-2xl font-bold text-slate-900 tracking-tight">
                             Attention Accuracy
-                            <span className="block text-slate-500 mt-1">durante o treinamento</span>
+                            <span className="block text-slate-500 mt-0">durante o treinamento</span>
                         </h4>
                     </div>
 
@@ -204,28 +207,51 @@ export const TTABenchmarkChart: React.FC = () => {
 
                             {/* Grid labels */}
                             {[0, 0.5, 1].map(v => (
-                                <text key={v} x={padding.left - 24} y={getAucY(v) + 8} textAnchor="end" className="text-lg font-black fill-slate-400">{Math.round(v * 100)}%</text>
+                                <text key={v} x={padding.left - 24} y={getAucY(v) + 8} textAnchor="end" className="text-xl font-black fill-slate-400">{Math.round(v * 100)}%</text>
                             ))}
 
                             {/* X-axis labels */}
-                            {['10^20', '10^21', '10^22', '10^23'].map((label, i) => (
-                                <text key={i} x={padding.left + 50 + (i / 3) * (plotWidth - 100)} y={aucHeight - padding.bottom + 45} textAnchor="middle" className="text-lg font-black fill-slate-400">{label}</text>
+                            {TRAINING_COMPUTE_DATA.map((d, i) => (
+                                <text key={d.compute} x={padding.left + 50 + (i / (TRAINING_COMPUTE_DATA.length - 1)) * (plotWidth - 100)} y={aucHeight - padding.bottom + 45} textAnchor="middle" className="text-lg font-black fill-slate-400">{d.compute}</text>
                             ))}
 
                             {/* X-axis title */}
-                            <text x={padding.left + plotWidth / 2} y={aucHeight - 15} textAnchor="middle" className="text-sm font-black uppercase tracking-[0.3em] fill-slate-300">
+                            <text x={padding.left + plotWidth / 2} y={aucHeight - 15} textAnchor="middle" className="text-xl font-black uppercase tracking-[0.2em] fill-slate-400">
                                 Training Compute (log scale)
                             </text>
 
-                            {/* Placeholder Line for Training - clean stylistic look */}
+                            {/* Training Scaling Line */}
                             <path
-                                d={`M ${[0, 1, 2, 3].map(i => `${padding.left + 50 + (i / 3) * (plotWidth - 100)} ${getAucY(0.1 + i * 0.25)}`).join(' L ')}`}
+                                d={`M ${TRAINING_COMPUTE_DATA.map((d, i) => `${padding.left + 50 + (i / (TRAINING_COMPUTE_DATA.length - 1)) * (plotWidth - 100)} ${getAucY(d.accuracy / 100)}`).join(' L ')}`}
                                 fill="none"
-                                stroke="#CBD5E1"
+                                stroke="#94A3B8"
                                 strokeWidth={5}
-                                strokeDasharray="12 12"
-                                opacity={0.5}
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                opacity={0.7}
                             />
+
+                            {/* Data Points */}
+                            {TRAINING_COMPUTE_DATA.map((d, i) => (
+                                <g key={d.compute}>
+                                    <circle
+                                        cx={padding.left + 50 + (i / (TRAINING_COMPUTE_DATA.length - 1)) * (plotWidth - 100)}
+                                        cy={getAucY(d.accuracy / 100)}
+                                        r={8}
+                                        fill="white"
+                                        stroke="#94A3B8"
+                                        strokeWidth={4}
+                                    />
+                                    <text
+                                        x={padding.left + 50 + (i / (TRAINING_COMPUTE_DATA.length - 1)) * (plotWidth - 100)}
+                                        y={getAucY(d.accuracy / 100) - 28}
+                                        textAnchor="middle"
+                                        className="text-xl font-black fill-slate-900"
+                                    >
+                                        {d.accuracy.toFixed(1)}%
+                                    </text>
+                                </g>
+                            ))}
                         </svg>
                     </div>
                 </div>
@@ -235,7 +261,7 @@ export const TTABenchmarkChart: React.FC = () => {
                     <div className="text-center z-10 mb-[-20px]">
                         <h4 className="text-2xl font-bold text-slate-900 tracking-tight">
                             Attention Accuracy
-                            <span className="block text-slate-500 mt-1">com Test-Time Attention</span>
+                            <span className="block text-slate-500 mt-0">com Test-Time Attention</span>
                         </h4>
                     </div>
 
@@ -247,7 +273,7 @@ export const TTABenchmarkChart: React.FC = () => {
 
                             {/* Grid labels */}
                             {[0, 0.5, 1].map(v => (
-                                <text key={v} x={padding.left - 24} y={getAucY(v) + 8} textAnchor="end" className="text-lg font-black fill-slate-400">{Math.round(v * 100)}%</text>
+                                <text key={v} x={padding.left - 24} y={getAucY(v) + 8} textAnchor="end" className="text-xl font-black fill-slate-400">{Math.round(v * 100)}%</text>
                             ))}
 
                             {/* X-axis TTA labels */}
@@ -256,7 +282,7 @@ export const TTABenchmarkChart: React.FC = () => {
                             ))}
 
                             {/* X-axis title */}
-                            <text x={padding.left + plotWidth / 2} y={aucHeight - 15} textAnchor="middle" className="text-sm font-black uppercase tracking-[0.3em] fill-slate-300">
+                            <text x={padding.left + plotWidth / 2} y={aucHeight - 15} textAnchor="middle" className="text-xl font-black uppercase tracking-[0.2em] fill-slate-400">
                                 Test-Time Compute (log scale)
                             </text>
 
@@ -296,25 +322,37 @@ export const TTABenchmarkChart: React.FC = () => {
                         </div>
                         {/* Context Indicator (HUD Mode) */}
                         <AnimatePresence>
-                            {hoveredContext !== null && (
+                            {displayContext !== null && (
                                 <motion.div
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     exit={{ opacity: 0, scale: 0.95 }}
                                     transition={{ duration: 0.1 }}
-                                    className="flex items-center gap-3 px-4 py-2 bg-slate-100 rounded-xl"
+                                    className={`flex items-center gap-3 px-4 py-2 rounded-xl transition-colors ${lockedContext === displayContext ? 'bg-blue-600' : 'bg-slate-100'}`}
                                 >
-                                    <div className="text-[10px] font-bold uppercase text-slate-400 tracking-wider">Context</div>
+                                    <div className={`text-[10px] font-bold uppercase tracking-wider ${lockedContext === displayContext ? 'text-blue-100' : 'text-slate-400'}`}>
+                                        {lockedContext === displayContext ? 'Fixed Context' : 'Context'}
+                                    </div>
                                     <motion.div
-                                        key={hoveredContext}
+                                        key={displayContext}
                                         initial={{ opacity: 0, y: -5 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 0.08 }}
                                         className="flex items-baseline gap-1"
                                     >
-                                        <span className="text-lg font-black text-slate-900">{formatContext(hoveredContext)}</span>
-                                        <span className="text-xs font-medium text-slate-400">Tokens</span>
+                                        <span className={`text-lg font-black ${lockedContext === displayContext ? 'text-white' : 'text-slate-900'}`}>{formatContext(displayContext)}</span>
+                                        <span className={`text-xs font-medium ${lockedContext === displayContext ? 'text-blue-200' : 'text-slate-400'}`}>Tokens</span>
                                     </motion.div>
+                                    {lockedContext === displayContext && (
+                                        <button
+                                            onClick={(e) => { e.stopPropagation(); setLockedContext(null); }}
+                                            className="ml-2 hover:bg-blue-500 rounded-full p-0.5 transition-colors"
+                                        >
+                                            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -330,8 +368,8 @@ export const TTABenchmarkChart: React.FC = () => {
                             </div>
                             <div className="flex items-center gap-1">
                                 {RIO_MODELS.map(m => {
-                                    const val = hoveredContext !== null
-                                        ? TTA_BENCHMARK_DATA.find(p => p.context === hoveredContext)?.[m as keyof TTABenchmarkPoint]
+                                    const val = displayContext !== null
+                                        ? TTA_BENCHMARK_DATA.find(p => p.context === displayContext)?.[m as keyof TTABenchmarkPoint]
                                         : undefined;
 
                                     return (
@@ -376,8 +414,8 @@ export const TTABenchmarkChart: React.FC = () => {
                         {/* Baselines Legend Row */}
                         <div className="flex items-center justify-center gap-1 flex-wrap">
                             {BASELINE_MODELS.map(m => {
-                                const val = hoveredContext !== null
-                                    ? TTA_BENCHMARK_DATA.find(p => p.context === hoveredContext)?.[m as keyof TTABenchmarkPoint]
+                                const val = displayContext !== null
+                                    ? TTA_BENCHMARK_DATA.find(p => p.context === displayContext)?.[m as keyof TTABenchmarkPoint]
                                     : undefined;
 
                                 // Short names for HUD
@@ -454,7 +492,7 @@ export const TTABenchmarkChart: React.FC = () => {
 
 
                         {/* Grid - Horizontal lines */}
-                        {[0, 25, 50, 75, 100].map(y => (
+                        {[50, 100].map(y => (
                             <g key={y}>
                                 <line
                                     x1={padding.left}
@@ -469,7 +507,7 @@ export const TTABenchmarkChart: React.FC = () => {
                                     x={padding.left - 14}
                                     y={getRetY(y) + 4}
                                     textAnchor="end"
-                                    className="text-[11px] font-semibold fill-slate-400"
+                                    className="text-[14px] font-bold fill-slate-400"
                                 >
                                     {y}%
                                 </text>
@@ -501,10 +539,10 @@ export const TTABenchmarkChart: React.FC = () => {
                                         y={retHeight - padding.bottom + 28}
                                         textAnchor="middle"
                                         className={`transition-all duration-200 ${isSpotlight
-                                            ? 'text-[13px] font-black fill-slate-900'
+                                            ? 'text-[16px] font-black fill-slate-900'
                                             : hoveredContext === d.context
-                                                ? 'text-[11px] font-bold fill-blue-600'
-                                                : 'text-[11px] font-bold fill-slate-400'
+                                                ? 'text-[14px] font-bold fill-blue-600'
+                                                : 'text-[14px] font-bold fill-slate-400'
                                             }`}
                                     >
                                         {label}
@@ -526,9 +564,9 @@ export const TTABenchmarkChart: React.FC = () => {
                         {/* X-axis title */}
                         <text
                             x={padding.left + retPlotWidth / 2}
-                            y={retHeight - 12}
+                            y={retHeight - 32}
                             textAnchor="middle"
-                            className="text-xs font-black uppercase tracking-[0.2em] fill-slate-500"
+                            className="text-xl font-black uppercase tracking-[0.2em] fill-slate-400"
                         >
                             Context Length (tokens)
                         </text>
@@ -599,33 +637,34 @@ export const TTABenchmarkChart: React.FC = () => {
                                 width={retPlotWidth / (xMax - xMin)}
                                 height={retPlotHeight}
                                 fill="transparent"
-                                className="cursor-crosshair"
+                                className="cursor-pointer"
                                 onMouseEnter={() => setHoveredContext(d.context)}
                                 onMouseLeave={() => setHoveredContext(null)}
+                                onClick={() => setLockedContext(lockedContext === d.context ? null : d.context)}
                             />
                         ))}
 
                         {/* Hover line and dots */}
-                        {hoveredContext !== null && (
+                        {displayContext !== null && (
                             <g>
                                 <line
-                                    x1={getRetX(hoveredContext)}
+                                    x1={getRetX(displayContext)}
                                     y1={padding.top}
-                                    x2={getRetX(hoveredContext)}
+                                    x2={getRetX(displayContext)}
                                     y2={padding.top + retPlotHeight}
-                                    stroke="#94A3B8"
-                                    strokeWidth={1}
-                                    strokeDasharray="3 3"
+                                    stroke={lockedContext === displayContext ? '#2563EB' : '#94A3B8'}
+                                    strokeWidth={lockedContext === displayContext ? 2 : 1}
+                                    strokeDasharray={lockedContext === displayContext ? undefined : "3 3"}
                                 />
                                 {[...RIO_MODELS, ...BASELINE_MODELS]
                                     .map(model => {
-                                        const d = TTA_BENCHMARK_DATA.find(p => p.context === hoveredContext);
+                                        const d = TTA_BENCHMARK_DATA.find(p => p.context === displayContext);
                                         const val = d?.[model as keyof TTABenchmarkPoint];
                                         if (val === undefined) return null;
                                         return (
                                             <circle
                                                 key={model}
-                                                cx={getRetX(hoveredContext)}
+                                                cx={getRetX(displayContext)}
                                                 cy={getRetY(val as number)}
                                                 r={isHeroLine(model) ? 6 : isRio(model) ? 4 : 3}
                                                 fill={ALL_COLORS[model]}

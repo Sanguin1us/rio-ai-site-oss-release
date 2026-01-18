@@ -31,3 +31,15 @@ export const TTA_BENCHMARK_DATA: TTABenchmarkPoint[] = [
     { context: 29.0, 'Rio 3 TTA 1': 0.2, 'Rio 3 TTA 10': 0.6, 'Rio 3 TTA 100': 1.2, 'Rio 3 TTA 1000': 1.3, 'Rio 3 TTA 10000': 19.9 },
     { context: 30.0, 'Rio 3 TTA 1': 0.4, 'Rio 3 TTA 10': 1.5, 'Rio 3 TTA 100': 3.1, 'Rio 3 TTA 1000': 2.2, 'Rio 3 TTA 10000': 10.7 },
 ];
+
+export interface TrainingComputePoint {
+    compute: string;
+    accuracy: number;
+}
+
+export const TRAINING_COMPUTE_DATA: TrainingComputePoint[] = [
+    { compute: '10^20', accuracy: 27.0 },
+    { compute: '10^21', accuracy: 34.8 },
+    { compute: '10^22', accuracy: 39.2 },
+    { compute: '10^23', accuracy: 45.1 },
+];
