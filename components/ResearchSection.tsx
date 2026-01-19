@@ -455,6 +455,10 @@ MANY_NEEDLES_CHART
 \`\`\`
 
 \`\`\`
+TTA_TYPEWRITER_CALLOUT
+\`\`\`
+
+\`\`\`
 SPINNING_EARTH_VISUALIZATION
 \`\`\`
 `,

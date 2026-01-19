@@ -3,6 +3,7 @@ import { ChevronLeft, Share2, Bookmark, Clock, ArrowRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { AttentionAccuracyChart, ManyNeedlesChart, TTABenchmarkChart } from './detail/TTABenchmarkChart';
+import { TTATypingCallout } from './detail/TTATypingCallout';
 import SpinningEarth from './SpinningEarth';
 import type { ResearchPost } from '../types/index';
 import { motion, useScroll, useSpring } from 'framer-motion';
@@ -66,7 +67,7 @@ export const ResearchDetailView: React.FC<ResearchDetailViewProps> = ({ post, on
                                 h1: ({ node, ...props }) => <h1 className="text-3xl font-bold text-slate-900 mt-16 mb-8 tracking-tight" {...props} />,
                                 h2: ({ node, ...props }) => <h2 className="text-2xl font-bold text-slate-900 mt-14 mb-6 pb-4 border-b border-slate-100" {...props} />,
                                 h3: ({ node, ...props }) => <h3 className="text-xl font-bold text-slate-900 mt-10 mb-5" {...props} />,
-                                p: ({ node, ...props }) => <p className="text-slate-600 leading-[1.8] text-lg mb-8" {...props} />,
+                                p: ({ node, ...props }) => <p className="text-slate-600 leading-[1.8] text-lg mb-12" {...props} />,
                                 ul: ({ node, ...props }) => <ul className="list-disc list-outside ml-6 space-y-4 mb-8 text-slate-600" {...props} />,
                                 li: ({ node, ...props }) => <li className="marker:text-rio-primary font-medium" {...props} />,
                                 blockquote: ({ node, ...props }) => (
@@ -82,6 +83,9 @@ export const ResearchDetailView: React.FC<ResearchDetailViewProps> = ({ post, on
                                     }
                                     if (!inline && content === 'MANY_NEEDLES_CHART') {
                                         return <ManyNeedlesChart />;
+                                    }
+                                    if (!inline && content === 'TTA_TYPEWRITER_CALLOUT') {
+                                        return <TTATypingCallout />;
                                     }
                                     if (!inline && content === 'SPINNING_EARTH_VISUALIZATION') {
                                         return <SpinningEarth />;

@@ -80,13 +80,13 @@ export const AttentionAccuracyChart: React.FC = () => {
     };
 
     return (
-        <div style={breakoutStyle} className="mt-4 mb-[30vh]">
+        <div style={breakoutStyle} className="mt-22 mb-[12vh]">
             <div className="max-w-7xl mx-auto w-full px-6 md:px-12 grid grid-cols-1 md:grid-cols-2 gap-12 font-sans">
                 {/* Left: Training Scaling */}
                 <div className="overflow-hidden rounded-[2.5rem] bg-white p-12 shadow-sm border border-slate-200 flex flex-col items-center">
                     <div className="text-center z-10 mb-[-20px]">
                         <h4 className="text-2xl font-bold text-slate-900 tracking-tight">
-                            Attention Accuracy
+                            Precisão da Atenção
                             <span className="block text-slate-500 mt-0">durante o treinamento</span>
                         </h4>
                     </div>
@@ -152,7 +152,7 @@ export const AttentionAccuracyChart: React.FC = () => {
                 <div className="overflow-hidden rounded-[2.5rem] bg-white p-12 shadow-sm border border-slate-200 flex flex-col items-center">
                     <div className="text-center z-10 mb-[-20px]">
                         <h4 className="text-2xl font-bold text-slate-900 tracking-tight">
-                            Attention Accuracy
+                            Precisão da Atenção
                             <span className="block text-slate-500 mt-0">com Test-Time Attention</span>
                         </h4>
                     </div>
