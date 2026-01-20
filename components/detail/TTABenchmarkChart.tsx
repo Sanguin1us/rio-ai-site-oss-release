@@ -40,13 +40,17 @@ export const AttentionAccuracyChart: React.FC = () => {
         return models.map(model => {
             let auc = 0;
             for (let i = 0; i < TTA_BENCHMARK_DATA.length - 1; i++) {
-                const y1 = TTA_BENCHMARK_DATA[i][model as keyof TTABenchmarkPoint] as number || 0;
-                const y2 = TTA_BENCHMARK_DATA[i + 1][model as keyof TTABenchmarkPoint] as number || 0;
-                const x1 = TTA_BENCHMARK_DATA[i].context;
-                const x2 = TTA_BENCHMARK_DATA[i + 1].context;
+                const current = TTA_BENCHMARK_DATA[i];
+                const next = TTA_BENCHMARK_DATA[i + 1];
+                if (!current || !next) continue;
+                const y1 = (current[model as keyof TTABenchmarkPoint] as number | undefined) ?? 0;
+                const y2 = (next[model as keyof TTABenchmarkPoint] as number | undefined) ?? 0;
+                const x1 = current.context;
+                const x2 = next.context;
                 auc += ((y1 + y2) / 2) * (x2 - x1);
             }
-            const ttaValue = parseInt(model.split('TTA ')[1]);
+            const ttaRaw = model.split('TTA ')[1] ?? '0';
+            const ttaValue = Number.parseInt(ttaRaw, 10) || 0;
             return {
                 model,
                 tta: ttaValue,
@@ -190,7 +194,7 @@ export const AttentionAccuracyChart: React.FC = () => {
                             />
 
                             {/* Data Points */}
-                            {aucScalingData.map((d, i) => (
+                            {aucScalingData.map((d) => (
                                 <g key={d.model}>
                                     <circle cx={getAucX(d.logTta)} cy={getAucY(d.aucPercent)} r={8} fill="white" stroke="#3B82F6" strokeWidth={4} />
                                     <text x={getAucX(d.logTta)} y={getAucY(d.aucPercent) - 28} textAnchor="middle" className="text-xl font-black fill-slate-900">{(d.aucPercent * 100).toFixed(1)}%</text>
@@ -211,10 +215,7 @@ export const ManyNeedlesChart: React.FC = () => {
     const displayContext = hoveredContext;
 
     // Dimensions
-    const width = 1000;
     const padding = { top: 60, right: 80, bottom: 120, left: 80 };
-    const plotWidth = width - padding.left - padding.right;
-
     // Domain
     const xMin = 13;
     const xMax = 30;
@@ -238,13 +239,16 @@ export const ManyNeedlesChart: React.FC = () => {
             .map(d => ({ x: getRetX(d.context), y: getRetY(d[model as keyof TTABenchmarkPoint] as number) }));
 
         if (points.length < 2) return '';
+        const firstPoint = points[0];
+        if (!firstPoint) return '';
 
-        let d = `M ${points[0].x} ${points[0].y}`;
+        let d = `M ${firstPoint.x} ${firstPoint.y}`;
         for (let i = 0; i < points.length - 1; i++) {
             const p0 = points[i - 1] || points[i];
             const p1 = points[i];
             const p2 = points[i + 1];
             const p3 = points[i + 2] || p2;
+            if (!p0 || !p1 || !p2 || !p3) continue;
 
             const cp1x = p1.x + (p2.x - p0.x) / 6;
             const cp1y = p1.y + (p2.y - p0.y) / 6;

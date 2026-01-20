@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
-import { TextureLoader, CatmullRomCurve3, Quaternion, Vector3 } from 'three';
+import { TextureLoader, CatmullRomCurve3, Quaternion, Vector3, Group } from 'three';
 import { OrbitControls } from '@react-three/drei';
 
 const EARTH_RADIUS = 2;
@@ -203,7 +203,7 @@ const Earth = ({
     focusActive: boolean;
     rotationRef: React.MutableRefObject<number>;
 }) => {
-    const earthGroupRef = useRef<any>();
+    const earthGroupRef = useRef<Group | null>(null);
     const [colorMap, normalMap, specularMap] = useLoader(TextureLoader, [
         'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_atmos_2048.jpg',
         'https://raw.githubusercontent.com/mrdoob/three.js/master/examples/textures/planets/earth_normal_2048.jpg',
@@ -274,7 +274,14 @@ const SpinningEarth = () => {
         return () => window.removeEventListener('tta-typewriter-complete', handler);
     }, []);
 
-    const activeRoute = useMemo(() => ROUTES[routeIndex], [routeIndex]);
+    const activeRoute = useMemo<Route | undefined>(
+        () => ROUTES[routeIndex] ?? ROUTES[0],
+        [routeIndex]
+    );
+
+    if (!activeRoute) {
+        return null;
+    }
 
     const routeLabel = focusActive
         ? `${activeRoute.start.label} e ${activeRoute.end.label}`

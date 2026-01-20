@@ -8,3 +8,17 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+declare module 'react-dom/client' {
+  type Root = {
+    render: (children: React.ReactNode) => void;
+    unmount: () => void;
+  };
+
+  const ReactDOMClient: {
+    createRoot: (container: Element | DocumentFragment) => Root;
+  };
+
+  export default ReactDOMClient;
+  export function createRoot(container: Element | DocumentFragment): Root;
+}

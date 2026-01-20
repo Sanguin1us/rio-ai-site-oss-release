@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import type { Model } from '../../types/index';
 import {
     ArrowLeft,
@@ -73,15 +73,6 @@ const BENCHMARKS_AGENT: Array<{ metric: string; score: string; note: string }> =
     { metric: 'Toolathlon', score: '45,8%', note: 'avg@2' },
 ];
 
-const BENCHMARKS_MRCR: Array<{ needles: string; context: string; score: string }> = [
-    { needles: '2', context: '128k', score: '97,2' },
-    { needles: '2', context: '1M', score: '91,3' },
-    { needles: '4', context: '128k', score: '86,4' },
-    { needles: '4', context: '1M', score: '53,9' },
-    { needles: '8', context: '128k', score: '51,0' },
-    { needles: '8', context: '1M', score: '37,7' },
-];
-
 // MRCR Chart Component with hover tooltips
 const MrcrChart: React.FC = () => {
     const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; score: number; context: string; needles: number } | null>(null);
@@ -108,23 +99,42 @@ const MrcrChart: React.FC = () => {
     const getY = (score: number) => chartBottom - (score / 100) * chartHeight;
 
     // Generate polyline points
-    const points2 = contextTokens.map((t, i) => `${getX(t)},${getY(needles2[i])}`).join(' ');
-    const points4 = contextTokens.map((t, i) => `${getX(t)},${getY(needles4[i])}`).join(' ');
-    const points8 = contextTokens.map((t, i) => `${getX(t)},${getY(needles8[i])}`).join(' ');
+    const points2 = contextTokens
+        .map((t, i) => {
+            const score = needles2[i] ?? 0;
+            return `${getX(t)},${getY(score)}`;
+        })
+        .join(' ');
+    const points4 = contextTokens
+        .map((t, i) => {
+            const score = needles4[i] ?? 0;
+            return `${getX(t)},${getY(score)}`;
+        })
+        .join(' ');
+    const points8 = contextTokens
+        .map((t, i) => {
+            const score = needles8[i] ?? 0;
+            return `${getX(t)},${getY(score)}`;
+        })
+        .join(' ');
 
     const renderDots = (scores: number[], needleCount: number, color: string) =>
-        contextTokens.map((t, i) => (
-            <circle
-                key={`n${needleCount}-${i}`}
-                cx={getX(t)}
-                cy={getY(scores[i])}
-                r={hoveredPoint?.needles === needleCount && hoveredPoint?.context === contexts[i] ? 7 : 4}
-                fill={color}
-                className="cursor-pointer transition-all duration-150"
-                onMouseEnter={() => setHoveredPoint({ x: getX(t), y: getY(scores[i]), score: scores[i], context: contexts[i], needles: needleCount })}
-                onMouseLeave={() => setHoveredPoint(null)}
-            />
-        ));
+        contextTokens.map((t, i) => {
+            const score = scores[i] ?? 0;
+            const context = contexts[i] ?? '';
+            return (
+                <circle
+                    key={`n${needleCount}-${i}`}
+                    cx={getX(t)}
+                    cy={getY(score)}
+                    r={hoveredPoint?.needles === needleCount && hoveredPoint?.context === context ? 7 : 4}
+                    fill={color}
+                    className="cursor-pointer transition-all duration-150"
+                    onMouseEnter={() => setHoveredPoint({ x: getX(t), y: getY(score), score, context, needles: needleCount })}
+                    onMouseLeave={() => setHoveredPoint(null)}
+                />
+            );
+        });
 
     return (
         <>
@@ -144,9 +154,14 @@ const MrcrChart: React.FC = () => {
                 })}
 
                 {/* X-axis labels */}
-                {contexts.map((label, i) => (
-                    <text key={label} x={getX(contextTokens[i])} y="250" textAnchor="middle" className="text-[10px] fill-slate-500">{label}</text>
-                ))}
+                {contexts.map((label, i) => {
+                    const tokenValue = contextTokens[i] ?? contextTokens[0] ?? 0;
+                    return (
+                        <text key={label} x={getX(tokenValue)} y="250" textAnchor="middle" className="text-[10px] fill-slate-500">
+                            {label}
+                        </text>
+                    );
+                })}
 
                 {/* Axes */}
                 <line x1={chartLeft} y1={chartBottom} x2={chartRight} y2={chartBottom} stroke="#cbd5e1" strokeWidth="1.5" />
@@ -654,17 +669,19 @@ export const Rio30Detail: React.FC<Rio30DetailProps> = ({ model, onBack }) => {
 
                                         const observer = new IntersectionObserver(
                                             (entries) => {
-                                                if (entries[0].isIntersecting && !hasTriggered) {
-                                                    setHasTriggered(true);
-                                                    // Precise Story Timeline
-                                                    setTimeout(() => setPhase(1), 500);    // Rio 2.5 appears
-                                                    setTimeout(() => setPhase(2), 2000);   // START DISTRIBUTION: Packages fly out
-                                                    // Flight time is ~1.5s + stagger. Last package lands around 2000 + 900 + 1500 = 4400ms
-                                                    setTimeout(() => setPhase(3), 4500);   // All delivered. Rio 2.5 fades out.
-                                                    setTimeout(() => setPhase(4), 5500);   // Brief pause with empty center
-                                                    setTimeout(() => setPhase(5), 6500);   // CONVERGENCE: Flow to center
-                                                    setTimeout(() => setPhase(6), 9000);   // Rio 3 emerges from the influx
+                                                const [entry] = entries;
+                                                if (!entry || !entry.isIntersecting || hasTriggered) {
+                                                    return;
                                                 }
+                                                setHasTriggered(true);
+                                                // Precise Story Timeline
+                                                setTimeout(() => setPhase(1), 500);    // Rio 2.5 appears
+                                                setTimeout(() => setPhase(2), 2000);   // START DISTRIBUTION: Packages fly out
+                                                // Flight time is ~1.5s + stagger. Last package lands around 2000 + 900 + 1500 = 4400ms
+                                                setTimeout(() => setPhase(3), 4500);   // All delivered. Rio 2.5 fades out.
+                                                setTimeout(() => setPhase(4), 5500);   // Brief pause with empty center
+                                                setTimeout(() => setPhase(5), 6500);   // CONVERGENCE: Flow to center
+                                                setTimeout(() => setPhase(6), 9000);   // Rio 3 emerges from the influx
                                             },
                                             { threshold: 0.4 }
                                         );
@@ -734,7 +751,7 @@ export const Rio30Detail: React.FC<Rio30DetailProps> = ({ model, onBack }) => {
 
                                                     // Straight line trajectory for precise "shooting" effect
                                                     const path = `M 400 260 L ${endX} ${endY}`;
-                                                    const pathId = `dist-path-${i}`;
+                                                    const pathId = `dist-path-${expert.id}`;
                                                     const staggerMs = i * 100; // 100ms stagger
                                                     const duration = 1.5;
 
@@ -748,7 +765,7 @@ export const Rio30Detail: React.FC<Rio30DetailProps> = ({ model, onBack }) => {
                                                     };
 
                                                     return (
-                                                        <g key={`dist-pkg-${i}`}>
+                                                        <g key={`dist-pkg-${expert.id}`}>
                                                             <path id={pathId} d={path} fill="none" stroke="none" />
 
                                                             {/* The 'Package' - SINGLE visible bright orb, starts invisible */}

@@ -115,17 +115,12 @@ const generateModeWeights = () => {
   const samples = TRAINING_MODES.map(() => Math.random() + 0.3);
   const total = samples.reduce((sum, value) => sum + value, 0);
   return TRAINING_MODES.reduce<Record<string, number>>((acc, mode, index) => {
-    acc[mode.title] = samples[index] / total;
+    const sample = samples[index] ?? 0;
+    acc[mode.title] = sample / total;
     return acc;
   }, {});
 };
 const parseScore = (value: string) => Number.parseFloat(value);
-// _formatDelta is unused but preserved for future use
-const _formatDelta = (value: string, base: string) => {
-  const delta = parseScore(value) - parseScore(base);
-  const sign = delta >= 0 ? '+' : '';
-  return `${sign}${delta.toFixed(1)}`;
-};
 const RAW_MIN = Math.min(...BENCHMARKS.map((row) => parseScore(row.base)));
 const RAW_MAX = Math.max(...BENCHMARKS.map((row) => parseScore(row.latent)));
 const SCALE_MIN = Math.max(0, Math.floor((RAW_MIN - 2) / 5) * 5);

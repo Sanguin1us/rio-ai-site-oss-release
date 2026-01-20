@@ -1,6 +1,5 @@
 import React from 'react';
 import { AnimateOnScroll } from './AnimateOnScroll';
-import { ArrowRight, Calendar } from 'lucide-react';
 import type { ResearchPost } from '../types/index';
 
 const RESEARCH_POSTS: ResearchPost[] = [
@@ -571,41 +570,6 @@ Estamos entusiasmados com o potencial do RPT para criar uma nova geração de mo
     imageUrl: '/images/research/reinforcement-pre-training.png',
   },
 ];
-
-const ResearchCard: React.FC<{ post: ResearchPost; onSelect?: (post: ResearchPost) => void }> = ({
-  post,
-  onSelect
-}) => (
-  <div
-    onClick={() => onSelect?.(post)}
-    className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-slate-200 h-full cursor-pointer"
-  >
-    <div className="relative h-48 overflow-hidden">
-      <img
-        src={post.imageUrl}
-        alt={post.title}
-        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-    </div>
-    <div className="flex flex-1 flex-col p-6">
-      <div className="mb-2 flex items-center gap-2 text-xs text-slate-500">
-        <Calendar className="h-3.5 w-3.5" />
-        {post.date}
-      </div>
-      <h3 className="mb-3 text-xl font-bold text-slate-900 group-hover:text-rio-primary transition-colors">
-        {post.title}
-      </h3>
-      <p className="mb-6 text-sm leading-relaxed text-slate-600 flex-grow">{post.summary}</p>
-      <div className="mt-auto">
-        <div className="inline-flex items-center gap-2 text-sm font-semibold text-rio-primary transition-colors group-hover:text-blue-700">
-          Ler Artigo
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-        </div>
-      </div>
-    </div>
-  </div>
-);
 
 export const ResearchSection: React.FC<{ onSelectPost?: (post: ResearchPost) => void }> = ({
   onSelectPost

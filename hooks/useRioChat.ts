@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   type ChatRole,
   type MessageTree,
+  type Attachment,
   createEmptyTree,
   computeFlatMessages,
   addNode,
@@ -37,6 +38,56 @@ const DEFAULT_SYSTEM_PROMPT =
 const DEFAULT_HISTORY_LIMIT = 30;
 const DEFAULT_ERROR_MESSAGE =
   'Desculpe, ocorreu um erro ao me comunicar com a API. Por favor, tente novamente mais tarde.';
+
+type ApiContentBlock =
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string } }
+  | { type: 'file'; file: { filename: string; file_data: string } };
+
+type ApiMessage = { role: ChatRole; content: string | ApiContentBlock[] };
+
+const buildContentPayload = (
+  content: string,
+  attachments?: Attachment[]
+): string | ApiContentBlock[] => {
+  if (!attachments || attachments.length === 0) {
+    return content;
+  }
+
+  const contentBlock: ApiContentBlock[] = [];
+
+  if (content) {
+    contentBlock.push({ type: 'text', text: content });
+  }
+
+  attachments.forEach((att) => {
+    if (att.type === 'image') {
+      contentBlock.push({
+        type: 'image_url',
+        image_url: { url: att.dataUrl },
+      });
+    } else if (att.type === 'file') {
+      contentBlock.push({
+        type: 'file',
+        file: {
+          filename: att.name,
+          file_data: att.dataUrl,
+        },
+      });
+    }
+  });
+
+  return contentBlock;
+};
+
+const buildApiMessage = (
+  role: ChatRole,
+  content: string,
+  attachments?: Attachment[]
+): ApiMessage => ({
+  role,
+  content: buildContentPayload(content, attachments),
+});
 
 export function useRioChat(options: UseRioChatOptions = {}) {
   const {
@@ -115,11 +166,6 @@ export function useRioChat(options: UseRioChatOptions = {}) {
     });
   }, []);
 
-  // Get the last node in the current path
-  const _getLastNodeId = useCallback((): string | null => {
-    return tree.selectedPath.length > 0 ? tree.selectedPath[tree.selectedPath.length - 1] ?? null : null;
-  }, [tree.selectedPath]);
-
   // Remove message at index (for editing - now deprecated, use editAndResubmit)
   const removeMessageAt = useCallback((_index: number) => {
     // This is kept for backward compatibility but doesn't modify the tree
@@ -145,7 +191,7 @@ export function useRioChat(options: UseRioChatOptions = {}) {
 
   // Submit a new message
   const handleSubmit = useCallback(
-    async (event?: React.FormEvent<HTMLFormElement>, attachments: import('../utils/messageTree').Attachment[] = []) => {
+    async (event?: React.FormEvent<HTMLFormElement>, attachments: Attachment[] = []) => {
       if (event) {
         event.preventDefault();
       }
@@ -160,9 +206,6 @@ export function useRioChat(options: UseRioChatOptions = {}) {
       setIsLoading(true);
 
       // Add user message to tree
-      let currentTree: MessageTree;
-      let _userNodeId: string;
-
       setTree((prevTree) => {
         const parentId: string | null =
           prevTree.selectedPath.length > 0
@@ -170,57 +213,22 @@ export function useRioChat(options: UseRioChatOptions = {}) {
             : null;
 
         const { newTree, newNodeId } = addNode(prevTree, 'user', userContent, parentId, attachments);
-        _userNodeId = newNodeId;
-        currentTree = {
+        return {
           ...newTree,
           selectedPath: [...prevTree.selectedPath, newNodeId],
         };
-        return currentTree;
       });
 
       // Wait for state to settle
       await new Promise((resolve) => setTimeout(resolve, 0));
 
       // Rebuild history with attachments
-      const historyPayload = tree.selectedPath.map(id => {
-        const node = tree.nodes.get(id);
-        if (!node) return null;
-
-        const contentBlock: any[] = [];
-
-        // Add text content if present
-        if (node.content) {
-          contentBlock.push({ type: 'text', text: node.content });
-        }
-
-        // Add attachments if present
-        if (node.attachments && node.attachments.length > 0) {
-          node.attachments.forEach(att => {
-            if (att.type === 'image') {
-              contentBlock.push({
-                type: 'image_url',
-                image_url: { url: att.dataUrl }
-              });
-            } else if (att.type === 'file') {
-              contentBlock.push({
-                type: 'file',
-                file: {
-                  filename: att.name,
-                  file_data: att.dataUrl
-                }
-              });
-            }
-          });
-        }
-
-        // If simpler text-only message (and no attachments), send as string to be safe/compatible
-        // or use array format if we want consistency. Using array format for Rio 3 / consistency.
-        if (node.attachments && node.attachments.length > 0) {
-          return { role: node.role, content: contentBlock };
-        }
-
-        return { role: node.role, content: node.content };
-      }).filter(Boolean);
+      const historyPayload = tree.selectedPath
+        .map((id) => {
+          const node = tree.nodes.get(id);
+          return node ? buildApiMessage(node.role, node.content, node.attachments) : null;
+        })
+        .filter((message): message is ApiMessage => Boolean(message));
 
       // We need to apply history limit to this payload
       // Note: historyPayload is derived from the *current* tree state (before update),
@@ -231,29 +239,7 @@ export function useRioChat(options: UseRioChatOptions = {}) {
           : historyPayload;
 
       // Construct the current message payload object
-      const currentUserMessagePayload: any = { role: 'user', content: userContent };
-
-      if ((attachments && attachments.length > 0) || (userContent && attachments && attachments.length > 0)) {
-        const contentBlock: any[] = [];
-
-        // Add text if present
-        if (userContent) {
-          contentBlock.push({ type: 'text', text: userContent });
-        }
-
-        // Add attachments
-        if (attachments && attachments.length > 0) {
-          attachments.forEach(att => {
-            if (att.type === 'image') {
-              contentBlock.push({ type: 'image_url', image_url: { url: att.dataUrl } });
-            } else if (att.type === 'file') {
-              contentBlock.push({ type: 'file', file: { filename: att.name, file_data: att.dataUrl } });
-            }
-          });
-        }
-
-        currentUserMessagePayload.content = contentBlock;
-      }
+      const currentUserMessagePayload = buildApiMessage('user', userContent, attachments);
 
       const payloadMessages = [
         ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
@@ -357,9 +343,9 @@ export function useRioChat(options: UseRioChatOptions = {}) {
       const historyMessages = pathToUser
         .map((id) => {
           const node = tree.nodes.get(id);
-          return node ? { role: node.role, content: node.content } : null;
+          return node ? buildApiMessage(node.role, node.content, node.attachments) : null;
         })
-        .filter(Boolean) as Array<{ role: string; content: string }>;
+        .filter((message): message is ApiMessage => Boolean(message));
 
       const historySlice =
         typeof historyLimit === 'number' && historyLimit >= 0
@@ -451,12 +437,16 @@ export function useRioChat(options: UseRioChatOptions = {}) {
       const parentId: string | null = pathToParent.length > 0 ? (pathToParent[pathToParent.length - 1] ?? null) : null;
 
       // Create new user node as sibling
-      let _newUserNodeId: string;
       let treeAfterUser: MessageTree;
 
       setTree((prevTree) => {
-        const { newTree, newNodeId } = addNode(prevTree, 'user', newContent, parentId);
-        _newUserNodeId = newNodeId;
+        const { newTree, newNodeId } = addNode(
+          prevTree,
+          'user',
+          newContent,
+          parentId,
+          node.attachments
+        );
         treeAfterUser = {
           ...newTree,
           selectedPath: [...pathToParent, newNodeId],
@@ -471,9 +461,9 @@ export function useRioChat(options: UseRioChatOptions = {}) {
       const historyMessages = pathToParent
         .map((id) => {
           const n = tree.nodes.get(id);
-          return n ? { role: n.role, content: n.content } : null;
+          return n ? buildApiMessage(n.role, n.content, n.attachments) : null;
         })
-        .filter(Boolean) as Array<{ role: string; content: string }>;
+        .filter((message): message is ApiMessage => Boolean(message));
 
       const historySlice =
         typeof historyLimit === 'number' && historyLimit >= 0
@@ -483,7 +473,7 @@ export function useRioChat(options: UseRioChatOptions = {}) {
       const payloadMessages = [
         ...(systemPrompt ? [{ role: 'system', content: systemPrompt }] : []),
         ...historySlice,
-        { role: 'user', content: newContent },
+        buildApiMessage('user', newContent, node.attachments),
       ];
 
       try {

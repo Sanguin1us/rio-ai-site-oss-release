@@ -55,11 +55,14 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLDivElement>(
                 const visible = entry.isIntersecting;
                 setIsIntersecting(visible);
 
-                if (visible && !hasBeenVisible) {
-                    setHasBeenVisible(true);
-                    if (triggerOnce) {
-                        observer.unobserve(element);
-                    }
+                if (visible) {
+                    setHasBeenVisible((prev) => {
+                        if (prev) return prev;
+                        if (triggerOnce) {
+                            observer.unobserve(element);
+                        }
+                        return true;
+                    });
                 }
             },
             { threshold, rootMargin }
@@ -70,7 +73,7 @@ export function useIntersectionObserver<T extends HTMLElement = HTMLDivElement>(
         return () => {
             observer.unobserve(element);
         };
-    }, [threshold, rootMargin, triggerOnce, hasBeenVisible]);
+    }, [threshold, rootMargin, triggerOnce]);
 
     return { ref, isIntersecting, hasBeenVisible };
 }

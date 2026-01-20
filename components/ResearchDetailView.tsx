@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ChevronLeft, Share2, Bookmark, Clock, ArrowRight } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { ChevronLeft, ArrowRight } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { AttentionAccuracyChart, ManyNeedlesChart, TTABenchmarkChart } from './detail/TTABenchmarkChart';

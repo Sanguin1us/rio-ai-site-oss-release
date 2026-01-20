@@ -657,6 +657,7 @@ export const ChatSection = () => {
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Process files (shared between input and drag-drop)
   const processFiles = async (files: File[]) => {
@@ -670,27 +671,36 @@ export const ChatSection = () => {
     setIsUploadingFiles(true);
     const newAttachments: Attachment[] = [];
 
-    for (const file of validFiles) {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+    try {
+      for (const file of validFiles) {
+        try {
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = () => reject(reader.error ?? new Error('File read failed'));
+            reader.readAsDataURL(file);
+          });
 
-      const type = file.type.startsWith('image/') ? 'image' : 'file';
+          const type = file.type.startsWith('image/') ? 'image' : 'file';
 
-      newAttachments.push({
-        id: crypto.randomUUID(),
-        type,
-        mimeType: file.type,
-        name: file.name,
-        dataUrl: base64
-      });
+          newAttachments.push({
+            id: crypto.randomUUID(),
+            type,
+            mimeType: file.type,
+            name: file.name,
+            dataUrl: base64
+          });
+        } catch (error) {
+          console.error('Failed to read attachment', error);
+        }
+      }
+
+      if (newAttachments.length > 0) {
+        setSelectedFiles(prev => [...prev, ...newAttachments]);
+      }
+    } finally {
+      setIsUploadingFiles(false);
     }
-
-    setSelectedFiles(prev => [...prev, ...newAttachments]);
-    setIsUploadingFiles(false);
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -770,6 +780,12 @@ export const ChatSection = () => {
   }, []);
 
   useEffect(() => {
+    if (!inputTextareaRef.current) return;
+    inputTextareaRef.current.style.height = 'auto';
+    inputTextareaRef.current.style.height = `${Math.min(inputTextareaRef.current.scrollHeight, 200)}px`;
+  }, [input]);
+
+  useEffect(() => {
     const chatContainer = chatContainerRef.current;
     if (!chatContainer) return;
 
@@ -788,7 +804,12 @@ export const ChatSection = () => {
 
     // When a new user message is added (user just sent a message)
     // This is detected by: messageCount increased AND the last user message was just added
-    const lastUserMessageIndex = messages.findLastIndex(m => m.role === 'user');
+    const lastUserMessageIndex = (() => {
+      for (let i = messages.length - 1; i >= 0; i -= 1) {
+        if (messages[i]?.role === 'user') return i;
+      }
+      return -1;
+    })();
     const userJustSentMessage = messageCountChanged &&
       lastUserMessageIndex === messages.length - 1 &&
       messages[lastUserMessageIndex]?.role === 'user';
@@ -1042,6 +1063,7 @@ export const ChatSection = () => {
                 )}
 
                 <textarea
+                  ref={inputTextareaRef}
                   value={input}
                   onChange={(e) => {
                     setInput(e.target.value);
@@ -1097,15 +1119,21 @@ export const ChatSection = () => {
                         className="absolute bottom-full right-0 z-20 mb-2 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200"
                         role="listbox"
                         onKeyDown={(e) => {
-                          const currentIndex = chatModels.findIndex(m => m.id === selectedModelId);
+                          const currentIndex = chatModels.findIndex((m) => m.id === selectedModelId);
                           if (e.key === 'ArrowDown') {
                             e.preventDefault();
                             const nextIndex = (currentIndex + 1) % chatModels.length;
-                            setSelectedModelId(chatModels[nextIndex].id);
+                            const nextModel = chatModels[nextIndex];
+                            if (nextModel) {
+                              setSelectedModelId(nextModel.id);
+                            }
                           } else if (e.key === 'ArrowUp') {
                             e.preventDefault();
                             const prevIndex = (currentIndex - 1 + chatModels.length) % chatModels.length;
-                            setSelectedModelId(chatModels[prevIndex].id);
+                            const prevModel = chatModels[prevIndex];
+                            if (prevModel) {
+                              setSelectedModelId(prevModel.id);
+                            }
                           } else if (e.key === 'Escape' || e.key === 'Enter') {
                             setIsModelMenuOpen(false);
                           }

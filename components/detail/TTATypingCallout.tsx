@@ -21,7 +21,7 @@ export const TTATypingCallout: React.FC = () => {
 
         const observer = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting) {
+                if (entry && entry.isIntersecting) {
                     setHasStarted(true);
                     observer.disconnect();
                 }
@@ -37,7 +37,7 @@ export const TTATypingCallout: React.FC = () => {
         if (!hasStarted) return;
         if (isComplete) return;
 
-        const fullText = PHRASES[phraseIndex];
+        const fullText = PHRASES[phraseIndex] ?? '';
 
         if (!isDeleting && displayText === fullText) {
             if (phraseIndex === PHRASES.length - 1) {

@@ -197,7 +197,8 @@ const generateModeWeights = () => {
     const samples = TRAINING_MODES.map(() => Math.random() + 0.3);
     const total = samples.reduce((sum, value) => sum + value, 0);
     return TRAINING_MODES.reduce<Record<string, number>>((acc, mode, index) => {
-        acc[mode.title] = samples[index] / total;
+        const sample = samples[index] ?? 0;
+        acc[mode.title] = sample / total;
         return acc;
     }, {});
 };

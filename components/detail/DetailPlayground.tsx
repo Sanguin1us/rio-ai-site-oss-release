@@ -1,13 +1,13 @@
 import { useMemo, useRef, useEffect } from 'react';
 import { Send } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { type Components } from 'react-markdown';
 import { Highlight, Language, themes } from 'prism-react-renderer';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import remarkBreaks from 'remark-breaks';
 import katex from 'katex';
 import 'katex/dist/katex.min.css';
-import { ChatMessage, useRioChat } from '../../hooks/useRioChat';
+import { ChatMessage, type ChatRole, useRioChat } from '../../hooks/useRioChat';
 import { normalizeMathDelimiters } from '../../lib/markdown';
 
 const codeTheme = themes.nightOwl;
@@ -47,6 +47,17 @@ const renderMathToHtml = (value: string | undefined, displayMode: boolean) => {
     console.error('Failed to render KaTeX expression', error);
     return value;
   }
+};
+
+type MathComponentProps = {
+  value?: string;
+  children?: React.ReactNode;
+};
+
+type CodeComponentProps = React.HTMLAttributes<HTMLElement> & {
+  inline?: boolean;
+  className?: string;
+  children?: React.ReactNode;
 };
 
 const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
@@ -123,7 +134,7 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
               />
             ),
             hr: () => <hr className="my-4 border border-slate-200/80" />,
-            inlineMath: ({ value, children }) => {
+            inlineMath: ({ value, children }: MathComponentProps) => {
               const mathContent =
                 typeof value === 'string'
                   ? value
@@ -141,7 +152,7 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
                 />
               );
             },
-            math: ({ value, children }) => {
+            math: ({ value, children }: MathComponentProps) => {
               const mathContent =
                 typeof value === 'string'
                   ? value
@@ -201,13 +212,16 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
                 {...props}
               />
             ),
-            code: ({ node: _node, inline, className, children, ...props }) => {
+            code: ({ inline, className, children, ...props }: CodeComponentProps) => {
               const rawLanguage =
                 typeof className === 'string' ? className.replace('language-', '') : '';
               const language = rawLanguage
                 ? (rawLanguage.toLowerCase() as Language)
                 : ('tsx' as Language);
               const code = String(children).replace(/\s+$/, '');
+              const { ref: _ref, ...rest } = props as CodeComponentProps & {
+                ref?: React.Ref<HTMLElement>;
+              };
 
               if (inline) {
                 return (
@@ -218,7 +232,7 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
                     ]
                       .filter(Boolean)
                       .join(' ')}
-                    {...props}
+                    {...rest}
                   >
                     {children}
                   </code>
@@ -241,7 +255,7 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
                       <pre
                         className={`overflow-x-auto px-4 pb-4 pt-2 text-xs leading-relaxed ${highlightClassName ?? ''}`}
                         style={{ ...style, background: 'transparent' }}
-                        {...props}
+                        {...rest}
                       >
                         {tokens.map((line, i) => (
                           <div key={i} {...getLineProps({ line, key: i })}>
@@ -256,7 +270,7 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
                 </div>
               );
             },
-          }}
+          } as Components}
         >
           {markdownContent}
         </ReactMarkdown>
@@ -266,7 +280,7 @@ const ChatBubble: React.FC<{ message: ChatMessage }> = ({ message }) => {
 };
 
 export const DetailPlayground: React.FC<{ modelName: string }> = ({ modelName }) => {
-  const initialMessages = useMemo<ChatMessage[]>(
+  const initialMessages = useMemo<Array<{ role: ChatRole; content: string }>>(
     () => [
       {
         role: 'assistant',

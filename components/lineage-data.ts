@@ -4,6 +4,7 @@ import {
   LucideIcon,
   Atom,
   Bot,
+  Code,
   Music,
   Palette,
   Box,
@@ -12,8 +13,15 @@ import {
   Hammer,
   FileText,
   Eye,
+  BarChart3,
+  GraduationCap,
+  Languages,
+  Lightbulb,
   Mic,
+  Microscope,
+  Sigma,
   Sparkles,
+  Stethoscope,
 } from 'lucide-react';
 
 export interface LineageNode {
@@ -549,20 +557,6 @@ export const RIO_2_5_NODES = [...LINEAGE_NODES];
 // Deepthink Internalization Merging: 10 Rio 2.5 Omni instances converge into Rio 3 Preview
 // Deepthink Internalization Merging: Rio 2.5 Omni acts as a central source, creating 10 specialized experts that converge into Rio 3 Preview
 // Deepthink Internalization Merging: Experts from Rio 3.0 Lineage
-import {
-  Sparkles,
-  Bot,
-  Brain,
-  Code,
-  Sigma,
-  Languages,
-  Microscope,
-  GraduationCap,
-  Lightbulb,
-  Eye,
-  BarChart3,
-  Stethoscope,
-} from 'lucide-react';
 
 export const RIO_3_NODES: LineageNode[] = [
   // 1. The Source: Rio 2.5 Omni (Standard Style)
