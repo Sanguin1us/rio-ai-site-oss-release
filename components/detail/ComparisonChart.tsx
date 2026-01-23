@@ -108,7 +108,8 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
     const plotWidth = width - left - right;
     const plotHeight = height - top - bottom;
 
-    const logMin = Math.log10(minCost ?? COST_DOMAIN.min);
+    const xMin = minCost ?? COST_DOMAIN.min;
+    const logMin = Math.log10(xMin);
     const logMax = Math.log10(COST_DOMAIN.max);
 
     // Filter out items that don't have the required metric
@@ -220,7 +221,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                     })}
 
                     {/* X-axis ticks */}
-                    {COST_TICKS.map((tick) => {
+                    {COST_TICKS.filter((tick) => tick >= xMin).map((tick) => {
                         const x = getX(tick);
                         return (
                             <text
