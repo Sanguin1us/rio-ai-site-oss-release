@@ -4,6 +4,21 @@ import type { ResearchPost } from '../types/index';
 
 const RESEARCH_POSTS: ResearchPost[] = [
   {
+    id: 'accelerating-reinforcement-learning',
+    title: 'Acelerando Reinforcement Learning',
+    summary:
+      'Como novas técnicas de otimização distribuída e curricula dinâmicos estão reduzindo o tempo de convergência de agentes complexos em ordens de magnitude.',
+    content: `
+No Rio-AI, estamos redefinindo os limites do Reinforcement Learning através de um novo framework de otimização distribuída. Ao combinar técnicas de evolução de população com perturbações de baixo ranking (low-rank), conseguimos treinar agentes altamente complexos com uma fração do custo computacional tradicional.
+
+![Diagrama de Otimização de Reinforcement Learning](/images/research/accelerating-rl-diagram.png)
+
+Nossa abordagem elimina a necessidade de backpropagation em larga escala durante a fase de avaliação, permitindo que milhares de "offsprings" (descendentes) sejam avaliados simultaneamente em ambientes heterogêneos. As atualizações são então agregadas de forma ponderada pela performance (fitness score), garantindo uma convergência estável e ultra-rápida.
+`,
+    date: '12 Jan 2026',
+    imageUrl: '/images/research/accelerating-reinforcement-learning.png',
+  },
+  {
     id: 'efficient-cot-language',
     title: 'Creating a Language for Efficient CoT',
     summary:

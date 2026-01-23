@@ -164,6 +164,56 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-open")
     ],
   },
   {
+    name: 'Rio 3.0 Open Mini',
+    description:
+      'Modelo open source compacto da geração 3.0, pensado para eficiência e experimentação rápida.',
+    category: 'Open Source',
+    Icon: FlaskConical,
+    tags: ['Open Source', 'CC BY 4.0', '4B Parâmetros', 'Geração 3.0', 'Compacto'],
+    isOpenSource: true,
+    baseModel: 'Qwen3-4B-Thinking-2507',
+    baseModelUrl: 'https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507',
+    parameters: '4 Bilhões',
+    license: 'Creative Commons Attribution 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/deed.en',
+    datasets: ['nvidia/OpenScienceReasoning-2', 'nvidia/Nemotron-Post-Training-Dataset-v1'],
+    datasetLinks: [
+      {
+        label: 'nvidia/OpenScienceReasoning-2',
+        url: 'https://huggingface.co/datasets/nvidia/OpenScienceReasoning-2',
+      },
+      {
+        label: 'nvidia/Nemotron-Post-Training-Dataset-v1',
+        url: 'https://huggingface.co/datasets/nvidia/Nemotron-Post-Training-Dataset-v1',
+      },
+    ],
+  },
+  {
+    name: 'Rio 3.0 Open',
+    description:
+      'Modelo open source principal da geração 3.0, equilibrando qualidade e custo para uso amplo.',
+    category: 'Open Source',
+    Icon: FlaskConical,
+    tags: ['Open Source', 'CC BY 4.0', '235B Parâmetros', 'Geração 3.0'],
+    isOpenSource: true,
+    baseModel: 'Qwen3-235B-A22B-Thinking-2507',
+    baseModelUrl: 'https://huggingface.co/Qwen/Qwen3-235B-A22B-Thinking-2507',
+    parameters: '235 Bilhões (22B ativados)',
+    license: 'Creative Commons Attribution 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/deed.en',
+    datasets: ['nvidia/OpenScienceReasoning-2', 'nvidia/Nemotron-Post-Training-Dataset-v1'],
+    datasetLinks: [
+      {
+        label: 'nvidia/OpenScienceReasoning-2',
+        url: 'https://huggingface.co/datasets/nvidia/OpenScienceReasoning-2',
+      },
+      {
+        label: 'nvidia/Nemotron-Post-Training-Dataset-v1',
+        url: 'https://huggingface.co/datasets/nvidia/Nemotron-Post-Training-Dataset-v1',
+      },
+    ],
+  },
+  {
     name: 'Rio 2.0 Open',
     description:
       'Versão open source de alta performance, pós-treinada a partir do Qwen 2.5 14B, ideal para pesquisa e desenvolvimento.',

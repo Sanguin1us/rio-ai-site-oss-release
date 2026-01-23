@@ -223,3 +223,43 @@ html,
 .chat-scroll-container::-webkit-scrollbar-button {
   display: none;
 }
+
+@keyframes flow-bubble {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    left: 100%;
+    opacity: 0;
+  }
+}
+
+.flow-bubble {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 8px;
+  width: 8px;
+  border-radius: 9999px;
+  background: rgba(0, 43, 127, 0.65);
+  transform: translate(-50%, -50%);
+  animation: flow-bubble 2.4s linear infinite;
+}
+
+.flow-bubble--delay-1 {
+  animation-delay: 0.6s;
+}
+
+.flow-bubble--delay-2 {
+  animation-delay: 1.2s;
+}

@@ -8,6 +8,8 @@ import { DetailSpecs } from './detail/DetailSpecs';
 import { AnimateOnScroll } from './AnimateOnScroll';
 import { ArrowUpRight } from 'lucide-react';
 import { Rio25OpenDetail } from './detail/Rio25OpenDetail';
+import { Rio30OpenDetail } from './detail/Rio30OpenDetail';
+import { Rio30OpenMiniDetail } from './detail/Rio30OpenMiniDetail';
 import { Rio20OpenDetail } from './detail/Rio20OpenDetail';
 import { Rio20Detail } from './detail/Rio20Detail';
 import { Rio25Detail } from './detail/Rio25Detail';
@@ -22,6 +24,14 @@ interface ModelDetailViewProps {
 export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack }) => {
   if (model.name === 'Rio 2.5 Open') {
     return <Rio25OpenDetail model={model} onBack={onBack} />;
+  }
+
+  if (model.name === 'Rio 3.0 Open') {
+    return <Rio30OpenDetail model={model} onBack={onBack} />;
+  }
+
+  if (model.name === 'Rio 3.0 Open Mini') {
+    return <Rio30OpenMiniDetail model={model} onBack={onBack} />;
   }
 
   if (model.name === 'Rio 2.0 Open') {

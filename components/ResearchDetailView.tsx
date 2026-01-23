@@ -91,7 +91,19 @@ export const ResearchDetailView: React.FC<ResearchDetailViewProps> = ({ post, on
                                         return <SpinningEarth />;
                                     }
                                     return <code className="bg-slate-100 rounded px-1.5 py-0.5 text-sm font-mono text-rio-primary" {...props}>{children}</code>;
-                                }
+                                },
+                                img: ({ node, ...props }) => (
+                                    <div className="my-16 flex flex-col items-center">
+                                        <div className="relative overflow-hidden rounded-3xl border border-slate-100 shadow-2xl shadow-blue-900/10">
+                                            <img className="max-w-full h-auto" {...props} />
+                                        </div>
+                                        {props.alt && (
+                                            <span className="mt-4 text-sm text-slate-400 font-medium">
+                                                — {props.alt}
+                                            </span>
+                                        )}
+                                    </div>
+                                )
                             }}
                         >
                             {post.content || post.summary}
