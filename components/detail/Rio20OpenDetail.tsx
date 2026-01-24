@@ -238,7 +238,7 @@ export const Rio20OpenDetail: React.FC<Rio20OpenDetailProps> = ({ model, onBack 
                         className="inline-flex items-center gap-2 text-sm font-semibold text-prose-light hover:text-rio-primary transition"
                     >
                         <ArrowLeft className="h-4 w-4" />
-                        Voltar para todos os modelos
+                        Voltar para modelos Open
                     </button>
 
                     <div className="mt-6 space-y-10">

@@ -9,7 +9,6 @@
 
 // Layout components
 export { Header } from './Header';
-export { Footer } from './Footer';
 
 // Hero & Landing
 export { Hero } from './Hero';
@@ -17,15 +16,11 @@ export { HeroTitleAnimation } from './HeroTitleAnimation';
 
 // Page sections
 export { ChatSection } from './ChatSection';
-export { ModelsSection } from './ModelsSection';
 export { OpenSourceSection } from './OpenSourceSection';
-export { ResearchSection } from './ResearchSection';
-export { SciencePlatformSection } from './SciencePlatformSection';
 
 // Model display
 export { ModelCard } from './ModelCard';
 export { ModelDetailView } from './ModelDetailView';
-export { LineageTree } from './LineageTree';
 
 // Utilities
 export { AnimateOnScroll } from './AnimateOnScroll';

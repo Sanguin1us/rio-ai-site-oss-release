@@ -1,7 +1,6 @@
 import React from 'react';
 import type { Model } from '../types/index';
 import { DetailHeader } from './detail/DetailHeader';
-import { DetailPlayground } from './detail/DetailPlayground';
 import { DetailUseCases } from './detail/DetailUseCases';
 import { DetailCodeSnippets } from './detail/DetailCodeSnippets';
 import { DetailSpecs } from './detail/DetailSpecs';
@@ -11,10 +10,6 @@ import { Rio25OpenDetail } from './detail/Rio25OpenDetail';
 import { Rio30OpenDetail } from './detail/Rio30OpenDetail';
 import { Rio30OpenMiniDetail } from './detail/Rio30OpenMiniDetail';
 import { Rio20OpenDetail } from './detail/Rio20OpenDetail';
-import { Rio20Detail } from './detail/Rio20Detail';
-import { Rio25Detail } from './detail/Rio25Detail';
-import { Rio30Detail } from './detail/Rio30Detail';
-
 
 interface ModelDetailViewProps {
   model: Model;
@@ -36,18 +31,6 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
 
   if (model.name === 'Rio 2.0 Open') {
     return <Rio20OpenDetail model={model} onBack={onBack} />;
-  }
-
-  if (model.name === 'Rio 2.5') {
-    return <Rio25Detail model={model} onBack={onBack} />;
-  }
-
-  if (model.name === 'Rio 2.0') {
-    return <Rio20Detail model={model} onBack={onBack} />;
-  }
-
-  if (model.name === 'Rio 3 Preview') {
-    return <Rio30Detail model={model} onBack={onBack} />;
   }
 
   return (
@@ -75,9 +58,7 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
           {/* Sidebar */}
           <div className="lg:col-span-2 space-y-12">
             <AnimateOnScroll delay={300}>
-              {model.supportsChat ? (
-                <DetailPlayground modelName={model.name} />
-              ) : model.huggingFaceUrl ? (
+              {model.huggingFaceUrl ? (
                 <div className="rounded-lg border border-slate-200 bg-gradient-to-br from-blue-50/60 to-white p-6 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
                     <h3 className="text-lg font-semibold text-prose">Explore no Hugging Face</h3>
@@ -101,9 +82,9 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
                 </div>
               ) : (
                 <div className="rounded-lg border border-slate-200 bg-white p-6">
-                  <h3 className="text-lg font-semibold text-prose">Demo interativa indisponível</h3>
+                  <h3 className="text-lg font-semibold text-prose">Pesos em breve</h3>
                   <p className="mt-2 text-sm text-prose-light">
-                    O chat ao vivo está disponível apenas para o modelo flagship Rio 2.0 Omni.
+                    Assim que os pesos forem liberados, vamos publicar o acesso por aqui.
                   </p>
                 </div>
               )}

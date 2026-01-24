@@ -17,7 +17,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ model, onBack }) => 
             className="inline-flex items-center gap-2 text-sm font-semibold text-prose-light hover:text-rio-primary transition"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar para todos os modelos
+            Voltar para modelos Open
           </button>
         </div>
         <div className="flex flex-col sm:flex-row sm:items-start gap-6">

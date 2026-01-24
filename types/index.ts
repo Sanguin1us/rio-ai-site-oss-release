@@ -13,7 +13,7 @@ import type { LucideIcon } from 'lucide-react';
  * Application view/route type.
  * Previously duplicated in App.tsx, Header.tsx, and Hero.tsx.
  */
-export type View = 'home' | 'chat' | 'opensource' | 'research';
+export type View = 'home' | 'chat' | 'opensource';
 
 // ============================================================================
 // Model Types
@@ -97,16 +97,3 @@ export interface MessageTree {
   selectedPath: string[];
 }
 
-// ============================================================================
-// Research Types
-// ============================================================================
-
-export interface ResearchPost {
-  id: string;
-  title: string;
-  summary: string;
-  content?: string; // Markdown content
-  date: string;
-  imageUrl: string;
-  isFeatured?: boolean;
-}

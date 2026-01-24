@@ -1,29 +1,28 @@
 # Rio-AI – Portal da Família de Modelos de IA
 
-Portal institucional da Prefeitura do Rio de Janeiro, desenvolvido pela **IPLANRIO**, para apresentar a evolução e as capacidades da família completa de modelos **Rio** (gerações 1.0 a 3.0). O projeto destaca o compromisso da cidade com a transparência tecnológica, o fomento ao ecossistema Open Source e a aplicação prática de IA no setor público.
+Portal institucional da Prefeitura do Rio de Janeiro, desenvolvido pela **IPLANRIO**, para apresentar a nova geração de modelos **Rio Open**. O projeto destaca o compromisso da cidade com a transparência tecnológica, o fomento ao ecossistema Open Source e a aplicação prática de IA no setor público.
 
 ---
 
 ## 🌟 Visão Geral
 
 - **Stack Moderna**: Baseado em **React 19** e **TypeScript**, orquestrado pelo **Vite 6** para uma experiência de desenvolvimento e performance de ponta.
-- **Navegação Fluida**: SPA (Single Page Application) com controle de estado nativo, garantindo transições instantâneas entre o playground de chat, catálogo e áreas de pesquisa.
-- **Ecossistema de Modelos**: Portfólio de mais de 35 modelos especializados, variando de modelos de linguagem puras (LLMs) a modelos multimodais de visão, voz e áudio.
-- **Inovação Técnica**: Implementação de técnicas de vanguarda como *SwiReasoning* (raciocínio latente), *Deepthink Internalization Merging* e algoritmos genéticos para evolução autônoma de modelos.
+- **Navegação Fluida**: SPA (Single Page Application) com controle de estado nativo, garantindo transições instantâneas entre o playground de chat e o catálogo de modelos.
+- **Ecossistema de Modelos**: Catálogo enxuto com foco nos modelos Open Source da família Rio.
+- **Inovação Técnica**: Destaque para técnicas de raciocínio latente e otimizações de desempenho presentes nos modelos open source.
 
 ---
 
-## 🧬 Família de Modelos
+## 🧬 Modelos Open Source
 
-A evolução dos modelos Rio é dividida em quatro gerações principais, cada uma representando um salto qualitativo em parâmetros e capacidades:
+Catálogo focado nos modelos abertos que serão lançados:
 
-| Geração | Foco Principal | Base Tecnológica | Modelos de Destaque |
-| :--- | :--- | :--- | :--- |
-| **1.0** | Fundação | Qwen 2.5 32B | Rio 1 |
-| **1.5** | Especialização | Qwen 2.5 Instruct / VL | Rio 1.5, Ipiranga (Visão), Niemeyer (Design) |
-| **2.0** | Multimodalidade | Qwen 2.5 14B/32B | Rio 2.0 Omni (Flagship), Rio 2.0 Open |
-| **2.5** | Raciocínio (SOTA) | Qwen 3 / Qwen 3 Thinking | Rio 2.5 Omni, Rio 2.5 Open (30B), Rio 2.5 Evolve |
-| **3.0** | Convergência | Deepthink Internalization | Rio 3 Preview (Merging de 10x Rio 2.5 Omni) |
+| Modelo | Foco | Base Tecnológica |
+| :--- | :--- | :--- |
+| **Rio 3.0 Open** | Modelo principal | Qwen3-235B-Thinking |
+| **Rio 3.0 Open Mini** | Eficiência | Qwen3-4B-Thinking |
+| **Rio 2.5 Open** | Equilíbrio custo/qualidade | Qwen3-30B-Thinking |
+| **Rio 2.0 Open** | Pesquisa e desenvolvimento | Qwen 2.5 14B Instruct |
 
 ### 🔓 Iniciativa Open Source
 
@@ -36,21 +35,14 @@ O Rio-AI é um dos maiores contribuidores públicos para a comunidade de IA no B
 
 ## 🚀 Principais Experiências
 
-### 📊 Árvore de Linhagem Interativa
-Visualize a árvore genealógica dos modelos através de um componente SVG reativo (`LineageTree.tsx`).
-- **Conexões Bézier**: Linhas dinâmicas que recalculam caminhos em tempo real.
-- **Focus Mode**: Destaque visual ao passar o mouse, facilitando a compreensão de dependências entre modelos base e derivados.
-
 ### 💬 Chat Rio (Advanced Branching)
 Um playground de chat que vai além do básico, oferecendo ferramentas para desenvolvedores e pesquisadores:
 - **Árvore de Mensagens**: Suporte total a *branching*. Edite qualquer mensagem passada para criar um novo ramo na conversa sem perder o histórico original.
 - **Renderização Rica**: Suporte nativo a Markdown GFM, tabelas complexas e expressões matemáticas via **KaTeX**.
 - **Controle de Fluxo**: Botão de interrupção (*Stop*) e regeneração de respostas com animação de "pensamento" integrada.
-
-### 🧬 Rio 2.5 Evolve (Scientific Platform)
-Uma vitrine da nossa plataforma de pesquisa algorítmica autônoma.
-- **Algoritmos Genéticos**: O sistema busca soluções para problemas complexos através de herança, mutação e seleção.
-- **Terminal de Logs**: Acompanhe em tempo real a simulação do processo evolutivo de otimização matemática.
+ 
+### 🧪 Catálogo Open Source
+Acesse as fichas técnicas, benchmarks e links oficiais de cada modelo Open Source.
 
 ---
 
@@ -63,10 +55,9 @@ Uma vitrine da nossa plataforma de pesquisa algorítmica autônoma.
 ├── App.tsx                    # Orquestrador de views e roteamento de estado
 ├── constants.ts               # Definição central do catálogo de modelos
 ├── components/
-│   ├── lineage-data.ts        # Coordenadas e conexões da árvore de linhagem
-│   ├── detail/                # Views específicas para cada tipo de modelo
+│   ├── detail/                # Views específicas para cada modelo Open
 │   ├── ui/                    # Design System (Button, Badge, Card, etc.)
-│   └── ...                    # Componentes modulares (Hero, Chat, Research)
+│   └── ...                    # Componentes modulares (Hero, Chat, etc.)
 ├── hooks/
 │   ├── useRioChat.ts          # Lógica de chat baseada em árvore de mensagens
 │   └── useScrollAnimation.ts  # Trigger de animações baseadas em scroll
