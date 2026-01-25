@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type {
     ComparisonMetric,
     LabelPosition,
@@ -102,6 +102,8 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
     minCost,
 }) => {
     const [hovered, setHovered] = useState<ModelComparisonDatum | null>(null);
+    const [pinned, setPinned] = useState<ModelComparisonDatum | null>(null);
+    const hoverTimeout = useRef<number | null>(null);
 
     const { width, height } = CHART_DIMENSIONS;
     const { top, right, bottom, left } = CHART_PADDING;
@@ -139,22 +141,23 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
         return LABEL_POSITION_CONFIG[position];
     };
 
-    const tooltipMetrics = hovered
+    const activeDatum = pinned ?? hovered;
+    const tooltipMetrics = activeDatum
         ? {
-            pointX: getX(hovered.cost),
-            pointY: getY(getMetricValue(hovered, metric)),
-            score: getMetricValue(hovered, metric),
+            pointX: getX(activeDatum.cost),
+            pointY: getY(getMetricValue(activeDatum, metric)),
+            score: getMetricValue(activeDatum, metric),
         }
         : null;
 
     const tooltipBox = (() => {
         if (!tooltipMetrics) return null;
-        const tooltipWidth = 220;
-        const tooltipHeight = 78;
+        const tooltipWidth = 248;
+        const tooltipHeight = 94;
         const xMin = left;
         const xMax = width - right - tooltipWidth;
         const clampedX = Math.min(Math.max(tooltipMetrics.pointX - tooltipWidth / 2, xMin), xMax);
-        const clampedY = Math.max(tooltipMetrics.pointY - tooltipHeight - 16, top);
+        const clampedY = tooltipMetrics.pointY - tooltipHeight - 16;
         return {
             ...tooltipMetrics,
             boxX: clampedX,
@@ -163,6 +166,33 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
             height: tooltipHeight,
         };
     })();
+
+    const scheduleClearHover = () => {
+        if (pinned) return;
+        if (hoverTimeout.current) {
+            window.clearTimeout(hoverTimeout.current);
+        }
+        hoverTimeout.current = window.setTimeout(() => {
+            setHovered(null);
+        }, 90);
+    };
+
+    const handleHover = (item: ModelComparisonDatum) => {
+        if (pinned) return;
+        if (hoverTimeout.current) {
+            window.clearTimeout(hoverTimeout.current);
+        }
+        setHovered(item);
+    };
+
+    const handlePin = (item: ModelComparisonDatum) => {
+        if (pinned?.model === item.model) {
+            setPinned(null);
+            return;
+        }
+        setPinned(item);
+        setHovered(null);
+    };
 
     return (
         <div className="rounded-3xl bg-white/80 p-4 sm:p-5">
@@ -175,8 +205,12 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                 <svg
                     viewBox={`0 0 ${width} ${height}`}
                     role="img"
-                    className="h-80 w-full"
-                    onMouseLeave={() => setHovered(null)}
+                    className="h-80 w-full overflow-visible"
+                    onMouseLeave={scheduleClearHover}
+                    onClick={() => {
+                        setPinned(null);
+                        setHovered(null);
+                    }}
                 >
                     {/* Axes */}
                     <line
@@ -269,8 +303,10 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                         const lineEndX = lineStartX + dxLine * scale;
                         const lineEndY = lineStartY + dyLine * scale;
                         const isHovered = hovered?.model === item.model;
-                        const circleRadius = radius + (isHovered ? 2 : 0);
-                        const faded = Boolean(hovered) && !isHovered;
+                        const isPinned = pinned?.model === item.model;
+                        const isActive = isHovered || isPinned;
+                        const circleRadius = radius + (isActive ? 2 : 0);
+                        const shouldFade = (Boolean(hovered) || Boolean(pinned)) && !isActive;
 
                         return (
                             <g
@@ -279,11 +315,28 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                                 tabIndex={0}
                                 role="button"
                                 aria-label={`${item.model} - ${label} ${formatTooltipScore(metricValue)}, custo ${formatTooltipCost(item.cost)} por 1M tokens`}
-                                onMouseEnter={() => setHovered(item)}
-                                onFocus={() => setHovered(item)}
-                                onMouseLeave={() => setHovered(null)}
-                                onBlur={() => setHovered(null)}
+                                onMouseEnter={() => handleHover(item)}
+                                onFocus={() => handleHover(item)}
+                                onMouseLeave={scheduleClearHover}
+                                onBlur={scheduleClearHover}
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    handlePin(item);
+                                }}
+                                onKeyDown={(event) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        handlePin(item);
+                                    }
+                                }}
                             >
+                                <circle
+                                    cx={x}
+                                    cy={y}
+                                    r={14}
+                                    fill="transparent"
+                                    className="pointer-events-auto"
+                                />
                                 <circle
                                     cx={x}
                                     cy={y}
@@ -291,7 +344,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                                     fill={item.isRio ? '#1E40AF' : '#FFFFFF'}
                                     stroke={item.isRio ? '#1E40AF' : item.color}
                                     strokeWidth={item.isRio ? 2.5 : 1.5}
-                                    opacity={faded ? 0.4 : 1}
+                                    opacity={shouldFade ? 0.4 : 1}
                                 />
                                 <line
                                     x1={lineStartX}
@@ -300,14 +353,14 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                                     y2={lineEndY}
                                     className="stroke-slate-300"
                                     strokeWidth={1}
-                                    opacity={faded ? 0.5 : 1}
+                                    opacity={shouldFade ? 0.5 : 1}
                                 />
                                 <text
                                     x={labelX}
                                     y={labelY}
                                     textAnchor={anchor}
                                     className="text-[11px] font-semibold fill-slate-700"
-                                    opacity={faded ? 0.5 : 1}
+                                    opacity={shouldFade ? 0.5 : 1}
                                 >
                                     {item.model}
                                 </text>
@@ -316,7 +369,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                     })}
 
                     {/* Tooltip */}
-                    {tooltipBox && hovered && (
+                    {tooltipBox && activeDatum && (
                         <>
                             <line
                                 x1={tooltipBox.pointX}
@@ -334,19 +387,37 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                                 height={tooltipBox.height}
                                 pointerEvents="none"
                             >
-                                <div className="h-full rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg ring-1 ring-black/5">
-                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                                        {hovered.model}
-                                    </p>
-                                    <p className="mt-1 text-sm font-semibold text-slate-900">
-                                        {label}:{' '}
-                                        <span className="text-rio-primary">
+                                <div className="h-full rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm">
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className="h-2.5 w-2.5 rounded-full"
+                                                style={{ backgroundColor: activeDatum.color ?? '#94A3B8' }}
+                                            />
+                                            <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                                                {activeDatum.model}
+                                            </p>
+                                        </div>
+                                        {activeDatum.isRio && (
+                                            <span className="rounded-full bg-rio-primary/10 px-2 py-0.5 text-[10px] font-semibold text-rio-primary">
+                                                RIO
+                                            </span>
+                                        )}
+                                    </div>
+                                    <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5">
+                                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                            {label}
+                                        </span>
+                                        <span className="text-sm font-semibold text-rio-primary">
                                             {formatTooltipScore(tooltipBox.score)}
                                         </span>
-                                    </p>
-                                    <p className="text-xs text-slate-600">
-                                        Preco: {formatTooltipCost(hovered.cost)} / 1M tokens
-                                    </p>
+                                        <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                            Preço
+                                        </span>
+                                        <span className="text-xs font-semibold text-slate-700">
+                                            {formatTooltipCost(activeDatum.cost)} / 1M tokens
+                                        </span>
+                                    </div>
                                 </div>
                             </foreignObject>
                         </>

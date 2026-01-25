@@ -10,7 +10,12 @@ interface ModelCardProps {
 export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) => {
   const { name, description, Icon, tags, isOpenSource } = model;
   return (
-    <div className="flex flex-col rounded-lg bg-white border border-slate-200 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-rio-primary hover:-translate-y-1 h-full">
+    <button
+      type="button"
+      onClick={() => onSelectModel(model)}
+      aria-label={`Ver detalhes de ${name}`}
+      className="group flex w-full flex-col rounded-lg bg-white border border-slate-200 text-left shadow-sm transition-all duration-300 hover:shadow-lg hover:border-rio-primary hover:-translate-y-1 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rio-primary focus-visible:ring-offset-2"
+    >
       <div className="p-6 flex-grow">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
@@ -39,15 +44,12 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) =>
               </span>
             ))}
           </div>
-          <button
-            onClick={() => onSelectModel(model)}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-rio-primary transition hover:text-blue-800 group"
-          >
+          <span className="inline-flex items-center gap-2 text-sm font-semibold text-rio-primary transition group-hover:text-blue-800">
             Ver Detalhes
             <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </button>
+          </span>
         </div>
       </div>
-    </div>
+    </button>
   );
 };

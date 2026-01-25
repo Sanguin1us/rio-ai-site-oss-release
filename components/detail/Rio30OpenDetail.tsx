@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { Model } from '../../types/index';
 import {
   ArrowLeft,
@@ -112,6 +112,8 @@ const formatScoreValue = (value: number) => {
 
 const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, yTicks, data }) => {
   const [hovered, setHovered] = useState<ParameterDatum | null>(null);
+  const [pinned, setPinned] = useState<ParameterDatum | null>(null);
+  const hoverTimeout = useRef<number | null>(null);
   const { width, height } = CHART_DIMENSIONS;
   const { top, right, bottom, left } = CHART_PADDING;
   const plotWidth = width - left - right;
@@ -130,21 +132,23 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
     return height - bottom - ratio * plotHeight;
   };
 
-  const tooltipMetrics = hovered
+  const activeDatum = pinned ?? hovered;
+  const tooltipMetrics = activeDatum
     ? {
-        pointX: getX(hovered.paramsB),
-        pointY: getY(hovered.score),
+        pointX: getX(activeDatum.paramsB),
+        pointY: getY(activeDatum.score),
       }
     : null;
 
   const tooltipBox = (() => {
-    if (!tooltipMetrics || !hovered) return null;
-    const tooltipWidth = 210;
-    const tooltipHeight = 72;
+    if (!tooltipMetrics || !activeDatum) return null;
+    const tooltipWidth = 248;
+    const tooltipHeight = 94;
+    const tooltipGap = 22;
     const xMin = left;
     const xMax = width - right - tooltipWidth;
     const clampedX = Math.min(Math.max(tooltipMetrics.pointX - tooltipWidth / 2, xMin), xMax);
-    const clampedY = Math.max(tooltipMetrics.pointY - tooltipHeight - 16, top);
+    const clampedY = tooltipMetrics.pointY - tooltipHeight - tooltipGap;
     return {
       ...tooltipMetrics,
       boxX: clampedX,
@@ -154,6 +158,33 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
     };
   })();
   const tooltipLabel = label === "Humanity's Last Exam" ? 'HLE' : label;
+
+  const scheduleClearHover = () => {
+    if (pinned) return;
+    if (hoverTimeout.current) {
+      window.clearTimeout(hoverTimeout.current);
+    }
+    hoverTimeout.current = window.setTimeout(() => {
+      setHovered(null);
+    }, 90);
+  };
+
+  const handleHover = (item: ParameterDatum) => {
+    if (pinned) return;
+    if (hoverTimeout.current) {
+      window.clearTimeout(hoverTimeout.current);
+    }
+    setHovered(item);
+  };
+
+  const handlePin = (item: ParameterDatum) => {
+    if (pinned?.model === item.model) {
+      setPinned(null);
+      return;
+    }
+    setPinned(item);
+    setHovered(null);
+  };
 
   return (
     <div className="rounded-3xl bg-white/80 p-4 sm:p-5">
@@ -166,8 +197,12 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
         <svg
           viewBox={`0 0 ${width} ${height}`}
           role="img"
-          className="h-80 w-full"
-          onMouseLeave={() => setHovered(null)}
+          className="h-80 w-full overflow-visible"
+          onMouseLeave={scheduleClearHover}
+          onClick={() => {
+            setPinned(null);
+            setHovered(null);
+          }}
         >
           <line
             x1={left}
@@ -237,8 +272,10 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
             }[position];
             const radius = item.isRio ? 7 : 5;
             const isHovered = hovered?.model === item.model;
-            const faded = Boolean(hovered) && !isHovered;
-            const circleRadius = radius + (isHovered ? 2 : 0);
+            const isPinned = pinned?.model === item.model;
+            const isActive = isHovered || isPinned;
+            const shouldFade = (Boolean(hovered) || Boolean(pinned)) && !isActive;
+            const circleRadius = radius + (isActive ? 2 : 0);
             const strokeWidth = item.isRio ? 2.5 : 1.5;
             const fill = item.isRio ? item.color : '#ffffff';
             const stroke = item.isRio ? item.color : item.color;
@@ -263,11 +300,28 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
                 tabIndex={0}
                 role="button"
                 aria-label={`${item.model} - ${tooltipLabel} ${formatScoreValue(item.score)}, parâmetros ${formatParameterValue(item.paramsB)}`}
-                onMouseEnter={() => setHovered(item)}
-                onFocus={() => setHovered(item)}
-                onMouseLeave={() => setHovered(null)}
-                onBlur={() => setHovered(null)}
+                onMouseEnter={() => handleHover(item)}
+                onFocus={() => handleHover(item)}
+                onMouseLeave={scheduleClearHover}
+                onBlur={scheduleClearHover}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handlePin(item);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handlePin(item);
+                  }
+                }}
               >
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={14}
+                  fill="transparent"
+                  className="pointer-events-auto"
+                />
                 <circle
                   cx={x}
                   cy={y}
@@ -275,7 +329,7 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
                   fill={fill}
                   stroke={stroke}
                   strokeWidth={strokeWidth}
-                  opacity={faded ? 0.4 : 1}
+                  opacity={shouldFade ? 0.4 : 1}
                 />
                 <line
                   x1={lineStartX}
@@ -284,14 +338,14 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
                   y2={lineEndY}
                   className="stroke-slate-300"
                   strokeWidth={1}
-                  opacity={faded ? 0.5 : 1}
+                  opacity={shouldFade ? 0.5 : 1}
                 />
                 <text
                   x={labelX}
                   y={labelY}
                   textAnchor={offset.anchor}
                   className="text-[11px] font-semibold fill-slate-700"
-                  opacity={faded ? 0.5 : 1}
+                  opacity={shouldFade ? 0.5 : 1}
                 >
                   {item.model}
                 </text>
@@ -299,7 +353,7 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
             );
           })}
 
-          {tooltipBox && hovered && (
+          {tooltipBox && activeDatum && (
             <>
               <line
                 x1={tooltipBox.pointX}
@@ -317,19 +371,37 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
                 height={tooltipBox.height}
                 pointerEvents="none"
               >
-                <div className="h-full rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-lg ring-1 ring-black/5">
-                  <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                    {hovered.model}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold text-slate-900">
-                    {tooltipLabel}:{' '}
-                    <span className="text-rio-primary">
-                      {formatScoreValue(hovered.score)}
+                <div className="h-full rounded-2xl border border-slate-200 bg-white/95 p-3 shadow-xl ring-1 ring-black/5 backdrop-blur-sm">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full"
+                        style={{ backgroundColor: activeDatum.color ?? '#94A3B8' }}
+                      />
+                      <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                        {activeDatum.model}
+                      </p>
+                    </div>
+                    {activeDatum.isRio && (
+                      <span className="rounded-full bg-rio-primary/10 px-2 py-0.5 text-[10px] font-semibold text-rio-primary">
+                        RIO
+                      </span>
+                    )}
+                  </div>
+                  <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5">
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                      {tooltipLabel}
                     </span>
-                  </p>
-                  <p className="text-xs text-slate-600">
-                    Parâmetros: {formatParameterValue(hovered.paramsB)}
-                  </p>
+                    <span className="text-sm font-semibold text-rio-primary">
+                      {formatScoreValue(activeDatum.score)}
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                      Parâmetros
+                    </span>
+                    <span className="text-xs font-semibold text-slate-700">
+                      {formatParameterValue(activeDatum.paramsB)}
+                    </span>
+                  </div>
                 </div>
               </foreignObject>
             </>
