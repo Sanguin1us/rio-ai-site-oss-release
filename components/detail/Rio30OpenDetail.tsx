@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowUpRight,
   ArrowDown,
-  ArrowRight,
   Box,
   GraduationCap,
   Sparkles,
@@ -365,7 +364,7 @@ const segmentStyle = (start: string, end: string) => {
   };
 };
 
-const PARAMETER_BENCHMARKS = {
+const PARAMETER_BENCHMARKS: Record<'hle' | 'matharena', ParameterDatum[]> = {
   hle: [
     { model: 'Kimi K2 Thinking', paramsB: 1000, score: 23.9, color: '#9CA3AF', labelPosition: 'bottom-left' },
     { model: 'GLM 4.7', paramsB: 357, score: 24.8, color: '#9CA3AF' },

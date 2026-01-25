@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Send,
   Copy,
@@ -17,20 +17,12 @@ import {
   Loader2,
   Trash2,
 } from 'lucide-react';
-import ReactMarkdown from 'react-markdown';
-import { Highlight, Language, themes } from 'prism-react-renderer';
-import remarkMath from 'remark-math';
-import remarkGfm from 'remark-gfm';
-import remarkBreaks from 'remark-breaks';
-import rehypeKatex from 'rehype-katex';
-import 'katex/dist/katex.min.css';
+import type { Language } from 'prism-react-renderer';
 import { AnimateOnScroll } from './AnimateOnScroll';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ChatMessage, useRioChat, Attachment } from '../hooks/useRioChat';
 import { normalizeMathDelimiters } from '../lib/markdown';
 import { FeedbackModal, FeedbackType, FeedbackData } from './FeedbackModal';
-
-const codeTheme = themes.nightOwl;
 
 const getNodeText = (node: React.ReactNode): string => {
   if (typeof node === 'string' || typeof node === 'number') {
@@ -45,6 +37,22 @@ const getNodeText = (node: React.ReactNode): string => {
   return '';
 };
 
+type MarkdownBundle = {
+  ReactMarkdown: typeof import('react-markdown').default;
+  Highlight: typeof import('prism-react-renderer').Highlight;
+  themes: typeof import('prism-react-renderer').themes;
+  remarkMath: typeof import('remark-math').default;
+  remarkGfm: typeof import('remark-gfm').default;
+  remarkBreaks: typeof import('remark-breaks').default;
+  rehypeKatex: typeof import('rehype-katex').default;
+};
+
+type PrismTheme = (typeof import('prism-react-renderer').themes)[keyof typeof import('prism-react-renderer').themes];
+
+const MARKDOWN_TRIGGER_RE = /(```|`|\$\$|\$|\n|\|\s*\||[*_#>])/;
+
+const hasRichMarkdown = (content: string) => MARKDOWN_TRIGGER_RE.test(content);
+
 interface ChatBubbleProps {
   message: ChatMessage;
   onEdit?: () => void;
@@ -57,17 +65,18 @@ interface ChatBubbleProps {
   onEditContentChange?: (content: string) => void;
   onSaveEdit?: () => void;
   onCancelEdit?: () => void;
+  markdownBundle?: MarkdownBundle | null;
 }
 
 const CodeBlock: React.FC<{
   inline?: boolean;
   className?: string;
-  children: React.ReactNode;
-  node?: {
-    lang?: string | null;
-  };
+  children?: React.ReactNode;
+  node?: unknown;
   isUser: boolean;
-}> = ({ inline, className, children, node, isUser, ...codeProps }) => {
+  highlight?: MarkdownBundle['Highlight'];
+  theme?: PrismTheme;
+}> = ({ inline, className, children, node, isUser, highlight, theme, ...codeProps }) => {
   const [codeCopied, setCodeCopied] = useState(false);
   const codeCopyTimeoutRef = useRef<number | null>(null);
 
@@ -80,15 +89,16 @@ const CodeBlock: React.FC<{
     []
   );
 
+  const nodeLang = (node as { lang?: string } | null | undefined)?.lang;
   const rawLanguage =
-    typeof node?.lang === 'string' && node.lang.trim().length > 0
-      ? node.lang.trim()
+    typeof nodeLang === 'string' && nodeLang.trim().length > 0
+      ? nodeLang.trim()
       : (className?.replace('language-', '') ?? '');
   const displayLanguage = (rawLanguage || 'code').toLowerCase();
   const fallbackLanguage: Language = 'tsx';
   const language = rawLanguage.toLowerCase();
   const prismLanguage = language ? (language as Language) : fallbackLanguage;
-  const codeTextRaw = getNodeText(children);
+  const codeTextRaw = getNodeText(children ?? '');
   const codeText = codeTextRaw.replace(/\s+$/, '');
   const trimmed = codeText.trim();
   const shouldRenderAsChip =
@@ -132,6 +142,34 @@ const CodeBlock: React.FC<{
     return <span className={`${chipBase} ${chipPadding} ${chipStyles}`}>{trimmed}</span>;
   }
 
+  const HighlightComponent = highlight;
+
+  if (!HighlightComponent || !theme) {
+    return (
+      <div className="group relative mt-3 w-full overflow-x-auto rounded-2xl border border-slate-800/80 bg-[radial-gradient(circle_at_top,_#172036,_#090b12)] pb-2 text-white shadow-[0_18px_40px_-24px_rgba(8,10,20,0.9)] custom-scrollbar">
+        <div className="absolute top-1.5 left-4 right-4 flex items-center justify-between text-[11px] font-semibold text-white/70">
+          <span className="inline-flex items-center rounded-full bg-white/8 px-2.5 py-1 backdrop-blur">
+            {displayLanguage}
+          </span>
+          <button
+            type="button"
+            onClick={handleCopyCode}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white/80 opacity-0 transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 group-hover:opacity-100"
+            aria-label="Copiar bloco de cÃ³digo"
+          >
+            {codeCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+          </button>
+        </div>
+        <pre
+          className="overflow-x-auto px-4 pb-4 pt-12 text-sm leading-relaxed text-white/90"
+          {...codeProps}
+        >
+          {codeText}
+        </pre>
+      </div>
+    );
+  }
+
   return (
     <div className="group relative mt-3 w-full overflow-x-auto rounded-2xl border border-slate-800/80 bg-[radial-gradient(circle_at_top,_#172036,_#090b12)] pb-2 text-white shadow-[0_18px_40px_-24px_rgba(8,10,20,0.9)] custom-scrollbar">
       <div className="absolute top-1.5 left-4 right-4 flex items-center justify-between text-[11px] font-semibold text-white/70">
@@ -147,7 +185,7 @@ const CodeBlock: React.FC<{
           {codeCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </button>
       </div>
-      <Highlight theme={codeTheme} code={codeText} language={prismLanguage}>
+      <HighlightComponent theme={theme} code={codeText} language={prismLanguage}>
         {({ className: highlightClassName, style, tokens, getLineProps, getTokenProps }) => (
           <pre
             className={`overflow-x-auto px-4 pb-4 pt-12 text-sm leading-relaxed ${highlightClassName}`}
@@ -180,7 +218,7 @@ const CodeBlock: React.FC<{
             ))}
           </pre>
         )}
-      </Highlight>
+      </HighlightComponent>
     </div>
   );
 };
@@ -197,12 +235,19 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   onEditContentChange,
   onSaveEdit,
   onCancelEdit,
+  markdownBundle,
 }) => {
   const isUser = message.role === 'user';
   const [copiedBubble, setCopiedBubble] = useState(false);
   const bubbleCopyTimeoutRef = useRef<number | null>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const markdownContent = normalizeMathDelimiters(message.content);
+  const MarkdownRenderer = markdownBundle?.ReactMarkdown;
+  const codeTheme = markdownBundle?.themes?.nightOwl;
+  const remarkPlugins = markdownBundle
+    ? [markdownBundle.remarkMath, markdownBundle.remarkGfm, markdownBundle.remarkBreaks]
+    : [];
+  const rehypePlugins = markdownBundle ? [markdownBundle.rehypeKatex] : [];
 
   useEffect(
     () => () => {
@@ -330,121 +375,131 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
             }`}
         >
           <div className="min-w-0 max-w-full whitespace-normal break-words text-[14px] leading-relaxed text-prose space-y-3">
-            <ReactMarkdown
-              remarkPlugins={[remarkMath, remarkGfm, remarkBreaks]}
-              rehypePlugins={[rehypeKatex]}
-              components={{
-                a: ({ node: _node, ...anchorProps }) => (
-                  <a {...anchorProps} rel="noopener noreferrer" target="_blank" />
-                ),
-                // @ts-expect-error - react-markdown types don't include inline prop
-                code: (props) => <CodeBlock {...props} isUser={isUser} />,
-                blockquote: ({ node: _node, className, children, ...blockquoteProps }) => (
-                  <blockquote
-                    className={[
-                      className,
-                      'border-l-4 border-slate-300/70 bg-slate-100/60 px-4 py-2 italic text-prose-light',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    {...blockquoteProps}
-                  >
-                    {children}
-                  </blockquote>
-                ),
-                ul: ({ node: _node, className, ...listProps }) => (
-                  <ul
-                    className={['list-disc space-y-2 pl-5', className].filter(Boolean).join(' ')}
-                    {...listProps}
-                  />
-                ),
-                ol: ({ node: _node, className, ...listProps }) => (
-                  <ol
-                    className={['list-decimal space-y-2 pl-5', className].filter(Boolean).join(' ')}
-                    {...listProps}
-                  />
-                ),
-                li: ({ node: _node, className, ...itemProps }) => (
-                  <li
-                    className={[
-                      'leading-relaxed',
-                      'marker:text-rio-primary/80',
-                      className,
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    {...itemProps}
-                  />
-                ),
-                table: ({ node: _node, className, children, ...tableProps }) => (
-                  <div className="my-4 overflow-x-auto">
-                    <table
-                      className={['min-w-full border-collapse text-left text-sm', className]
+            {MarkdownRenderer ? (
+              <MarkdownRenderer
+                remarkPlugins={remarkPlugins}
+                rehypePlugins={rehypePlugins}
+                components={{
+                  a: ({ node: _node, ...anchorProps }) => (
+                    <a {...anchorProps} rel="noopener noreferrer" target="_blank" />
+                  ),
+                  code: (props) => (
+                    <CodeBlock
+                      {...props}
+                      isUser={isUser}
+                      highlight={markdownBundle?.Highlight}
+                      theme={codeTheme}
+                    />
+                  ),
+                  blockquote: ({ node: _node, className, children, ...blockquoteProps }) => (
+                    <blockquote
+                      className={[
+                        className,
+                        'border-l-4 border-slate-300/70 bg-slate-100/60 px-4 py-2 italic text-prose-light',
+                      ]
                         .filter(Boolean)
                         .join(' ')}
-                      {...tableProps}
+                      {...blockquoteProps}
                     >
                       {children}
-                    </table>
-                  </div>
-                ),
-                thead: ({ node: _node, className, ...theadProps }) => (
-                  <thead
-                    className={['bg-slate-200/80', className].filter(Boolean).join(' ')}
-                    {...theadProps}
-                  />
-                ),
-                tbody: ({ node: _node, className, ...tbodyProps }) => (
-                  <tbody
-                    className={['divide-y divide-slate-200', className].filter(Boolean).join(' ')}
-                    {...tbodyProps}
-                  />
-                ),
-                tr: ({ node: _node, className, ...trProps }) => (
-                  <tr
-                    className={[className, 'odd:bg-white even:bg-slate-50']
-                      .filter(Boolean)
-                      .join(' ')}
-                    {...trProps}
-                  />
-                ),
-                th: ({ node: _node, className, ...thProps }) => (
-                  <th
-                    className={[
-                      'px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600',
+                    </blockquote>
+                  ),
+                  ul: ({ node: _node, className, ...listProps }) => (
+                    <ul
+                      className={['list-disc space-y-2 pl-5', className].filter(Boolean).join(' ')}
+                      {...listProps}
+                    />
+                  ),
+                  ol: ({ node: _node, className, ...listProps }) => (
+                    <ol
+                      className={['list-decimal space-y-2 pl-5', className].filter(Boolean).join(' ')}
+                      {...listProps}
+                    />
+                  ),
+                  li: ({ node: _node, className, ...itemProps }) => (
+                    <li
+                      className={[
+                        'leading-relaxed',
+                        'marker:text-rio-primary/80',
+                        className,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      {...itemProps}
+                    />
+                  ),
+                  table: ({ node: _node, className, children, ...tableProps }) => (
+                    <div className="my-4 overflow-x-auto">
+                      <table
+                        className={['min-w-full border-collapse text-left text-sm', className]
+                          .filter(Boolean)
+                          .join(' ')}
+                        {...tableProps}
+                      >
+                        {children}
+                      </table>
+                    </div>
+                  ),
+                  thead: ({ node: _node, className, ...theadProps }) => (
+                    <thead
+                      className={['bg-slate-200/80', className].filter(Boolean).join(' ')}
+                      {...theadProps}
+                    />
+                  ),
+                  tbody: ({ node: _node, className, ...tbodyProps }) => (
+                    <tbody
+                      className={['divide-y divide-slate-200', className].filter(Boolean).join(' ')}
+                      {...tbodyProps}
+                    />
+                  ),
+                  tr: ({ node: _node, className, ...trProps }) => (
+                    <tr
+                      className={[className, 'odd:bg-white even:bg-slate-50']
+                        .filter(Boolean)
+                        .join(' ')}
+                      {...trProps}
+                    />
+                  ),
+                  th: ({ node: _node, className, ...thProps }) => (
+                    <th
+                      className={[
+                        'px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600',
+                        className,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      {...thProps}
+                    />
+                  ),
+                  td: ({ node: _node, className, ...tdProps }) => (
+                    <td
+                      className={['px-3 py-2 align-top text-sm text-slate-700', className]
+                        .filter(Boolean)
+                        .join(' ')}
+                      {...tdProps}
+                    />
+                  ),
+                  hr: () => <hr className="my-4 border border-slate-300/70" />,
+                  p: ({ node: _node, className, ...paragraphProps }) => {
+                    const paragraphClasses = [
                       className,
+                      'mt-2',
+                      'mb-2',
+                      'first:mt-0',
+                      'last:mb-0',
+                      'leading-relaxed',
                     ]
                       .filter(Boolean)
-                      .join(' ')}
-                    {...thProps}
-                  />
-                ),
-                td: ({ node: _node, className, ...tdProps }) => (
-                  <td
-                    className={['px-3 py-2 align-top text-sm text-slate-700', className]
-                      .filter(Boolean)
-                      .join(' ')}
-                    {...tdProps}
-                  />
-                ),
-                hr: () => <hr className="my-4 border border-slate-300/70" />,
-                p: ({ node: _node, className, ...paragraphProps }) => {
-                  const paragraphClasses = [
-                    className,
-                    'mt-2',
-                    'mb-2',
-                    'first:mt-0',
-                    'last:mb-0',
-                    'leading-relaxed',
-                  ]
-                    .filter(Boolean)
-                    .join(' ');
-                  return <p className={paragraphClasses} {...paragraphProps} />;
-                },
-              }}
-            >
-              {markdownContent}
-            </ReactMarkdown>
+                      .join(' ');
+                    return <p className={paragraphClasses} {...paragraphProps} />;
+                  },
+                }}
+              >
+                {markdownContent}
+              </MarkdownRenderer>
+            ) : (
+              <p className="whitespace-pre-wrap leading-relaxed">{markdownContent}</p>
+            )}
           </div>
           <span className="pointer-events-none absolute inset-0 rounded-2xl border border-white/0 transition group-hover:border-white/40" />
         </div>
@@ -632,6 +687,12 @@ export const ChatSection = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [editingState, setEditingState] = useState<EditingState | null>(null);
+  const [markdownBundle, setMarkdownBundle] = useState<MarkdownBundle | null>(null);
+  const [markdownLoading, setMarkdownLoading] = useState(false);
+  const shouldLoadMarkdown = useMemo(
+    () => messages.some((message) => hasRichMarkdown(message.content)),
+    [messages]
+  );
   const [feedbackState, setFeedbackState] = useState<FeedbackState>({
     isOpen: false,
     type: 'positive',
@@ -640,6 +701,61 @@ export const ChatSection = () => {
   const [showScrollbar, setShowScrollbar] = useState(false);
   const isAutoScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!shouldLoadMarkdown || markdownBundle || markdownLoading) return;
+
+    let isMounted = true;
+    setMarkdownLoading(true);
+
+    const loadMarkdownBundle = async () => {
+      try {
+        const [
+          markdownModule,
+          prismModule,
+          remarkMathModule,
+          remarkGfmModule,
+          remarkBreaksModule,
+          rehypeKatexModule,
+        ] = await Promise.all([
+          import('react-markdown'),
+          import('prism-react-renderer'),
+          import('remark-math'),
+          import('remark-gfm'),
+          import('remark-breaks'),
+          import('rehype-katex'),
+        ]);
+
+        if (!isMounted) return;
+
+        setMarkdownBundle({
+          ReactMarkdown: markdownModule.default,
+          Highlight: prismModule.Highlight,
+          themes: prismModule.themes,
+          remarkMath: remarkMathModule.default,
+          remarkGfm: remarkGfmModule.default,
+          remarkBreaks: remarkBreaksModule.default,
+          rehypeKatex: rehypeKatexModule.default,
+        });
+
+        void import('katex/dist/katex.min.css').catch((cssError) => {
+          console.error('Falha ao carregar CSS do KaTeX', cssError);
+        });
+      } catch (error) {
+        console.error('Falha ao carregar markdown do chat', error);
+      } finally {
+        if (isMounted) {
+          setMarkdownLoading(false);
+        }
+      }
+    };
+
+    loadMarkdownBundle();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [shouldLoadMarkdown, markdownBundle, markdownLoading]);
 
   const handleClearChat = useCallback(() => {
     if (messages.length === 0) return;
@@ -977,6 +1093,7 @@ export const ChatSection = () => {
                   onEditContentChange={handleEditContentChange}
                   onSaveEdit={handleSaveEdit}
                   onCancelEdit={handleCancelEdit}
+                  markdownBundle={markdownBundle}
                 />
               ))}
               {isLoading && <ThinkingAnimation modelName={currentModelData.name} />}

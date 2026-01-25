@@ -4,7 +4,6 @@ import {
   ArrowLeft,
   ArrowUpRight,
   ArrowDown,
-  ArrowRight,
   Box,
   GraduationCap,
   Sparkles,
