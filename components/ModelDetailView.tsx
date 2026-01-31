@@ -9,7 +9,7 @@ import { ArrowUpRight } from 'lucide-react';
 import { Rio25OpenDetail } from './detail/Rio25OpenDetail';
 import { Rio30OpenDetail } from './detail/Rio30OpenDetail';
 import { Rio30OpenMiniDetail } from './detail/Rio30OpenMiniDetail';
-import { Rio20OpenDetail } from './detail/Rio20OpenDetail';
+import { Rio30OpenSearchDetail } from './detail/Rio30OpenSearchDetail';
 
 interface ModelDetailViewProps {
   model: Model;
@@ -29,8 +29,8 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
     return <Rio30OpenMiniDetail model={model} onBack={onBack} />;
   }
 
-  if (model.name === 'Rio 2.0 Open') {
-    return <Rio20OpenDetail model={model} onBack={onBack} />;
+  if (model.name === 'Rio 3.0 Open Search') {
+    return <Rio30OpenSearchDetail model={model} onBack={onBack} />;
   }
 
   return (

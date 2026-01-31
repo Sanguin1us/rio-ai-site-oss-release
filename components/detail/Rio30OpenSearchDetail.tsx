@@ -1,256 +1,28 @@
 import React from 'react';
 import type { Model } from '../../types/index';
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  ArrowDown,
-  Box,
-  GraduationCap,
-  Sparkles,
-} from 'lucide-react';
-import { ComparisonChart } from './ComparisonChart';
-import {
-  ComparisonMetric,
-  LabelOverride,
-  ModelComparisonDatum,
-} from '../../types/chart';
+import { ArrowDown, Box, GraduationCap, Sparkles } from 'lucide-react';
+import { DetailHeader } from './DetailHeader';
 import { DetailUseCases } from './DetailUseCases';
 import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { DetailSpecs } from './DetailSpecs';
 import { AnimateOnScroll } from '../AnimateOnScroll';
 
-interface Rio25OpenDetailProps {
+interface Rio30OpenSearchDetailProps {
   model: Model;
   onBack: () => void;
 }
 
-const BENCHMARKS = [
-  { metric: 'AIME 2025', base: '85.0', rl: '93.3', latent: '95.0' },
-  { metric: 'HMMT 2025', base: '71.4', rl: '80.0', latent: '83.3' },
-  { metric: 'GPQA Diamond', base: '73.4', rl: '75.8', latent: '77.2' },
-  { metric: 'LiveCodeBench v6', base: '66.0', rl: '69.4', latent: '69.6' },
-];
-
-const LABEL_POSITION_OVERRIDES: Partial<Record<string, LabelOverride>> = {
-  'Gemini 3 Pro': 'top-left',
-  'GPT-5.2': 'bottom-right',
-  'Gemini 3 Flash': 'bottom-right',
-  'Claude Sonnet 4.5': 'bottom-left',
-  'Gemini 2.5 Flash-Lite': { gpqa: 'bottom-right' },
-  'GPT-5 mini': { aime: 'bottom-right' },
-};
-
-const MODEL_COMPARISON: ModelComparisonDatum[] = [
-  { model: 'Gemini 3 Pro', cost: 12, gpqa: 91.9, aime: 95.0, color: '#9CA3AF', isRio: false },
-  { model: 'GPT-5.2', cost: 14, gpqa: 92.4, aime: 100.0, color: '#9CA3AF', isRio: false },
-  { model: 'Rio 2.5 Open', cost: 0.1, gpqa: 77.2, aime: 95, color: '#1E40AF', isRio: true },
-  { model: 'Gemini 3 Flash', cost: 3, gpqa: 90.4, aime: 95.2, color: '#9CA3AF', isRio: false },
-  { model: 'GPT-5 mini', cost: 2, gpqa: 82.3, aime: 91.1, color: '#9CA3AF', isRio: false },
-  { model: 'Gemini 2.5 Flash-Lite', cost: 0.4, gpqa: 71, aime: 69, color: '#9CA3AF', isRio: false },
-  { model: 'GPT-5 nano', cost: 0.4, gpqa: 71.2, aime: 85.2, color: '#9CA3AF', isRio: false },
-  { model: 'Claude Sonnet 4.5', cost: 15, gpqa: 83.4, aime: 87, color: '#9CA3AF', isRio: false },
-  { model: 'Claude Haiku 4.5', cost: 5, gpqa: 73, aime: 80.7, color: '#9CA3AF', isRio: false },
-];
-
-const METRIC_CONFIGS: Array<{
-  metric: ComparisonMetric;
-  label: string;
-  yTicks: number[];
-  minY?: number;
-}> = [
-    {
-      metric: 'aime',
-      label: 'AIME 2025',
-      yTicks: [70, 80, 90, 100],
-    },
-    {
-      metric: 'gpqa',
-      label: 'GPQA-Diamond',
-      yTicks: [70, 80, 90],
-      minY: 67,
-    },
-  ];
-
-const parseScore = (value: string) => Number.parseFloat(value);
-const RAW_MIN = Math.min(...BENCHMARKS.map((row) => parseScore(row.base)));
-const RAW_MAX = Math.max(...BENCHMARKS.map((row) => parseScore(row.latent)));
-const SCALE_MIN = Math.max(0, Math.floor((RAW_MIN - 2) / 5) * 5);
-const SCALE_MAX = Math.ceil((RAW_MAX + 2) / 5) * 5;
-const scaleValue = (value: string) => {
-  if (SCALE_MAX === SCALE_MIN) return 0.5;
-  const ratio = (parseScore(value) - SCALE_MIN) / (SCALE_MAX - SCALE_MIN);
-  return Math.min(Math.max(ratio, 0), 1);
-};
-const positionStyle = (value: string) => ({
-  left: `${scaleValue(value) * 100}%`,
-});
-const segmentStyle = (start: string, end: string) => {
-  const startRatio = scaleValue(start);
-  const endRatio = scaleValue(end);
-  const width = Math.abs(endRatio - startRatio) * 100;
-  const left = Math.min(startRatio, endRatio) * 100;
-  return {
-    left: `${left}%`,
-    width: `${Math.max(width, 4)}%`,
-  };
-};
-
-export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack }) => {
-  const huggingFaceWeightsUrl =
-    model.huggingFaceUrl ?? 'https://huggingface.co/krzonkalla/rio-2.5-preview-beta';
-
+export const Rio30OpenSearchDetail: React.FC<Rio30OpenSearchDetailProps> = ({
+  model,
+  onBack,
+}) => {
   return (
     <div className="bg-white">
-      <section className="border-b border-slate-200 bg-gradient-to-b from-white via-slate-50 to-white">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12 sm:pt-10 sm:pb-16">
-          <button
-            onClick={onBack}
-            className="inline-flex items-center gap-2 text-sm font-semibold text-prose-light hover:text-rio-primary transition"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Voltar para modelos Open
-          </button>
+      <AnimateOnScroll>
+        <DetailHeader model={model} onBack={onBack} />
+      </AnimateOnScroll>
 
-          <div className="mt-6 space-y-10">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-              <div className="space-y-6 lg:max-w-3xl">
-                <h1 className="text-4xl font-bold leading-tight text-prose sm:text-5xl">
-                  {model.name}
-                </h1>
-                <p className="text-lg text-prose-light leading-relaxed">{model.description}</p>
-                <div className="flex flex-wrap gap-2">
-                  {model.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-slate-600"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {huggingFaceWeightsUrl && (
-                <a
-                  href={huggingFaceWeightsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-prose shadow-sm transition hover:border-rio-primary/50 hover:text-rio-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rio-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white lg:self-start"
-                >
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
-                    <img
-                      src="/logos/huggingface-2.svg"
-                      alt="Logomarca do Hugging Face"
-                      className="h-6 w-6"
-                    />
-                  </span>
-                  <span className="text-base">Acessar pesos</span>
-                  <ArrowUpRight className="h-4 w-4" />
-                </a>
-              )}
-            </div>
-
-            <div className="relative rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-lg">
-              <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rio-primary/10 blur-2xl" />
-              </div>
-              <div className="relative flex h-full flex-col gap-6">
-                <div className="grid gap-4 lg:grid-cols-2">
-                  {METRIC_CONFIGS.map((config) => (
-                    <ComparisonChart
-                      key={config.metric}
-                      {...config}
-                      data={MODEL_COMPARISON}
-                      labelOverrides={LABEL_POSITION_OVERRIDES}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 space-y-16">
-        <AnimateOnScroll>
-          <section className="rounded-[40px] border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">
-                  Benchmarks oficiais
-                </p>
-                <p className="mt-2 text-sm text-prose-light">
-                  Os gráficos mostram como refinamos o Qwen 3 30B-A3B utilizando Reinforcement
-                  Learning e o mecanismo de pensamento latente.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-10 space-y-6">
-              {BENCHMARKS.map((row) => (
-                <div
-                  key={row.metric}
-                  className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rio-primary">
-                      {row.metric}
-                    </p>
-                  </div>
-                  <div className="relative mt-4 h-3 rounded-full bg-slate-100">
-                    <div
-                      className="absolute inset-y-[3px] rounded-full bg-gradient-to-r from-rio-primary via-rio-primary/70 to-emerald-500"
-                      style={segmentStyle(row.base, row.latent)}
-                      aria-hidden="true"
-                    />
-                    <div className="absolute inset-0">
-                      {[
-                        {
-                          label: 'Base',
-                          value: row.base,
-                          className: 'text-slate-600',
-                          showValue: true,
-                        },
-                        {
-                          label: '+RL',
-                          value: row.rl,
-                          className: 'text-rio-primary',
-                          showValue: false,
-                        },
-                        {
-                          label: '+Latente',
-                          value: row.latent,
-                          className: 'text-emerald-600',
-                          showValue: true,
-                        },
-                      ].map((mark) => (
-                        <div
-                          key={mark.label}
-                          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-[11px] font-semibold"
-                          style={positionStyle(mark.value)}
-                        >
-                          <div className="relative flex items-center justify-center">
-                            {mark.showValue && (
-                              <span
-                                className={`absolute -top-7 left-1/2 -translate-x-1/2 rounded-full bg-white/80 px-2 py-0.5 shadow ${mark.className}`}
-                              >
-                                {mark.value}
-                              </span>
-                            )}
-                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-slate-500 shadow">
-                              {mark.label}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        </AnimateOnScroll>
-
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 space-y-16">
         <AnimateOnScroll>
           <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-10">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -259,7 +31,7 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
                   Como treinamos esse modelo
                 </p>
                 <h2 className="mt-2 text-3xl font-bold text-prose">
-                  Destilação On-Policy com Rio 2.5
+                  Destilação On-Policy com Rio 3.0
                 </h2>
               </div>
               <p className="text-sm text-prose-light max-w-lg">Treinamento nativo em 4-bit</p>
@@ -268,7 +40,7 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
               <div className="flex flex-col gap-2">
                 <h3 className="text-xl font-semibold text-prose">Pipeline de Treinamento</h3>
                 <p className="text-sm text-prose-light max-w-4xl">
-                  Partimos de um modelo base e aplicamos destilação on-policy utilizando o Rio 2.5
+                  Partimos de um modelo base e aplicamos destilação on-policy utilizando o Rio 3.0
                   como professor, transferindo seu conhecimento para produzir o modelo final.
                 </p>
               </div>
@@ -281,7 +53,7 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-prose">
-                      {model.baseModel ?? 'Qwen3-30B-A3B'}
+                      {model.baseModel ?? 'Modelo base'}
                     </p>
                     <p className="text-xs text-prose-light">Modelo base</p>
                   </div>
@@ -305,7 +77,7 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
                         <GraduationCap className="h-5 w-5 text-rio-primary" />
                       </span>
                       <div>
-                        <p className="text-sm font-semibold text-prose">Rio 2.5</p>
+                        <p className="text-sm font-semibold text-prose">Rio 3.0</p>
                         <p className="text-xs text-prose-light">Professor</p>
                       </div>
                     </div>
@@ -330,63 +102,63 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
                             width: p.size,
                             height: p.size,
                             top: `${p.y}%`,
-                            animation: `flowParticle25_${i} ${p.duration}s ease-in-out infinite`,
+                            animation: `flowParticleSearch_${i} ${p.duration}s ease-in-out infinite`,
                             animationDelay: `${p.delay}s`,
                             opacity: 0,
                           }}
                         />
                       ))}
                       <style>{`
-                        @keyframes flowParticle25_0 {
+                        @keyframes flowParticleSearch_0 {
                           0% { left: -6px; opacity: 0; transform: translateY(0) scale(0.3); }
                           15% { opacity: 0.8; transform: translateY(-8px) scale(1); }
                           50% { transform: translateY(-4px) scale(0.9); }
                           85% { opacity: 0.8; transform: translateY(-8px) scale(1); }
                           100% { left: calc(100% + 6px); opacity: 0; transform: translateY(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25_1 {
+                        @keyframes flowParticleSearch_1 {
                           0% { left: -8px; opacity: 0; transform: translateY(0) scale(0.3); }
                           15% { opacity: 0.9; transform: translateY(6px) scale(1); }
                           50% { transform: translateY(3px) scale(0.85); }
                           85% { opacity: 0.9; transform: translateY(6px) scale(1); }
                           100% { left: calc(100% + 8px); opacity: 0; transform: translateY(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25_2 {
+                        @keyframes flowParticleSearch_2 {
                           0% { left: -5px; opacity: 0; transform: translateY(0) scale(0.3); }
                           15% { opacity: 0.7; transform: translateY(-4px) scale(1); }
                           50% { transform: translateY(-2px) scale(0.95); }
                           85% { opacity: 0.7; transform: translateY(-4px) scale(1); }
                           100% { left: calc(100% + 5px); opacity: 0; transform: translateY(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25_3 {
+                        @keyframes flowParticleSearch_3 {
                           0% { left: -7px; opacity: 0; transform: translateY(0) scale(0.3); }
                           15% { opacity: 0.85; transform: translateY(10px) scale(1); }
                           50% { transform: translateY(5px) scale(0.9); }
                           85% { opacity: 0.85; transform: translateY(10px) scale(1); }
                           100% { left: calc(100% + 7px); opacity: 0; transform: translateY(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25_4 {
+                        @keyframes flowParticleSearch_4 {
                           0% { left: -6px; opacity: 0; transform: translateY(0) scale(0.3); }
                           15% { opacity: 0.75; transform: translateY(-6px) scale(1); }
                           50% { transform: translateY(-3px) scale(0.85); }
                           85% { opacity: 0.75; transform: translateY(-6px) scale(1); }
                           100% { left: calc(100% + 6px); opacity: 0; transform: translateY(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25_5 {
+                        @keyframes flowParticleSearch_5 {
                           0% { left: -5px; opacity: 0; transform: translateY(0) scale(0.3); }
                           15% { opacity: 0.8; transform: translateY(5px) scale(1); }
                           50% { transform: translateY(2px) scale(0.9); }
                           85% { opacity: 0.8; transform: translateY(5px) scale(1); }
                           100% { left: calc(100% + 5px); opacity: 0; transform: translateY(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25_6 {
+                        @keyframes flowParticleSearch_6 {
                           0% { left: -8px; opacity: 0; transform: translateY(0) scale(0.3); }
                           15% { opacity: 0.9; transform: translateY(-10px) scale(1); }
                           50% { transform: translateY(-5px) scale(0.85); }
                           85% { opacity: 0.9; transform: translateY(-10px) scale(1); }
                           100% { left: calc(100% + 8px); opacity: 0; transform: translateY(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25_7 {
+                        @keyframes flowParticleSearch_7 {
                           0% { left: -6px; opacity: 0; transform: translateY(0) scale(0.3); }
                           15% { opacity: 0.85; transform: translateY(8px) scale(1); }
                           50% { transform: translateY(4px) scale(0.9); }
@@ -412,42 +184,42 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
                             width: p.size,
                             height: p.size,
                             left: `${p.x}%`,
-                            animation: `flowParticle25Mobile_${i} ${p.duration}s ease-in-out infinite`,
+                            animation: `flowParticleSearchMobile_${i} ${p.duration}s ease-in-out infinite`,
                             animationDelay: `${p.delay}s`,
                             opacity: 0,
                           }}
                         />
                       ))}
                       <style>{`
-                        @keyframes flowParticle25Mobile_0 {
+                        @keyframes flowParticleSearchMobile_0 {
                           0% { top: -6px; opacity: 0; transform: translateX(0) scale(0.3); }
                           15% { opacity: 0.8; transform: translateX(-6px) scale(1); }
                           50% { transform: translateX(-3px) scale(0.9); }
                           85% { opacity: 0.8; transform: translateX(-6px) scale(1); }
                           100% { top: calc(100% + 6px); opacity: 0; transform: translateX(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25Mobile_1 {
+                        @keyframes flowParticleSearchMobile_1 {
                           0% { top: -7px; opacity: 0; transform: translateX(0) scale(0.3); }
                           15% { opacity: 0.85; transform: translateX(8px) scale(1); }
                           50% { transform: translateX(4px) scale(0.85); }
                           85% { opacity: 0.85; transform: translateX(8px) scale(1); }
                           100% { top: calc(100% + 7px); opacity: 0; transform: translateX(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25Mobile_2 {
+                        @keyframes flowParticleSearchMobile_2 {
                           0% { top: -5px; opacity: 0; transform: translateX(0) scale(0.3); }
                           15% { opacity: 0.75; transform: translateX(-4px) scale(1); }
                           50% { transform: translateX(-2px) scale(0.9); }
                           85% { opacity: 0.75; transform: translateX(-4px) scale(1); }
                           100% { top: calc(100% + 5px); opacity: 0; transform: translateX(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25Mobile_3 {
+                        @keyframes flowParticleSearchMobile_3 {
                           0% { top: -6px; opacity: 0; transform: translateX(0) scale(0.3); }
                           15% { opacity: 0.8; transform: translateX(6px) scale(1); }
                           50% { transform: translateX(3px) scale(0.85); }
                           85% { opacity: 0.8; transform: translateX(6px) scale(1); }
                           100% { top: calc(100% + 6px); opacity: 0; transform: translateX(0) scale(0.3); }
                         }
-                        @keyframes flowParticle25Mobile_4 {
+                        @keyframes flowParticleSearchMobile_4 {
                           0% { top: -7px; opacity: 0; transform: translateX(0) scale(0.3); }
                           15% { opacity: 0.9; transform: translateX(-8px) scale(1); }
                           50% { transform: translateX(-4px) scale(0.9); }
@@ -491,7 +263,7 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
         </AnimateOnScroll>
 
         <AnimateOnScroll>
-          <section className="grid gap-12 lg:grid-cols-5">
+          <section className="grid lg:grid-cols-5 gap-12">
             <div className="space-y-12 lg:col-span-3">
               {model.useCases && <DetailUseCases useCases={model.useCases} />}
               {model.codeSnippets && <DetailCodeSnippets snippets={model.codeSnippets} />}
