@@ -17,7 +17,7 @@ export type { ChatRole, ChatMessage, Attachment } from '../utils/messageTree';
  * Options for configuring the useRioChat hook.
  */
 interface UseRioChatOptions {
-  /** Model identifier to use (default: 'rio-2.5') */
+  /** Model identifier to use (default: 'rio-3.0-open') */
   model?: string;
   /** API endpoint URL (default: '/api/chat') */
   apiUrl?: string;
@@ -32,7 +32,7 @@ interface UseRioChatOptions {
 }
 
 const DEFAULT_API_URL = '/api/chat';
-const DEFAULT_MODEL = 'rio-2.5';
+const DEFAULT_MODEL = 'rio-3.0-open';
 const DEFAULT_SYSTEM_PROMPT =
   'Seja amigável e respeitoso, sempre buscando atender da melhor maneira possível. Responda na mesma língua que o usuário estiver usando.';
 const DEFAULT_HISTORY_LIMIT = 30;
