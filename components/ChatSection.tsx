@@ -60,10 +60,9 @@ const CodeBlock: React.FC<{
   className?: string;
   children?: React.ReactNode;
   node?: unknown;
-  isUser: boolean;
   highlight?: typeof Highlight;
   theme?: PrismTheme;
-}> = ({ inline, className, children, node, isUser, highlight, theme, ...codeProps }) => {
+}> = ({ inline, className, children, node, highlight, theme, ...codeProps }) => {
   const [codeCopied, setCodeCopied] = useState(false);
   const codeCopyTimeoutRef = useRef<number | null>(null);
 
@@ -87,9 +86,14 @@ const CodeBlock: React.FC<{
   const prismLanguage = language ? (language as Language) : fallbackLanguage;
   const codeTextRaw = getNodeText(children ?? '');
   const codeText = codeTextRaw.replace(/\s+$/, '');
-  const trimmed = codeText.trim();
-  const shouldRenderAsChip =
-    !inline && trimmed.length > 0 && trimmed.length <= 40 && !trimmed.includes('\n');
+  const displayLanguageLabel = displayLanguage === 'code' ? 'text' : displayLanguage;
+  const blockWrapperClass =
+    'group relative mt-3 w-full overflow-hidden rounded-[14px] border border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04)]';
+  const blockHeaderClass =
+    'relative flex items-center justify-between px-4 pb-1 pt-3';
+  const blockCopyButtonClass =
+    'inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 opacity-60 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100';
+  const blockPreClass = 'm-0 overflow-auto px-4 pb-4 pt-1 text-[15px] leading-[1.65]';
 
   const handleCopyCode = useCallback(async () => {
     if (!codeText || typeof navigator === 'undefined' || !navigator.clipboard) return;
@@ -108,7 +112,10 @@ const CodeBlock: React.FC<{
   if (inline) {
     return (
       <code
-        className={['rounded bg-slate-200/80 px-1.5 py-0.5 font-mono', className]
+        className={[
+          'rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[0.92em] text-slate-700',
+          className,
+        ]
           .filter(Boolean)
           .join(' ')}
         {...codeProps}
@@ -118,55 +125,39 @@ const CodeBlock: React.FC<{
     );
   }
 
-  if (shouldRenderAsChip) {
-    const chipBase =
-      'inline-flex items-center justify-center rounded-[6px] border font-mono text-[11px] leading-snug shadow-sm';
-    const chipPadding = 'px-1 py-[1px]';
-    const chipStyles = isUser
-      ? 'border-white/60 bg-white/80 text-rio-primary'
-      : 'border-slate-300/80 bg-slate-100 text-slate-700';
-
-    return <span className={`${chipBase} ${chipPadding} ${chipStyles}`}>{trimmed}</span>;
-  }
-
   const HighlightComponent = highlight;
 
   if (!HighlightComponent || !theme) {
     return (
-      <div className="group relative mt-3 w-full overflow-x-auto rounded-2xl border border-slate-800/80 bg-[radial-gradient(circle_at_top,_#172036,_#090b12)] pb-2 text-white shadow-[0_18px_40px_-24px_rgba(8,10,20,0.9)] custom-scrollbar">
-        <div className="absolute top-1.5 left-4 right-4 flex items-center justify-between text-[11px] font-semibold text-white/70">
-          <span className="inline-flex items-center rounded-full bg-white/8 px-2.5 py-1 backdrop-blur">
-            {displayLanguage}
+      <div className={blockWrapperClass}>
+        <div className={blockHeaderClass}>
+          <span className="inline-flex items-center font-mono text-[13px] font-medium tracking-normal text-slate-500">
+            {displayLanguageLabel}
           </span>
           <button
             type="button"
             onClick={handleCopyCode}
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white/80 opacity-0 transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 group-hover:opacity-100"
+            className={blockCopyButtonClass}
             aria-label="Copiar bloco de código"
           >
             {codeCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </button>
         </div>
-        <pre
-          className="overflow-x-auto px-4 pb-4 pt-12 text-sm leading-relaxed text-white/90"
-          {...codeProps}
-        >
-          {codeText}
-        </pre>
+        <pre className={`${blockPreClass} text-[#1f2937]`} {...codeProps}>{codeText}</pre>
       </div>
     );
   }
 
   return (
-    <div className="group relative mt-3 w-full overflow-x-auto rounded-2xl border border-slate-800/80 bg-[radial-gradient(circle_at_top,_#172036,_#090b12)] pb-2 text-white shadow-[0_18px_40px_-24px_rgba(8,10,20,0.9)] custom-scrollbar">
-      <div className="absolute top-1.5 left-4 right-4 flex items-center justify-between text-[11px] font-semibold text-white/70">
-        <span className="inline-flex items-center rounded-full bg-white/8 px-2.5 py-1 backdrop-blur">
-          {displayLanguage}
-        </span>
+    <div className={blockWrapperClass}>
+      <div className={blockHeaderClass}>
+          <span className="inline-flex items-center font-mono text-[13px] font-medium tracking-normal text-slate-500">
+            {displayLanguageLabel}
+          </span>
         <button
           type="button"
           onClick={handleCopyCode}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white/80 opacity-0 transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 group-hover:opacity-100"
+          className={blockCopyButtonClass}
           aria-label="Copiar bloco de código"
         >
           {codeCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
@@ -175,11 +166,10 @@ const CodeBlock: React.FC<{
       <HighlightComponent theme={theme} code={codeText} language={prismLanguage}>
         {({ className: highlightClassName, style, tokens, getLineProps, getTokenProps }) => (
           <pre
-            className={`overflow-x-auto px-4 pb-4 pt-12 text-sm leading-relaxed ${highlightClassName}`}
+            className={`${blockPreClass} ${highlightClassName}`}
             style={{
               ...style,
               background: 'transparent',
-              margin: 0,
             }}
             {...codeProps}
           >
@@ -227,7 +217,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   const bubbleCopyTimeoutRef = useRef<number | null>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const markdownContent = normalizeMathDelimiters(message.content);
-  const codeTheme = themes.nightOwl;
+  const codeTheme = themes.oneLight;
   const remarkPlugins = [remarkMath, remarkGfm, remarkBreaks];
   const rehypePlugins = [rehypeKatex];
 
@@ -346,7 +336,6 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                   code: (props) => (
                     <CodeBlock
                       {...props}
-                      isUser={isUser}
                       highlight={Highlight}
                       theme={codeTheme}
                     />
@@ -740,7 +729,11 @@ export const ChatSection = () => {
     const wrapperClass =
       variant === 'intro'
         ? 'rounded-2xl bg-white p-3'
-        : 'border-t border-slate-200 bg-white p-4';
+        : 'bg-white/95 px-4 py-4 sm:px-6';
+    const formClass =
+      variant === 'intro'
+        ? 'group relative flex items-center gap-2 rounded-2xl border border-rio-primary bg-white p-1.5 pl-2 shadow-sm transition-all duration-300 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
+        : 'group relative mx-auto flex w-full max-w-4xl items-center gap-2 rounded-2xl border border-rio-primary bg-white p-1.5 pl-2 shadow-sm transition-all duration-300 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10';
 
     const canSubmit = input.trim().length > 0;
 
@@ -748,7 +741,7 @@ export const ChatSection = () => {
       <div className={wrapperClass}>
         <form
           onSubmit={handleFormSubmit}
-          className="group relative flex items-center gap-2 rounded-2xl border border-rio-primary bg-white p-1.5 pl-2 shadow-sm transition-all duration-300 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10"
+          className={formClass}
         >
           <div className={`transition-all duration-300 ease-in-out ${messages.length > 0 && !isLoading && !isClearing ? 'w-8 opacity-100 mr-1' : 'w-0 opacity-0 mr-0 overflow-hidden'}`}>
             <button
@@ -795,11 +788,11 @@ export const ChatSection = () => {
                 e.stopPropagation();
                 stop();
               }}
-              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-red-500 px-3 text-white transition-all duration-300 hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/25"
+              className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 text-slate-700 transition-colors duration-200 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
               aria-label="Interromper"
             >
-              <Square className="h-4 w-4 fill-current" />
-              <span className="text-sm font-medium">Parar</span>
+              <Square className="h-3.5 w-3.5 fill-current text-rose-500" />
+              <span className="text-xs font-medium sm:text-sm">Parar</span>
             </button>
           ) : (
             <button
@@ -951,8 +944,8 @@ export const ChatSection = () => {
   };
 
   return (
-    <section id="chat" className="bg-white py-20 sm:py-24">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="chat" className={`bg-white ${isEmptyChat ? 'py-20 sm:py-24' : 'py-0'}`}>
+      <div className={isEmptyChat ? 'container mx-auto px-4 sm:px-6 lg:px-8' : 'w-full'}>
         {isEmptyChat ? (
           <AnimateOnScroll className="max-w-3xl mx-auto">
             <div className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center">
@@ -980,50 +973,38 @@ export const ChatSection = () => {
             </div>
           </AnimateOnScroll>
         ) : (
-          <>
-            <AnimateOnScroll className="text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
-                Converse com o {CHAT_MODEL_NAME}
-              </h2>
-              <p className="mt-4 max-w-2xl mx-auto text-lg text-prose-light">
-                {CHAT_MODEL_SUBTITLE}
-              </p>
-            </AnimateOnScroll>
-            <AnimateOnScroll delay={200} className="mt-12 max-w-3xl mx-auto">
-              <div
-                className="group relative flex min-h-[400px] max-h-[70vh] h-[500px] flex-col rounded-lg border bg-white shadow-sm transition-all duration-300 border-slate-200"
-              >
-                <div
-                  ref={chatContainerRef}
-                  className={`flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-6 transition-all duration-300 ease-out chat-scroll-container ${showScrollbar ? 'show-scrollbar' : ''} ${isClearing ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'
-                    }`}
-                >
-                  {messages.map((msg, index) => (
-                    <MemoizedChatMessageRow
-                      key={msg.id}
-                      message={msg}
-                      index={index}
-                      previousRole={messages[index - 1]?.role}
-                      isLoading={isLoading}
-                      hasEditingState={!!editingState}
-                      editingMessageId={editingState?.messageId}
-                      editingContent={editingState?.originalContent}
-                      onRegenerateAtIndex={handleRegenerateAtIndex}
-                      onEditMessage={handleEditMessage}
-                      onNavigateMessage={handleNavigateMessage}
-                      onEditContentChange={handleEditContentChange}
-                      onSaveEdit={handleSaveEdit}
-                      onCancelEdit={handleCancelEdit}
-                    />
-                  ))}
-                  {isLoading && <ThinkingAnimation />}
-                  {/* Spacer to allow scrolling the last message to the top - always present to prevent layout shift */}
-                  <div ref={chatEndRef} className="min-h-[calc(100%-80px)] shrink-0" />
-                </div>
-                {renderComposer('inline')}
+          <div className="mx-auto flex min-h-[calc(100svh-5rem)] w-full flex-col">
+            <div
+              ref={chatContainerRef}
+              className={`flex-1 overflow-y-auto overflow-x-hidden transition-all duration-300 ease-out chat-scroll-container ${showScrollbar ? 'show-scrollbar' : ''} ${isClearing ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'
+                }`}
+            >
+              <div className="mx-auto flex w-full max-w-4xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
+                {messages.map((msg, index) => (
+                  <MemoizedChatMessageRow
+                    key={msg.id}
+                    message={msg}
+                    index={index}
+                    previousRole={messages[index - 1]?.role}
+                    isLoading={isLoading}
+                    hasEditingState={!!editingState}
+                    editingMessageId={editingState?.messageId}
+                    editingContent={editingState?.originalContent}
+                    onRegenerateAtIndex={handleRegenerateAtIndex}
+                    onEditMessage={handleEditMessage}
+                    onNavigateMessage={handleNavigateMessage}
+                    onEditContentChange={handleEditContentChange}
+                    onSaveEdit={handleSaveEdit}
+                    onCancelEdit={handleCancelEdit}
+                  />
+                ))}
+                {isLoading && <ThinkingAnimation />}
+                {/* Espaço extra para permitir posicionar a última pergunta no topo durante a geração */}
+                <div ref={chatEndRef} className="min-h-[30vh] shrink-0 sm:min-h-[220px]" />
               </div>
-            </AnimateOnScroll>
-          </>
+            </div>
+            {renderComposer('inline')}
+          </div>
         )}
       </div>
     </section>
