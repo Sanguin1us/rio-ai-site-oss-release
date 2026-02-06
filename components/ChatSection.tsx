@@ -1,17 +1,13 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import {
   ArrowUp,
   Copy,
   Check,
   Edit3,
-  X,
   RefreshCw,
-  ThumbsUp,
-  ThumbsDown,
   ChevronLeft,
   ChevronRight,
   Square,
-  FileText,
   Trash2,
 } from 'lucide-react';
 import type { Language } from 'prism-react-renderer';
@@ -25,8 +21,11 @@ import { AnimateOnScroll } from './AnimateOnScroll';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ChatMessage, useRioChat } from '../hooks/useRioChat';
 import { normalizeMathDelimiters } from '../lib/markdown';
-import { FeedbackModal, FeedbackType, FeedbackData } from './FeedbackModal';
 import 'katex/dist/katex.min.css';
+
+const CHAT_MODEL_ID = 'rio-3.0-open';
+const CHAT_MODEL_NAME = 'Rio 3.0 Open';
+const CHAT_MODEL_SUBTITLE = 'Nosso modelo open source mais avançado.';
 
 const getNodeText = (node: React.ReactNode): string => {
   if (typeof node === 'string' || typeof node === 'number') {
@@ -47,7 +46,6 @@ interface ChatBubbleProps {
   message: ChatMessage;
   onEdit?: () => void;
   onRegenerate?: () => void;
-  onFeedback?: (type: FeedbackType, message: ChatMessage) => void;
   onNavigate?: (direction: -1 | 1) => void;
   disableActions?: boolean;
   isEditing?: boolean;
@@ -144,7 +142,7 @@ const CodeBlock: React.FC<{
             type="button"
             onClick={handleCopyCode}
             className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/8 text-white/80 opacity-0 transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 group-hover:opacity-100"
-            aria-label="Copiar bloco de cÃ³digo"
+            aria-label="Copiar bloco de código"
           >
             {codeCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </button>
@@ -216,7 +214,6 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   message,
   onEdit,
   onRegenerate,
-  onFeedback,
   onNavigate,
   disableActions,
   isEditing,
@@ -265,8 +262,6 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
       console.error('Failed to copy chat message', error);
     }
   }, [message.content]);
-
-  const attachments = message.attachments || [];
 
   const actionButtonClass =
     'inline-flex h-8 w-8 items-center justify-center text-slate-400 transition hover:text-rio-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rio-primary/50 disabled:opacity-50';
@@ -334,27 +329,6 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
         className={`group flex max-w-[80%] min-w-0 flex-col gap-1 ${isUser ? 'items-end text-left' : 'items-start text-left'
           }`}
       >
-        {attachments.length > 0 && (
-          <div className={`flex flex-wrap gap-2 mb-1 ${isUser ? 'justify-end' : 'justify-start'}`}>
-            {attachments.map((att) => (
-              <div key={att.id} className="relative overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm">
-                {att.type === 'image' ? (
-                  <img src={att.dataUrl} alt={att.name} className="h-48 w-auto object-cover max-w-[200px]" />
-                ) : (
-                  <div className="flex items-center gap-2 px-3 py-2 bg-slate-50">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 text-red-600">
-                      <FileText className="h-4 w-4" />
-                    </div>
-                    <div className="flex flex-col overflow-hidden">
-                      <span className="truncate text-xs font-medium text-slate-700 max-w-[150px]" title={att.name}>{att.name}</span>
-                      <span className="text-[10px] text-slate-500 uppercase">PDF</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
         <div
           className={`relative min-w-0 max-w-full overflow-hidden text-[14px] leading-relaxed transition ${isUser
             ? 'rounded-2xl bg-rio-primary/10 px-4 py-3 text-rio-primary shadow-sm'
@@ -507,31 +481,6 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
             </button>
           )}
 
-          {!isUser && onFeedback && (
-            <>
-              <button
-                type="button"
-                onClick={() => onFeedback('positive', message)}
-                disabled={disableActions}
-                className={actionButtonClass}
-                aria-label="Dar feedback positivo"
-                title="Dar feedback positivo"
-              >
-                <ThumbsUp className="h-4 w-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onFeedback('negative', message)}
-                disabled={disableActions}
-                className={actionButtonClass}
-                aria-label="Dar feedback negativo"
-                title="Dar feedback negativo"
-              >
-                <ThumbsDown className="h-4 w-4" />
-              </button>
-            </>
-          )}
-
           {!isUser && onRegenerate && (
             <button
               type="button"
@@ -615,32 +564,85 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   );
 };
 
+const MemoizedChatBubble = React.memo(ChatBubble);
+
+interface ChatMessageRowProps {
+  message: ChatMessage;
+  index: number;
+  previousRole?: ChatMessage['role'];
+  isLoading: boolean;
+  hasEditingState: boolean;
+  editingMessageId?: string;
+  editingContent?: string;
+  onRegenerateAtIndex: (index: number) => void;
+  onEditMessage: (messageId: string, content: string) => void;
+  onNavigateMessage: (messageId: string, direction: -1 | 1) => void;
+  onEditContentChange: (content: string) => void;
+  onSaveEdit: () => void;
+  onCancelEdit: () => void;
+}
+
+const ChatMessageRow: React.FC<ChatMessageRowProps> = ({
+  message,
+  index,
+  previousRole,
+  isLoading,
+  hasEditingState,
+  editingMessageId,
+  editingContent,
+  onRegenerateAtIndex,
+  onEditMessage,
+  onNavigateMessage,
+  onEditContentChange,
+  onSaveEdit,
+  onCancelEdit,
+}) => {
+  const disableActions = isLoading || hasEditingState;
+
+  const onRegenerate = useMemo(() => {
+    if (message.role === 'user') {
+      return () => onRegenerateAtIndex(index);
+    }
+    if (index > 0 && previousRole === 'user') {
+      return () => onRegenerateAtIndex(index - 1);
+    }
+    return undefined;
+  }, [index, message.role, onRegenerateAtIndex, previousRole]);
+
+  const onEdit = useMemo(() => {
+    if (message.role !== 'user') return undefined;
+    return () => onEditMessage(message.id, message.content);
+  }, [message.content, message.id, message.role, onEditMessage]);
+
+  const onNavigate = useCallback(
+    (direction: -1 | 1) => onNavigateMessage(message.id, direction),
+    [message.id, onNavigateMessage]
+  );
+
+  return (
+    <MemoizedChatBubble
+      message={message}
+      disableActions={disableActions}
+      onRegenerate={onRegenerate}
+      onEdit={onEdit}
+      onNavigate={onNavigate}
+      isEditing={editingMessageId === message.id}
+      editContent={editingMessageId === message.id ? editingContent : undefined}
+      onEditContentChange={onEditContentChange}
+      onSaveEdit={onSaveEdit}
+      onCancelEdit={onCancelEdit}
+    />
+  );
+};
+
+const MemoizedChatMessageRow = React.memo(ChatMessageRow);
+
 type EditingState = {
   messageId: string;
   originalContent: string;
 };
 
-type FeedbackState = {
-  isOpen: boolean;
-  type: FeedbackType;
-  message?: ChatMessage;
-};
-
 export const ChatSection = () => {
-  const [selectedModelId, setSelectedModelId] = useState<'rio-3.0-open'>('rio-3.0-open');
-  const currentModel = selectedModelId;
-
-  const chatModels = [
-    {
-      id: 'rio-3.0-open' as const,
-      name: 'Rio 3.0 Open',
-      description: 'Estado da arte',
-      subtitle: 'Nosso modelo open source mais avançado.',
-    },
-  ];
-
-  const currentModelData = chatModels.find((m) => m.id === selectedModelId) || chatModels[0];
-  if (!currentModelData) throw new Error("Default model not found");
   const {
     messages,
     input,
@@ -653,15 +655,11 @@ export const ChatSection = () => {
     stop,
     clearChat,
   } = useRioChat({
-    model: currentModel,
+    model: CHAT_MODEL_ID,
   });
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [editingState, setEditingState] = useState<EditingState | null>(null);
-  const [feedbackState, setFeedbackState] = useState<FeedbackState>({
-    isOpen: false,
-    type: 'positive',
-  });
   const [isClearing, setIsClearing] = useState(false);
   const [showScrollbar, setShowScrollbar] = useState(false);
   const isAutoScrollingRef = useRef(false);
@@ -683,7 +681,7 @@ export const ChatSection = () => {
   const inputTextareaRef = useRef<HTMLTextAreaElement>(null);
   const inputPlaceholder = isEmptyChat
     ? 'Como posso ajudar você hoje?'
-    : `Perguntar para o ${currentModelData.name}...`;
+    : `Perguntar para o ${CHAT_MODEL_NAME}...`;
 
   // Track previous state to detect transitions
   const prevIsLoadingRef = useRef(isLoading);
@@ -744,14 +742,13 @@ export const ChatSection = () => {
         ? 'rounded-2xl bg-white p-3'
         : 'border-t border-slate-200 bg-white p-4';
 
+    const canSubmit = input.trim().length > 0;
+
     return (
       <div className={wrapperClass}>
         <form
           onSubmit={handleFormSubmit}
-          className={`group relative flex items-center gap-2 rounded-2xl border bg-white p-1.5 pl-2 shadow-sm transition-all duration-300 ${selectedModelId === 'rio-3.0-open'
-            ? 'border-rio-primary focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
-            : 'border-slate-200 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
-          }`}
+          className="group relative flex items-center gap-2 rounded-2xl border border-rio-primary bg-white p-1.5 pl-2 shadow-sm transition-all duration-300 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10"
         >
           <div className={`transition-all duration-300 ease-in-out ${messages.length > 0 && !isLoading && !isClearing ? 'w-8 opacity-100 mr-1' : 'w-0 opacity-0 mr-0 overflow-hidden'}`}>
             <button
@@ -807,7 +804,7 @@ export const ChatSection = () => {
           ) : (
             <button
               type="submit"
-              disabled={!input.trim()}
+              disabled={!canSubmit}
               className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-rio-primary transition-all duration-300 hover:bg-rio-primary/10 disabled:pointer-events-none disabled:opacity-50"
               aria-label="Enviar mensagem"
             >
@@ -932,24 +929,25 @@ export const ChatSection = () => {
     setEditingState(prev => prev ? { ...prev, originalContent: content } : null);
   }, []);
 
+  const handleRegenerateAtIndex = useCallback(
+    (index: number) => {
+      regenerate(index);
+    },
+    [regenerate]
+  );
+
+  const handleNavigateMessage = useCallback(
+    (messageId: string, direction: -1 | 1) => {
+      navigateMessage(messageId, direction);
+    },
+    [navigateMessage]
+  );
+
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!input.trim() || isLoading || editingState) return;
 
     handleSubmit();
-  };
-
-  const handleFeedback = (type: FeedbackType, message: ChatMessage) => {
-    setFeedbackState({
-      isOpen: true,
-      type,
-      message,
-    });
-  };
-
-  const handleFeedbackSubmit = (_data: FeedbackData) => {
-    // TODO: Implement feedback submission to backend API
-    setFeedbackState((prev) => ({ ...prev, isOpen: false }));
   };
 
   return (
@@ -960,10 +958,10 @@ export const ChatSection = () => {
             <div className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center">
               <div className="text-center mb-6 sm:mb-7">
                 <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
-                  Converse com o {currentModelData.name}
+                  Converse com o {CHAT_MODEL_NAME}
                 </h2>
                 <p className="mt-3 max-w-2xl mx-auto text-lg text-prose-light">
-                  {currentModelData.subtitle}
+                  {CHAT_MODEL_SUBTITLE}
                 </p>
               </div>
               <div className="w-full mb-2 sm:mb-3">{renderComposer('intro')}</div>
@@ -985,10 +983,10 @@ export const ChatSection = () => {
           <>
             <AnimateOnScroll className="text-center">
               <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
-                Converse com o {currentModelData.name}
+                Converse com o {CHAT_MODEL_NAME}
               </h2>
               <p className="mt-4 max-w-2xl mx-auto text-lg text-prose-light">
-                {currentModelData.subtitle}
+                {CHAT_MODEL_SUBTITLE}
               </p>
             </AnimateOnScroll>
             <AnimateOnScroll delay={200} className="mt-12 max-w-3xl mx-auto">
@@ -1001,30 +999,24 @@ export const ChatSection = () => {
                     }`}
                 >
                   {messages.map((msg, index) => (
-                    <ChatBubble
+                    <MemoizedChatMessageRow
                       key={msg.id}
                       message={msg}
-                      disableActions={isLoading || !!editingState}
-                      onRegenerate={
-                        msg.role === 'user'
-                          ? () => regenerate(index)
-                          : index > 0 && messages[index - 1]?.role === 'user'
-                            ? () => regenerate(index - 1)
-                            : undefined
-                      }
-                      onEdit={
-                        msg.role === 'user' ? () => handleEditMessage(msg.id, msg.content) : undefined
-                      }
-                      onNavigate={(direction) => navigateMessage(msg.id, direction)}
-                      onFeedback={handleFeedback}
-                      isEditing={editingState?.messageId === msg.id}
-                      editContent={editingState?.messageId === msg.id ? editingState.originalContent : undefined}
+                      index={index}
+                      previousRole={messages[index - 1]?.role}
+                      isLoading={isLoading}
+                      hasEditingState={!!editingState}
+                      editingMessageId={editingState?.messageId}
+                      editingContent={editingState?.originalContent}
+                      onRegenerateAtIndex={handleRegenerateAtIndex}
+                      onEditMessage={handleEditMessage}
+                      onNavigateMessage={handleNavigateMessage}
                       onEditContentChange={handleEditContentChange}
                       onSaveEdit={handleSaveEdit}
                       onCancelEdit={handleCancelEdit}
                     />
                   ))}
-                  {isLoading && <ThinkingAnimation modelName={currentModelData.name} />}
+                  {isLoading && <ThinkingAnimation />}
                   {/* Spacer to allow scrolling the last message to the top - always present to prevent layout shift */}
                   <div ref={chatEndRef} className="min-h-[calc(100%-80px)] shrink-0" />
                 </div>
@@ -1034,12 +1026,6 @@ export const ChatSection = () => {
           </>
         )}
       </div>
-      <FeedbackModal
-        isOpen={feedbackState.isOpen}
-        onClose={() => setFeedbackState((prev) => ({ ...prev, isOpen: false }))}
-        onSubmit={handleFeedbackSubmit}
-        type={feedbackState.type}
-      />
     </section>
   );
 };
