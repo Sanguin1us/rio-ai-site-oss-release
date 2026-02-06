@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { ArrowDown, ArrowRight } from 'lucide-react';
 import { AnimateOnScroll } from './AnimateOnScroll';
 import { HeroTitleAnimation } from './HeroTitleAnimation';
 import type { View } from '../types/index';
@@ -23,6 +23,14 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, onAnimationComplete }) =
         </AnimateOnScroll>
         <AnimateOnScroll delay={400}>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-stretch">
+            <button
+              type="button"
+              onClick={() => onNavigate?.('opensource')}
+              className="inline-flex items-center gap-2 rounded-md bg-rio-primary px-6 py-3 text-base font-semibold text-white transition hover:bg-rio-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rio-primary"
+            >
+              Conheça nossos modelos
+              <ArrowDown className="h-5 w-5" />
+            </button>
             <button
               type="button"
               onClick={() => onNavigate?.('chat')}

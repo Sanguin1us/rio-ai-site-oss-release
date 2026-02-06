@@ -1,6 +1,6 @@
-import React, { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import {
-  Send,
+  ArrowUp,
   Copy,
   Check,
   Edit3,
@@ -10,17 +10,23 @@ import {
   ThumbsDown,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Square,
   FileText,
   Trash2,
 } from 'lucide-react';
 import type { Language } from 'prism-react-renderer';
+import { Highlight, themes } from 'prism-react-renderer';
+import ReactMarkdown from 'react-markdown';
+import remarkMath from 'remark-math';
+import remarkGfm from 'remark-gfm';
+import remarkBreaks from 'remark-breaks';
+import rehypeKatex from 'rehype-katex';
 import { AnimateOnScroll } from './AnimateOnScroll';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ChatMessage, useRioChat } from '../hooks/useRioChat';
 import { normalizeMathDelimiters } from '../lib/markdown';
 import { FeedbackModal, FeedbackType, FeedbackData } from './FeedbackModal';
+import 'katex/dist/katex.min.css';
 
 const getNodeText = (node: React.ReactNode): string => {
   if (typeof node === 'string' || typeof node === 'number') {
@@ -35,21 +41,7 @@ const getNodeText = (node: React.ReactNode): string => {
   return '';
 };
 
-type MarkdownBundle = {
-  ReactMarkdown: typeof import('react-markdown').default;
-  Highlight: typeof import('prism-react-renderer').Highlight;
-  themes: typeof import('prism-react-renderer').themes;
-  remarkMath: typeof import('remark-math').default;
-  remarkGfm: typeof import('remark-gfm').default;
-  remarkBreaks: typeof import('remark-breaks').default;
-  rehypeKatex: typeof import('rehype-katex').default;
-};
-
-type PrismTheme = (typeof import('prism-react-renderer').themes)[keyof typeof import('prism-react-renderer').themes];
-
-const MARKDOWN_TRIGGER_RE = /(```|`|\$\$|\$|\n|\|\s*\||[*_#>])/;
-
-const hasRichMarkdown = (content: string) => MARKDOWN_TRIGGER_RE.test(content);
+type PrismTheme = (typeof themes)[keyof typeof themes];
 
 interface ChatBubbleProps {
   message: ChatMessage;
@@ -63,7 +55,6 @@ interface ChatBubbleProps {
   onEditContentChange?: (content: string) => void;
   onSaveEdit?: () => void;
   onCancelEdit?: () => void;
-  markdownBundle?: MarkdownBundle | null;
 }
 
 const CodeBlock: React.FC<{
@@ -72,7 +63,7 @@ const CodeBlock: React.FC<{
   children?: React.ReactNode;
   node?: unknown;
   isUser: boolean;
-  highlight?: MarkdownBundle['Highlight'];
+  highlight?: typeof Highlight;
   theme?: PrismTheme;
 }> = ({ inline, className, children, node, isUser, highlight, theme, ...codeProps }) => {
   const [codeCopied, setCodeCopied] = useState(false);
@@ -233,19 +224,15 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   onEditContentChange,
   onSaveEdit,
   onCancelEdit,
-  markdownBundle,
 }) => {
   const isUser = message.role === 'user';
   const [copiedBubble, setCopiedBubble] = useState(false);
   const bubbleCopyTimeoutRef = useRef<number | null>(null);
   const editTextareaRef = useRef<HTMLTextAreaElement>(null);
   const markdownContent = normalizeMathDelimiters(message.content);
-  const MarkdownRenderer = markdownBundle?.ReactMarkdown;
-  const codeTheme = markdownBundle?.themes?.nightOwl;
-  const remarkPlugins = markdownBundle
-    ? [markdownBundle.remarkMath, markdownBundle.remarkGfm, markdownBundle.remarkBreaks]
-    : [];
-  const rehypePlugins = markdownBundle ? [markdownBundle.rehypeKatex] : [];
+  const codeTheme = themes.nightOwl;
+  const remarkPlugins = [remarkMath, remarkGfm, remarkBreaks];
+  const rehypePlugins = [rehypeKatex];
 
   useEffect(
     () => () => {
@@ -310,8 +297,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                 }
               }}
               className="w-full border-none bg-transparent text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 resize-none max-h-[200px] overflow-y-auto"
-              style={{ minHeight: '40px' }}
-              rows={1}
+            style={{ minHeight: '40px' }}
+            rows={1}
             />
           </div>
           <div className="flex items-center justify-between">
@@ -369,12 +356,13 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
           </div>
         )}
         <div
-          className={`relative min-w-0 max-w-full overflow-hidden rounded-2xl px-4 py-3 text-[14px] leading-relaxed shadow-sm transition ${isUser ? 'bg-rio-primary/10 text-rio-primary' : 'bg-slate-100 text-prose'
+          className={`relative min-w-0 max-w-full overflow-hidden text-[14px] leading-relaxed transition ${isUser
+            ? 'rounded-2xl bg-rio-primary/10 px-4 py-3 text-rio-primary shadow-sm'
+            : 'px-0 py-0 text-prose'
             }`}
         >
           <div className="min-w-0 max-w-full whitespace-normal break-words text-[14px] leading-relaxed text-prose space-y-3">
-            {MarkdownRenderer ? (
-              <MarkdownRenderer
+            <ReactMarkdown
                 remarkPlugins={remarkPlugins}
                 rehypePlugins={rehypePlugins}
                 components={{
@@ -385,7 +373,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                     <CodeBlock
                       {...props}
                       isUser={isUser}
-                      highlight={markdownBundle?.Highlight}
+                      highlight={Highlight}
                       theme={codeTheme}
                     />
                   ),
@@ -494,17 +482,16 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                 }}
               >
                 {markdownContent}
-              </MarkdownRenderer>
-            ) : (
-              <p className="whitespace-pre-wrap leading-relaxed">{markdownContent}</p>
-            )}
+            </ReactMarkdown>
           </div>
-          <span className="pointer-events-none absolute inset-0 rounded-2xl border border-white/0 transition group-hover:border-white/40" />
+          {isUser && (
+            <span className="pointer-events-none absolute inset-0 rounded-2xl border border-white/0 transition group-hover:border-white/40" />
+          )}
         </div>
         <div
-          className={`flex items-center gap-1 text-xs font-medium transition-opacity duration-200 ${isUser
-            ? 'justify-end text-rio-primary opacity-0 group-hover:opacity-100'
-            : 'justify-start text-slate-500 opacity-0 group-hover:opacity-100'
+          className={`flex w-full items-center gap-1 text-xs font-medium transition-opacity duration-200 ${isUser
+            ? 'self-end justify-end text-rio-primary opacity-0 group-hover:opacity-100'
+            : 'self-start justify-start text-slate-500 opacity-0 group-hover:opacity-100 -ml-2'
             }`}
         >
           {!isUser && (
@@ -648,14 +635,12 @@ export const ChatSection = () => {
       id: 'rio-3.0-open' as const,
       name: 'Rio 3.0 Open',
       description: 'Estado da arte',
-      subtitle: 'Converse com o nosso modelo aberto mais avançado.',
+      subtitle: 'Nosso modelo open source mais avançado.',
     },
   ];
 
   const currentModelData = chatModels.find((m) => m.id === selectedModelId) || chatModels[0];
   if (!currentModelData) throw new Error("Default model not found");
-  const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
-
   const {
     messages,
     input,
@@ -673,12 +658,6 @@ export const ChatSection = () => {
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [editingState, setEditingState] = useState<EditingState | null>(null);
-  const [markdownBundle, setMarkdownBundle] = useState<MarkdownBundle | null>(null);
-  const [markdownLoading, setMarkdownLoading] = useState(false);
-  const shouldLoadMarkdown = useMemo(
-    () => messages.some((message) => hasRichMarkdown(message.content)),
-    [messages]
-  );
   const [feedbackState, setFeedbackState] = useState<FeedbackState>({
     isOpen: false,
     type: 'positive',
@@ -687,61 +666,7 @@ export const ChatSection = () => {
   const [showScrollbar, setShowScrollbar] = useState(false);
   const isAutoScrollingRef = useRef(false);
   const scrollTimeoutRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (!shouldLoadMarkdown || markdownBundle || markdownLoading) return;
-
-    let isMounted = true;
-    setMarkdownLoading(true);
-
-    const loadMarkdownBundle = async () => {
-      try {
-        const [
-          markdownModule,
-          prismModule,
-          remarkMathModule,
-          remarkGfmModule,
-          remarkBreaksModule,
-          rehypeKatexModule,
-        ] = await Promise.all([
-          import('react-markdown'),
-          import('prism-react-renderer'),
-          import('remark-math'),
-          import('remark-gfm'),
-          import('remark-breaks'),
-          import('rehype-katex'),
-        ]);
-
-        if (!isMounted) return;
-
-        setMarkdownBundle({
-          ReactMarkdown: markdownModule.default,
-          Highlight: prismModule.Highlight,
-          themes: prismModule.themes,
-          remarkMath: remarkMathModule.default,
-          remarkGfm: remarkGfmModule.default,
-          remarkBreaks: remarkBreaksModule.default,
-          rehypeKatex: rehypeKatexModule.default,
-        });
-
-        void import('katex/dist/katex.min.css').catch((cssError) => {
-          console.error('Falha ao carregar CSS do KaTeX', cssError);
-        });
-      } catch (error) {
-        console.error('Falha ao carregar markdown do chat', error);
-      } finally {
-        if (isMounted) {
-          setMarkdownLoading(false);
-        }
-      }
-    };
-
-    loadMarkdownBundle();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [shouldLoadMarkdown, markdownBundle, markdownLoading]);
+  const isEmptyChat = messages.length === 0;
 
   const handleClearChat = useCallback(() => {
     if (messages.length === 0) return;
@@ -756,6 +681,9 @@ export const ChatSection = () => {
   }, [clearChat, messages.length]);
 
   const inputTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const inputPlaceholder = isEmptyChat
+    ? 'Como posso ajudar você hoje?'
+    : `Perguntar para o ${currentModelData.name}...`;
 
   // Track previous state to detect transitions
   const prevIsLoadingRef = useRef(isLoading);
@@ -795,6 +723,101 @@ export const ChatSection = () => {
     inputTextareaRef.current.style.height = 'auto';
     inputTextareaRef.current.style.height = `${Math.min(inputTextareaRef.current.scrollHeight, 200)}px`;
   }, [input]);
+
+  const suggestionChips = [
+    { label: 'Escrever', prompt: 'Escreva um poema curto sobre o Rio.' },
+    { label: 'Aprender', prompt: 'Explique como a IA pode ajudar a cidade.' },
+    { label: 'Código', prompt: 'Crie um exemplo simples em JavaScript.' },
+    { label: 'Planejar', prompt: 'Sugira um roteiro de um dia no Rio.' },
+  ];
+
+  const handleSuggestionClick = (prompt: string) => {
+    setInput(prompt);
+    requestAnimationFrame(() => {
+      inputTextareaRef.current?.focus();
+    });
+  };
+
+  const renderComposer = (variant: 'intro' | 'inline') => {
+    const wrapperClass =
+      variant === 'intro'
+        ? 'rounded-2xl bg-white p-3'
+        : 'border-t border-slate-200 bg-white p-4';
+
+    return (
+      <div className={wrapperClass}>
+        <form
+          onSubmit={handleFormSubmit}
+          className={`group relative flex items-center gap-2 rounded-2xl border bg-white p-1.5 pl-2 shadow-sm transition-all duration-300 ${selectedModelId === 'rio-3.0-open'
+            ? 'border-rio-primary focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
+            : 'border-slate-200 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
+          }`}
+        >
+          <div className={`transition-all duration-300 ease-in-out ${messages.length > 0 && !isLoading && !isClearing ? 'w-8 opacity-100 mr-1' : 'w-0 opacity-0 mr-0 overflow-hidden'}`}>
+            <button
+              type="button"
+              onClick={handleClearChat}
+              disabled={messages.length === 0 || isLoading || isClearing}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
+              title="Limpar conversa"
+            >
+              <Trash2 className="h-5 w-5" />
+            </button>
+          </div>
+
+          <textarea
+            ref={inputTextareaRef}
+            value={input}
+            onChange={(e) => {
+              setInput(e.target.value);
+              // Auto-resize the textarea
+              e.target.style.height = 'auto';
+              e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
+            }}
+            onKeyDown={(e) => {
+              // Submit on Enter (without Shift)
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (input.trim() && !isLoading) {
+                  const form = e.currentTarget.closest('form');
+                  if (form) form.requestSubmit();
+                }
+              }
+            }}
+            placeholder={inputPlaceholder}
+            rows={1}
+            className="flex-1 border-none bg-transparent px-1 py-0 text-sm leading-9 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 resize-none max-h-[200px] overflow-y-auto"
+            style={{ minHeight: '40px' }}
+          />
+
+          {isLoading ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                stop();
+              }}
+              className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-red-500 px-3 text-white transition-all duration-300 hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/25"
+              aria-label="Interromper"
+            >
+              <Square className="h-4 w-4 fill-current" />
+              <span className="text-sm font-medium">Parar</span>
+            </button>
+          ) : (
+            <button
+              type="submit"
+              disabled={!input.trim()}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-rio-primary transition-all duration-300 hover:bg-rio-primary/10 disabled:pointer-events-none disabled:opacity-50"
+              aria-label="Enviar mensagem"
+            >
+              <ArrowUp className="h-5 w-5" />
+            </button>
+          )}
+        </form>
+      </div>
+    );
+  };
 
   useEffect(() => {
     const chatContainer = chatContainerRef.current;
@@ -932,210 +955,84 @@ export const ChatSection = () => {
   return (
     <section id="chat" className="bg-white py-20 sm:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <AnimateOnScroll className="text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
-            Converse com o {currentModelData.name}
-          </h2>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-prose-light">
-            {currentModelData.subtitle}
-          </p>
-        </AnimateOnScroll>
-        <AnimateOnScroll delay={200} className="mt-12 max-w-3xl mx-auto">
-          <div
-            className="group relative flex min-h-[400px] max-h-[70vh] h-[500px] flex-col rounded-lg border bg-white shadow-sm transition-all duration-300 border-slate-200"
-          >
-
-            <div
-              ref={chatContainerRef}
-              className={`flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-6 transition-all duration-300 ease-out chat-scroll-container ${showScrollbar ? 'show-scrollbar' : ''} ${isClearing ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'
-                }`}
-            >
-              {messages.map((msg, index) => (
-                <ChatBubble
-                  key={msg.id}
-                  message={msg}
-                  disableActions={isLoading || !!editingState}
-                  onRegenerate={
-                    msg.role === 'user'
-                      ? () => regenerate(index)
-                      : index > 0 && messages[index - 1]?.role === 'user'
-                        ? () => regenerate(index - 1)
-                        : undefined
-                  }
-                  onEdit={
-                    msg.role === 'user' ? () => handleEditMessage(msg.id, msg.content) : undefined
-                  }
-                  onNavigate={(direction) => navigateMessage(msg.id, direction)}
-                  onFeedback={handleFeedback}
-                  isEditing={editingState?.messageId === msg.id}
-                  editContent={editingState?.messageId === msg.id ? editingState.originalContent : undefined}
-                  onEditContentChange={handleEditContentChange}
-                  onSaveEdit={handleSaveEdit}
-                  onCancelEdit={handleCancelEdit}
-                  markdownBundle={markdownBundle}
-                />
-              ))}
-              {isLoading && <ThinkingAnimation modelName={currentModelData.name} />}
-              {/* Spacer to allow scrolling the last message to the top - always present to prevent layout shift */}
-              <div ref={chatEndRef} className="min-h-[calc(100%-80px)] shrink-0" />
+        {isEmptyChat ? (
+          <AnimateOnScroll className="max-w-3xl mx-auto">
+            <div className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center">
+              <div className="text-center mb-6 sm:mb-7">
+                <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
+                  Converse com o {currentModelData.name}
+                </h2>
+                <p className="mt-3 max-w-2xl mx-auto text-lg text-prose-light">
+                  {currentModelData.subtitle}
+                </p>
+              </div>
+              <div className="w-full mb-2 sm:mb-3">{renderComposer('intro')}</div>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                {suggestionChips.map((chip) => (
+                  <button
+                    key={chip.label}
+                    type="button"
+                    onClick={() => handleSuggestionClick(chip.prompt)}
+                    className="rounded-full border border-slate-200 bg-white px-4 py-1 text-xs font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="border-t border-slate-200 bg-white p-4">
-              <form
-                onSubmit={handleFormSubmit}
-                className={`group relative flex items-center gap-2 rounded-2xl border bg-white p-1.5 pl-3 shadow-sm transition-all duration-300 ${selectedModelId === 'rio-3.0-open'
-                  ? 'border-rio-primary focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
-                  : 'border-slate-200 focus-within:border-rio-primary focus-within:ring-4 focus-within:ring-rio-primary/10'
-                }`}
+          </AnimateOnScroll>
+        ) : (
+          <>
+            <AnimateOnScroll className="text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
+                Converse com o {currentModelData.name}
+              </h2>
+              <p className="mt-4 max-w-2xl mx-auto text-lg text-prose-light">
+                {currentModelData.subtitle}
+              </p>
+            </AnimateOnScroll>
+            <AnimateOnScroll delay={200} className="mt-12 max-w-3xl mx-auto">
+              <div
+                className="group relative flex min-h-[400px] max-h-[70vh] h-[500px] flex-col rounded-lg border bg-white shadow-sm transition-all duration-300 border-slate-200"
               >
-                <div className={`transition-all duration-300 ease-in-out ${messages.length > 0 && !isLoading && !isClearing ? 'w-8 opacity-100 mr-1' : 'w-0 opacity-0 mr-0 overflow-hidden'}`}>
-                  <button
-                    type="button"
-                    onClick={handleClearChat}
-                    disabled={messages.length === 0 || isLoading || isClearing}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
-                    title="Limpar conversa"
-                  >
-                    <Trash2 className="h-5 w-5" />
-                  </button>
-                </div>
-
-                <textarea
-                  ref={inputTextareaRef}
-                  value={input}
-                  onChange={(e) => {
-                    setInput(e.target.value);
-                    // Auto-resize the textarea
-                    e.target.style.height = 'auto';
-                    e.target.style.height = `${Math.min(e.target.scrollHeight, 200)}px`;
-                  }}
-                  onKeyDown={(e) => {
-                    // Submit on Enter (without Shift)
-                    if (e.key === 'Enter' && !e.shiftKey) {
-                      e.preventDefault();
-                      if (input.trim() && !isLoading) {
-                        const form = e.currentTarget.closest('form');
-                        if (form) form.requestSubmit();
-                      }
-                    }
-                  }}
-                  placeholder={`Perguntar para o ${currentModelData.name}...`}
-                  rows={1}
-                  className="flex-1 border-none bg-transparent px-2 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 resize-none max-h-[200px] overflow-y-auto"
-                  style={{ minHeight: '40px' }}
-                />
-
-                {/* Model selector on the right, Claude-style */}
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Escape') {
-                        setIsModelMenuOpen(false);
-                      } else if (e.key === 'ArrowDown' && !isModelMenuOpen) {
-                        e.preventDefault();
-                        setIsModelMenuOpen(true);
-                      }
-                    }}
-                    className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm text-slate-600 transition hover:bg-slate-100"
-                    title="Mudar de modelo"
-                    aria-haspopup="listbox"
-                    aria-expanded={isModelMenuOpen}
-                  >
-                    <span className="font-medium">{currentModelData.name}</span>
-                    <ChevronDown className={`h-4 w-4 transition-transform ${isModelMenuOpen ? 'rotate-180' : ''}`} />
-                  </button>
-
-                  {isModelMenuOpen && (
-                    <>
-                      <div
-                        className="fixed inset-0 z-10"
-                        onClick={() => setIsModelMenuOpen(false)}
-                      />
-                      <div
-                        className="absolute bottom-full right-0 z-20 mb-2 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200"
-                        role="listbox"
-                        onKeyDown={(e) => {
-                          const currentIndex = chatModels.findIndex((m) => m.id === selectedModelId);
-                          if (e.key === 'ArrowDown') {
-                            e.preventDefault();
-                            const nextIndex = (currentIndex + 1) % chatModels.length;
-                            const nextModel = chatModels[nextIndex];
-                            if (nextModel) {
-                              setSelectedModelId(nextModel.id);
-                            }
-                          } else if (e.key === 'ArrowUp') {
-                            e.preventDefault();
-                            const prevIndex = (currentIndex - 1 + chatModels.length) % chatModels.length;
-                            const prevModel = chatModels[prevIndex];
-                            if (prevModel) {
-                              setSelectedModelId(prevModel.id);
-                            }
-                          } else if (e.key === 'Escape' || e.key === 'Enter') {
-                            setIsModelMenuOpen(false);
-                          }
-                        }}
-                        tabIndex={0}
-                        ref={(el) => el?.focus()}
-                      >
-                        {chatModels.map((m) => (
-                          <button
-                            key={m.id}
-                            type="button"
-                            onClick={() => {
-                              setSelectedModelId(m.id);
-                              setIsModelMenuOpen(false);
-                            }}
-                            className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-50 ${selectedModelId === m.id ? 'bg-slate-50' : ''
-                              }`}
-                            role="option"
-                            aria-selected={selectedModelId === m.id}
-                          >
-                            <div className="flex flex-col">
-                              <span className="text-sm font-semibold text-slate-800">{m.name}</span>
-                              <span className="text-xs text-slate-500">{m.description}</span>
-                            </div>
-                            {selectedModelId === m.id && (
-                              <Check className="h-4 w-4 text-rio-primary shrink-0" />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-
-                {isLoading ? (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      stop();
-                    }}
-                    className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl bg-red-500 px-3 text-white transition-all duration-300 hover:bg-red-600 hover:shadow-lg hover:shadow-red-500/25"
-                    aria-label="Interromper"
-                  >
-                    <Square className="h-4 w-4 fill-current" />
-                    <span className="text-sm font-medium">Parar</span>
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={!input.trim()}
-                    className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all duration-500 disabled:pointer-events-none disabled:opacity-50 ${selectedModelId === 'rio-3.0-open'
-                      ? 'bg-rio-primary text-white hover:bg-rio-primary/90 hover:shadow-lg hover:shadow-rio-primary/25'
-                      : 'bg-rio-primary text-white hover:bg-rio-primary/90 hover:shadow-lg hover:shadow-rio-primary/25'
+                <div
+                  ref={chatContainerRef}
+                  className={`flex-1 space-y-6 overflow-y-auto overflow-x-hidden p-6 transition-all duration-300 ease-out chat-scroll-container ${showScrollbar ? 'show-scrollbar' : ''} ${isClearing ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0'
                     }`}
-                    aria-label="Enviar mensagem"
-                  >
-                    <Send className="h-5 w-5" />
-                  </button>
-                )}
-              </form>
-            </div>
-          </div>
-        </AnimateOnScroll>
+                >
+                  {messages.map((msg, index) => (
+                    <ChatBubble
+                      key={msg.id}
+                      message={msg}
+                      disableActions={isLoading || !!editingState}
+                      onRegenerate={
+                        msg.role === 'user'
+                          ? () => regenerate(index)
+                          : index > 0 && messages[index - 1]?.role === 'user'
+                            ? () => regenerate(index - 1)
+                            : undefined
+                      }
+                      onEdit={
+                        msg.role === 'user' ? () => handleEditMessage(msg.id, msg.content) : undefined
+                      }
+                      onNavigate={(direction) => navigateMessage(msg.id, direction)}
+                      onFeedback={handleFeedback}
+                      isEditing={editingState?.messageId === msg.id}
+                      editContent={editingState?.messageId === msg.id ? editingState.originalContent : undefined}
+                      onEditContentChange={handleEditContentChange}
+                      onSaveEdit={handleSaveEdit}
+                      onCancelEdit={handleCancelEdit}
+                    />
+                  ))}
+                  {isLoading && <ThinkingAnimation modelName={currentModelData.name} />}
+                  {/* Spacer to allow scrolling the last message to the top - always present to prevent layout shift */}
+                  <div ref={chatEndRef} className="min-h-[calc(100%-80px)] shrink-0" />
+                </div>
+                {renderComposer('inline')}
+              </div>
+            </AnimateOnScroll>
+          </>
+        )}
       </div>
       <FeedbackModal
         isOpen={feedbackState.isOpen}
