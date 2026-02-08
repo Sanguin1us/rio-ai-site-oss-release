@@ -8,7 +8,7 @@ interface ModelCardProps {
 }
 
 export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) => {
-  const { name, description, Icon, tags, isOpenSource } = model;
+  const { name, description, tags, isOpenSource } = model;
   return (
     <button
       type="button"
@@ -18,10 +18,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) =>
     >
       <div className="p-6 flex-grow">
         <div className="flex items-start justify-between">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-rio-primary/10">
-              <Icon className="h-6 w-6 text-rio-primary" />
-            </div>
+          <div className="flex items-center">
             <h3 className="text-xl font-semibold text-prose">{name}</h3>
           </div>
           {isOpenSource && (
@@ -30,7 +27,9 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) =>
             </span>
           )}
         </div>
-        <p className="mt-4 text-prose-light text-sm leading-6 flex-grow">{description}</p>
+        <p className="mt-4 text-prose-light text-sm leading-6 flex-grow whitespace-pre-line">
+          {description}
+        </p>
       </div>
       <div className="border-t border-slate-200 p-4">
         <div className="flex flex-wrap items-center justify-between gap-4">

@@ -1,5 +1,6 @@
 import type { Model } from './types/index';
-import { Code2, Terminal, FlaskConical } from 'lucide-react';
+import { Code2, Terminal, Eye, Search } from 'lucide-react';
+import { ModelGlyphXL, ModelGlyphL, ModelGlyphM, ModelGlyphS } from './components/icons/ModelSizeGlyphs';
 
 export const RIO_MODELS: Model[] = [
   {
@@ -7,14 +8,14 @@ export const RIO_MODELS: Model[] = [
     description:
       'Modelo open source principal da geração 3.0, equilibrando qualidade e custo para uso amplo.',
     category: 'Open Source',
-    Icon: FlaskConical,
-    tags: ['Open Source', 'CC BY 4.0', '235B Parâmetros', 'Geração 3.0'],
+    Icon: ModelGlyphXL,
+    tags: ['235B parâmetros · 22B ativos'],
     isOpenSource: true,
     baseModel: 'Qwen3-235B-A22B-Thinking-2507',
     baseModelUrl: 'https://huggingface.co/Qwen/Qwen3-235B-A22B-Thinking-2507',
     parameters: '235 Bilhões (22B ativados)',
-    license: 'Creative Commons Attribution 4.0',
-    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/deed.en',
+    license: 'MIT',
+    licenseUrl: 'https://opensource.org/license/mit',
     datasets: ['nvidia/OpenScienceReasoning-2', 'nvidia/Nemotron-Post-Training-Dataset-v1'],
     datasetLinks: [
       {
@@ -33,14 +34,14 @@ export const RIO_MODELS: Model[] = [
     description:
       'Modelo open source compacto da geração 3.0, pensado para eficiência e experimentação rápida.',
     category: 'Open Source',
-    Icon: FlaskConical,
-    tags: ['Open Source', 'CC BY 4.0', '4B Parâmetros', 'Geração 3.0', 'Compacto'],
+    Icon: ModelGlyphM,
+    tags: ['4B parâmetros'],
     isOpenSource: true,
     baseModel: 'Qwen3-4B-Thinking-2507',
     baseModelUrl: 'https://huggingface.co/Qwen/Qwen3-4B-Thinking-2507',
     parameters: '4 Bilhões',
-    license: 'Creative Commons Attribution 4.0',
-    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/deed.en',
+    license: 'MIT',
+    licenseUrl: 'https://opensource.org/license/mit',
     datasets: ['nvidia/OpenScienceReasoning-2', 'nvidia/Nemotron-Post-Training-Dataset-v1'],
     datasetLinks: [
       {
@@ -55,18 +56,30 @@ export const RIO_MODELS: Model[] = [
     huggingFaceUrl: 'https://huggingface.co/prefeitura-rio/Rio-3.0-Open-Mini',
   },
   {
+    name: 'Rio 3.0 Open Nano',
+    description:
+      'Modelo open source ultracompacto da geração 3.0, otimizado para baixa latência e cenários com recursos limitados.',
+    category: 'Open Source',
+    Icon: ModelGlyphS,
+    tags: ['1.7B parâmetros'],
+    isOpenSource: true,
+    license: 'MIT',
+    licenseUrl: 'https://opensource.org/license/mit',
+    huggingFaceUrl: 'https://huggingface.co/prefeitura-rio/Rio-3.0-Open-Nano',
+  },
+  {
     name: 'Rio 2.5 Open',
     description:
       'Uma versão aberta do futuro. Este modelo open source, baseado no Qwen 3, oferece um equilíbrio excepcional entre performance e eficiência.',
     category: 'Open Source',
-    Icon: FlaskConical,
-    tags: ['Open Source', 'CC BY 4.0', '30B Parâmetros'],
+    Icon: ModelGlyphL,
+    tags: ['30B parâmetros · 3B ativos'],
     isOpenSource: true,
     baseModel: 'Qwen 3 30B-A3B 2507 Thinking',
     baseModelUrl: 'https://huggingface.co/Qwen/Qwen3-30B-A3B-Thinking-2507',
     parameters: '30 Bilhões (3B ativados)',
-    license: 'Creative Commons Attribution 4.0',
-    licenseUrl: 'https://creativecommons.org/licenses/by/4.0/deed.en',
+    license: 'MIT',
+    licenseUrl: 'https://opensource.org/license/mit',
     datasets: ['nvidia/OpenScienceReasoning-2', 'nvidia/Nemotron-Post-Training-Dataset-v1'],
     datasetLinks: [
       {
@@ -104,13 +117,27 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-open")
     ],
   },
   {
+    name: 'Rio 2.5 Open VL',
+    description:
+      'Modelo open source multimodal da geração 2.5,\nprojetado para tarefas de visão e linguagem.',
+    category: 'Open Source',
+    Icon: Eye,
+    tags: ['4B parâmetros'],
+    isOpenSource: true,
+    license: 'MIT',
+    licenseUrl: 'https://opensource.org/license/mit',
+    huggingFaceUrl: 'https://huggingface.co/prefeitura-rio/Rio-2.5-Open-VL',
+  },
+  {
     name: 'Rio 3.0 Open Search',
     description:
       'Modelo open source voltado para busca e recuperação de informação, ideal para experiências de pesquisa e RAG.',
     category: 'Open Source',
-    Icon: FlaskConical,
-    tags: ['Open Source', 'Geração 3.0', 'Busca'],
+    Icon: Search,
+    tags: ['235B parâmetros · 22B ativos'],
     isOpenSource: true,
+    license: 'MIT',
+    licenseUrl: 'https://opensource.org/license/mit',
     huggingFaceUrl: 'https://huggingface.co/prefeitura-rio/Rio-3.0-Open-Search',
   },
 ];

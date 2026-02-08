@@ -438,7 +438,7 @@ const segmentStyle = (start: string, end: string) => {
 
 const PARAMETER_BENCHMARKS: Record<'hle' | 'matharena', ParameterDatum[]> = {
   hle: [
-    { model: 'Kimi K2 Thinking', paramsB: 1000, score: 23.9, color: '#9CA3AF', labelPosition: 'bottom-left' },
+    { model: 'Kimi K2.5 Thinking', paramsB: 1000, score: 30.1, color: '#9CA3AF', labelPosition: 'bottom-left' },
     { model: 'GLM 4.7', paramsB: 357, score: 24.8, color: '#9CA3AF' },
     { model: 'gpt-oss-120b (high)', paramsB: 120, score: 14.9, color: '#9CA3AF' },
     { model: 'Qwen3-235B-Thinking-2507', paramsB: 235, score: 18.2, color: '#9CA3AF' },
@@ -446,7 +446,7 @@ const PARAMETER_BENCHMARKS: Record<'hle' | 'matharena', ParameterDatum[]> = {
     { model: 'Rio 3.0 Open', paramsB: 235, score: 25.2, color: '#1E40AF', isRio: true },
   ],
   matharena: [
-    { model: 'Kimi K2 Thinking', paramsB: 1000, score: 0.0, color: '#9CA3AF', labelPosition: 'top-left' },
+    { model: 'Kimi K2.5 Thinking', paramsB: 1000, score: 8.85, color: '#9CA3AF', labelPosition: 'top-left' },
     { model: 'GLM 4.7', paramsB: 357, score: 3.3, color: '#9CA3AF' },
     { model: 'gpt-oss-120b (high)', paramsB: 120, score: 1.04, color: '#9CA3AF' },
     { model: 'Qwen3-235B-Thinking-2507', paramsB: 235, score: 5.21, color: '#9CA3AF' },

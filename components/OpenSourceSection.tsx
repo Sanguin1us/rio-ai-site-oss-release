@@ -18,12 +18,12 @@ export const OpenSourceSection: React.FC<OpenSourceSectionProps> = ({ models, on
           </h2>
           <p className="mt-4 text-lg text-prose-light">
             Acreditamos no poder da colaboração para acelerar a inovação. Explore nossos modelos de
-            código aberto, licenciados sob CC BY 4.0, e junte-se a nós na construção do futuro da
+            código aberto, licenciados sob a licença MIT, e junte-se a nós na construção do futuro da
             inteligência artificial.
           </p>
         </AnimateOnScroll>
 
-        <div className="mt-16 max-w-5xl mx-auto grid gap-8 sm:grid-cols-1 lg:grid-cols-2">
+        <div className="mt-16 max-w-[96rem] mx-auto grid gap-8 sm:grid-cols-1 lg:grid-cols-3">
           {models.map((model, index) => (
             <AnimateOnScroll key={model.name} delay={index * 100}>
               <ModelCard model={model} onSelectModel={onSelectModel} />

@@ -20,10 +20,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({ model, onBack }) => 
             Voltar para modelos Open
           </button>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-start gap-6">
-          <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-rio-primary/10 shrink-0">
-            <model.Icon className="h-8 w-8 text-rio-primary" />
-          </div>
+        <div className="flex flex-col">
           <div>
             <h1 className="text-3xl sm:text-4xl font-bold text-prose">{model.name}</h1>
             <p className="mt-3 text-lg text-prose-light max-w-3xl">{model.description}</p>

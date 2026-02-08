@@ -21,7 +21,9 @@ Catálogo focado nos modelos abertos que serão lançados:
 | :--- | :--- | :--- |
 | **Rio 3.0 Open** | Modelo principal | Qwen3-235B-Thinking |
 | **Rio 3.0 Open Mini** | Eficiência | Qwen3-4B-Thinking |
+| **Rio 3.0 Open Nano** | Ultraeficiência e baixa latência | — |
 | **Rio 2.5 Open** | Equilíbrio custo/qualidade | Qwen3-30B-Thinking |
+| **Rio 2.5 Open VL** | Multimodal (visão e linguagem) | — |
 | **Rio 2.0 Open** | Pesquisa e desenvolvimento | Qwen 2.5 14B Instruct |
 
 ### 🔓 Iniciativa Open Source

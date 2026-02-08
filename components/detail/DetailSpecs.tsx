@@ -49,12 +49,12 @@ export const DetailSpecs: React.FC<DetailSpecsProps> = ({ model }) => {
     : undefined;
 
   const licenseLabel =
-    model.license ?? (isRioOpen ? 'Creative Commons Attribution 4.0' : undefined);
+    model.license ?? (isRioOpen ? 'MIT' : undefined);
   const licenseValue = licenseLabel
     ? createLinkedValue(
         licenseLabel,
         model.licenseUrl ??
-          (isRioOpen ? 'https://creativecommons.org/licenses/by/4.0/deed.en' : undefined)
+          (isRioOpen ? 'https://opensource.org/license/mit' : undefined)
       )
     : undefined;
 
