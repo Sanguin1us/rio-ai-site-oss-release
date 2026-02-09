@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
   return {
     server: {
       port: 3000,
-      host: '0.0.0.0',
+      host: 'localhost',
       proxy: {
         '/api': {
           target: proxyTarget,
@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    envPrefix: ['VITE_', 'RIO_'],
+    envPrefix: ['VITE_'],
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {

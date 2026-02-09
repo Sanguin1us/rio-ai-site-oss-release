@@ -89,7 +89,21 @@ Crie um arquivo `.env.local` na raiz do projeto:
 | `RIO_API_KEY` | Chave de acesso à API Rio (Necessária para o Chat) | — |
 | `RIO_API_URL` | Endpoint da API de inferência | `https://rio-api-test.onrender.com/v1/...` |
 | `RIO_PROXY_PORT` | Porta onde o servidor proxy será executado | `3001` |
+| `RIO_ALLOWED_ORIGINS` | Lista de origens permitidas (CORS + validação de origem/referer) | `http://localhost:3000,...` |
+| `RIO_RATE_LIMIT_WINDOW_MS` | Janela do rate limit em ms | `60000` |
+| `RIO_RATE_LIMIT_MAX` | Máximo de requisições por janela e por cliente | `30` |
+| `RIO_RATE_LIMIT_BLOCK_MS` | Tempo de bloqueio após exceder limite | `120000` |
+| `RIO_UPSTREAM_TIMEOUT_MS` | Timeout de requisição para API upstream | `30000` |
+| `RIO_MAX_BODY_BYTES` | Tamanho máximo do JSON aceito no endpoint | `8388608` |
+| `RIO_MAX_MESSAGES` | Máximo de mensagens por payload | `40` |
+| `RIO_MAX_MESSAGE_CHARS` | Máximo de caracteres por mensagem/bloco textual | `20000` |
+| `RIO_MAX_TOTAL_CHARS` | Máximo de caracteres totais por payload | `250000` |
+| `RIO_MAX_BLOCKS_PER_MESSAGE` | Máximo de blocos multimodais por mensagem | `12` |
+| `RIO_MAX_ATTACHMENT_CHARS` | Máximo de caracteres por anexo (`data:` / URL) | `5000000` |
+| `RIO_ALLOWED_MODELS` | (Opcional) lista de modelos permitidos no backend | — |
 | `VITE_RIO_CHAT_PROXY_URL` | URL do proxy (usado pelo Vite) | `http://localhost:3001/api/chat` |
+
+Em produção, configure `RIO_ALLOWED_ORIGINS` com o(s) domínio(s) oficial(is) do portal e, se possível, defina `RIO_ALLOWED_MODELS` para reduzir risco de abuso/custo inesperado.
 
 ### Início Rápido
 1. **Instalar dependências**:
