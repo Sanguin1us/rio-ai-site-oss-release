@@ -4,9 +4,9 @@ import {
   ArrowLeft,
   ArrowUpRight,
   ArrowDown,
+  Brain,
   Box,
   GraduationCap,
-  Sparkles,
 } from 'lucide-react';
 import { ComparisonChart } from './ComparisonChart';
 import {
@@ -19,19 +19,13 @@ import {
 import { DetailUseCases } from './DetailUseCases';
 import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { DetailSpecs } from './DetailSpecs';
+import { MathBenchmarkResultsTable } from './MathBenchmarkResultsTable';
 import { AnimateOnScroll } from '../AnimateOnScroll';
 
 interface Rio30OpenDetailProps {
   model: Model;
   onBack: () => void;
 }
-
-const BENCHMARKS = [
-  { metric: 'AIME 2025', base: '92.3', rl: '95.0', latent: '96.6' },
-  { metric: 'HMMT Feb 25', base: '83.9', rl: '85.0', latent: '90.0' },
-  { metric: 'GPQA Diamond', base: '81.1', rl: '83.2', latent: '85.1' },
-  { metric: 'LiveCodeBench v6', base: '74.1', rl: '76.0', latent: '76.0' },
-];
 
 const LABEL_POSITION_OVERRIDES: Partial<Record<string, LabelOverride>> = {
   'Gemini 3 Pro': 'top-left',
@@ -47,7 +41,7 @@ const MIN_COST = 0.3;
 const MODEL_COMPARISON: ModelComparisonDatum[] = [
   { model: 'Gemini 3 Pro', cost: 12, gpqa: 91.9, aime: 95.0, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5.2', cost: 14, gpqa: 92.4, aime: 100.0, color: '#9CA3AF', isRio: false },
-  { model: 'Rio 3.0 Open', cost: 0.4, gpqa: 85.1, aime: 96.6, color: '#1E40AF', isRio: true },
+  { model: 'Rio 3.0 Open', cost: 0.4, gpqa: 85.1, aime: 96.67, color: '#1E40AF', isRio: true },
   { model: 'Gemini 3 Flash', cost: 3, gpqa: 90.4, aime: 95.2, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5 mini', cost: 2, gpqa: 82.3, aime: 91.1, color: '#9CA3AF', isRio: false },
   { model: 'Gemini 2.5 Flash-Lite', cost: 0.4, gpqa: 71, aime: 69, color: '#9CA3AF', isRio: false },
@@ -412,30 +406,6 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
   );
 };
 
-const parseScore = (value: string) => Number.parseFloat(value);
-const RAW_MIN = Math.min(...BENCHMARKS.map((row) => parseScore(row.base)));
-const RAW_MAX = Math.max(...BENCHMARKS.map((row) => parseScore(row.latent)));
-const SCALE_MIN = Math.max(0, Math.floor((RAW_MIN - 2) / 5) * 5);
-const SCALE_MAX = Math.ceil((RAW_MAX + 2) / 5) * 5;
-const scaleValue = (value: string) => {
-  if (SCALE_MAX === SCALE_MIN) return 0.5;
-  const ratio = (parseScore(value) - SCALE_MIN) / (SCALE_MAX - SCALE_MIN);
-  return Math.min(Math.max(ratio, 0), 1);
-};
-const positionStyle = (value: string) => ({
-  left: `${scaleValue(value) * 100}%`,
-});
-const segmentStyle = (start: string, end: string) => {
-  const startRatio = scaleValue(start);
-  const endRatio = scaleValue(end);
-  const width = Math.abs(endRatio - startRatio) * 100;
-  const left = Math.min(startRatio, endRatio) * 100;
-  return {
-    left: `${left}%`,
-    width: `${Math.max(width, 4)}%`,
-  };
-};
-
 const PARAMETER_BENCHMARKS: Record<'hle' | 'matharena', ParameterDatum[]> = {
   hle: [
     { model: 'Kimi K2.5 Thinking', paramsB: 1000, score: 30.1, color: '#9CA3AF', labelPosition: 'bottom-left' },
@@ -545,115 +515,20 @@ export const Rio30OpenDetail: React.FC<Rio30OpenDetailProps> = ({ model, onBack 
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 space-y-16">
         <AnimateOnScroll>
-          <section className="rounded-[40px] border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">
-                  Benchmarks oficiais
-                </p>
-                <p className="mt-2 text-sm text-prose-light">
-                  Os gráficos mostram como refinamos o Qwen3-235B-A22B-Thinking-2507 utilizando Reinforcement
-                  Learning e o mecanismo de pensamento latente.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-10 space-y-6">
-              {BENCHMARKS.map((row) => (
-                <div
-                  key={row.metric}
-                  className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rio-primary">
-                      {row.metric}
-                    </p>
-                  </div>
-                  <div className="relative mt-4 h-3 rounded-full bg-slate-100">
-                    <div
-                      className="absolute inset-y-[3px] rounded-full bg-gradient-to-r from-rio-primary via-rio-primary/70 to-emerald-500"
-                      style={segmentStyle(row.base, row.latent)}
-                      aria-hidden="true"
-                    />
-                    <div className="absolute inset-0">
-                      {[
-                        {
-                          label: 'Base',
-                          value: row.base,
-                          className: 'text-slate-600',
-                          showValue: true,
-                        },
-                        {
-                          label: '+RL',
-                          value: row.rl,
-                          className: 'text-rio-primary',
-                          showValue: false,
-                        },
-                        {
-                          label: '+Latente',
-                          value: row.latent,
-                          className: 'text-emerald-600',
-                          showValue: true,
-                        },
-                      ].map((mark) => (
-                        <div
-                          key={mark.label}
-                          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-[11px] font-semibold"
-                          style={positionStyle(mark.value)}
-                        >
-                          <div className="relative flex items-center justify-center">
-                            {mark.showValue && (
-                              <span
-                                className={`absolute -top-7 left-1/2 -translate-x-1/2 rounded-full bg-white/80 px-2 py-0.5 shadow ${mark.className}`}
-                              >
-                                {mark.value}
-                              </span>
-                            )}
-                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-slate-500 shadow">
-                              {mark.label}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <MathBenchmarkResultsTable />
         </AnimateOnScroll>
 
         <AnimateOnScroll>
-          <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-10">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">
-                  Como treinamos esse modelo
-                </p>
-                <h2 className="mt-2 text-3xl font-bold text-prose">
-                  Destilação On-Policy com Rio 3.0 Preview
-                </h2>
-              </div>
-              <p className="text-sm text-prose-light max-w-lg">Treinamento nativo em 4-bit</p>
-            </div>
-            <div className="mt-10 rounded-[32px] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 sm:p-8">
-              <div className="flex flex-col gap-2">
-                <h3 className="text-xl font-semibold text-prose">Pipeline de Treinamento</h3>
-                <p className="text-sm text-prose-light max-w-4xl">
-                  Partimos de um modelo base e aplicamos destilação on-policy utilizando o Rio 3.0 Preview
-                  como professor, transferindo seu conhecimento para produzir o modelo final.
-                </p>
-              </div>
-
-              <div className="mt-10 flex flex-col items-center gap-4">
+          <section className="rounded-3xl p-6 sm:p-10">
+            <div className="mt-10 rounded-[32px] bg-white p-6 sm:p-8">
+              <div className="flex flex-col items-center gap-4">
                 {/* Base Model */}
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                <div className="flex items-center gap-3 rounded-2xl bg-white px-5 py-4">
                   <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
-                    <Box className="h-6 w-6 text-rio-primary" />
+                    <Box className="h-6 w-6 text-slate-600" />
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-prose">{model.baseModel ?? 'Qwen3-235B-A22B'}</p>
-                    <p className="text-xs text-prose-light">Modelo base</p>
                   </div>
                 </div>
 
@@ -663,15 +538,15 @@ export const Rio30OpenDetail: React.FC<Rio30OpenDetailProps> = ({ model, onBack 
                 </div>
 
                 {/* OPD Process with Teacher */}
-                <div className="relative flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed border-rio-primary/30 bg-rio-primary/5 px-8 py-6">
+                <div className="relative flex flex-col items-center gap-4 rounded-3xl px-8 py-6">
                   <p className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-rio-primary shadow-sm">
                     On-Policy Distillation
                   </p>
 
                   <div className="flex flex-col sm:flex-row items-center gap-6 mt-2">
                     {/* Teacher Model */}
-                    <div className="flex items-center gap-3 rounded-2xl border border-rio-primary/20 bg-white px-4 py-3 shadow-sm">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-rio-primary/10">
+                    <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
+                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-rio-primary/15">
                         <GraduationCap className="h-5 w-5 text-rio-primary" />
                       </span>
                       <div>
@@ -828,7 +703,7 @@ export const Rio30OpenDetail: React.FC<Rio30OpenDetailProps> = ({ model, onBack 
                     </div>
 
                     {/* Student/Base being trained */}
-                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                    <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-3">
                       <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
                         <Box className="h-5 w-5 text-slate-600" />
                       </span>
@@ -846,13 +721,12 @@ export const Rio30OpenDetail: React.FC<Rio30OpenDetailProps> = ({ model, onBack 
                 </div>
 
                 {/* Final Model */}
-                <div className="flex items-center gap-3 rounded-2xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-white px-5 py-4 shadow-md">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100">
-                    <Sparkles className="h-6 w-6 text-emerald-600" />
+                <div className="flex items-center gap-3 rounded-2xl bg-white px-5 py-4">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rio-primary/15">
+                    <Brain className="h-6 w-6 text-rio-primary" />
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-prose">{model.name}</p>
-                    <p className="text-xs text-emerald-600 font-medium">Modelo final</p>
                   </div>
                 </div>
               </div>

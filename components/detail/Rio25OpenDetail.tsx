@@ -17,19 +17,13 @@ import {
 import { DetailUseCases } from './DetailUseCases';
 import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { DetailSpecs } from './DetailSpecs';
+import { MathBenchmarkResultsTable } from './MathBenchmarkResultsTable';
 import { AnimateOnScroll } from '../AnimateOnScroll';
 
 interface Rio25OpenDetailProps {
   model: Model;
   onBack: () => void;
 }
-
-const BENCHMARKS = [
-  { metric: 'AIME 2025', base: '85.0', rl: '93.3', latent: '95.0' },
-  { metric: 'HMMT 2025', base: '71.4', rl: '80.0', latent: '83.3' },
-  { metric: 'GPQA Diamond', base: '73.4', rl: '75.8', latent: '77.2' },
-  { metric: 'LiveCodeBench v6', base: '66.0', rl: '69.4', latent: '69.6' },
-];
 
 const LABEL_POSITION_OVERRIDES: Partial<Record<string, LabelOverride>> = {
   'Gemini 3 Pro': 'top-left',
@@ -43,7 +37,7 @@ const LABEL_POSITION_OVERRIDES: Partial<Record<string, LabelOverride>> = {
 const MODEL_COMPARISON: ModelComparisonDatum[] = [
   { model: 'Gemini 3 Pro', cost: 12, gpqa: 91.9, aime: 95.0, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5.2', cost: 14, gpqa: 92.4, aime: 100.0, color: '#9CA3AF', isRio: false },
-  { model: 'Rio 2.5 Open', cost: 0.1, gpqa: 77.2, aime: 95, color: '#1E40AF', isRio: true },
+  { model: 'Rio 2.5 Open', cost: 0.1, gpqa: 77.2, aime: 93.33, color: '#1E40AF', isRio: true },
   { model: 'Gemini 3 Flash', cost: 3, gpqa: 90.4, aime: 95.2, color: '#9CA3AF', isRio: false },
   { model: 'GPT-5 mini', cost: 2, gpqa: 82.3, aime: 91.1, color: '#9CA3AF', isRio: false },
   { model: 'Gemini 2.5 Flash-Lite', cost: 0.4, gpqa: 71, aime: 69, color: '#9CA3AF', isRio: false },
@@ -70,30 +64,6 @@ const METRIC_CONFIGS: Array<{
       minY: 67,
     },
   ];
-
-const parseScore = (value: string) => Number.parseFloat(value);
-const RAW_MIN = Math.min(...BENCHMARKS.map((row) => parseScore(row.base)));
-const RAW_MAX = Math.max(...BENCHMARKS.map((row) => parseScore(row.latent)));
-const SCALE_MIN = Math.max(0, Math.floor((RAW_MIN - 2) / 5) * 5);
-const SCALE_MAX = Math.ceil((RAW_MAX + 2) / 5) * 5;
-const scaleValue = (value: string) => {
-  if (SCALE_MAX === SCALE_MIN) return 0.5;
-  const ratio = (parseScore(value) - SCALE_MIN) / (SCALE_MAX - SCALE_MIN);
-  return Math.min(Math.max(ratio, 0), 1);
-};
-const positionStyle = (value: string) => ({
-  left: `${scaleValue(value) * 100}%`,
-});
-const segmentStyle = (start: string, end: string) => {
-  const startRatio = scaleValue(start);
-  const endRatio = scaleValue(end);
-  const width = Math.abs(endRatio - startRatio) * 100;
-  const left = Math.min(startRatio, endRatio) * 100;
-  return {
-    left: `${left}%`,
-    width: `${Math.max(width, 4)}%`,
-  };
-};
 
 export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack }) => {
   const huggingFaceWeightsUrl =
@@ -173,82 +143,7 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 space-y-16">
         <AnimateOnScroll>
-          <section className="rounded-[40px] border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">
-                  Benchmarks oficiais
-                </p>
-                <p className="mt-2 text-sm text-prose-light">
-                  Os gráficos mostram como refinamos o Qwen 3 30B-A3B utilizando Reinforcement
-                  Learning e o mecanismo de pensamento latente.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-10 space-y-6">
-              {BENCHMARKS.map((row) => (
-                <div
-                  key={row.metric}
-                  className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm"
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-rio-primary">
-                      {row.metric}
-                    </p>
-                  </div>
-                  <div className="relative mt-4 h-3 rounded-full bg-slate-100">
-                    <div
-                      className="absolute inset-y-[3px] rounded-full bg-gradient-to-r from-rio-primary via-rio-primary/70 to-emerald-500"
-                      style={segmentStyle(row.base, row.latent)}
-                      aria-hidden="true"
-                    />
-                    <div className="absolute inset-0">
-                      {[
-                        {
-                          label: 'Base',
-                          value: row.base,
-                          className: 'text-slate-600',
-                          showValue: true,
-                        },
-                        {
-                          label: '+RL',
-                          value: row.rl,
-                          className: 'text-rio-primary',
-                          showValue: false,
-                        },
-                        {
-                          label: '+Latente',
-                          value: row.latent,
-                          className: 'text-emerald-600',
-                          showValue: true,
-                        },
-                      ].map((mark) => (
-                        <div
-                          key={mark.label}
-                          className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 text-[11px] font-semibold"
-                          style={positionStyle(mark.value)}
-                        >
-                          <div className="relative flex items-center justify-center">
-                            {mark.showValue && (
-                              <span
-                                className={`absolute -top-7 left-1/2 -translate-x-1/2 rounded-full bg-white/80 px-2 py-0.5 shadow ${mark.className}`}
-                              >
-                                {mark.value}
-                              </span>
-                            )}
-                            <span className="rounded-full bg-white px-2 py-0.5 text-[10px] text-slate-500 shadow">
-                              {mark.label}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </section>
+          <MathBenchmarkResultsTable />
         </AnimateOnScroll>
 
         <AnimateOnScroll>

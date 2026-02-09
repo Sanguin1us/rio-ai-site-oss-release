@@ -27,14 +27,6 @@ interface Rio20OpenDetailProps {
     onBack: () => void;
 }
 
-const BENCHMARKS: Array<{ metric: string; score: string; note?: string }> = [
-    { metric: 'GPQA Diamond', score: '75.1' },
-    { metric: 'AIME 2025', score: '88.1' },
-    { metric: 'AIME 2024', score: '91.6' },
-    { metric: 'MMLU Pro', score: '76.9' },
-    { metric: 'HLE (text)', score: '12.8' },
-];
-
 interface ConnectorLayout {
     width: number;
     height: number;
@@ -302,40 +294,6 @@ export const Rio20OpenDetail: React.FC<Rio20OpenDetailProps> = ({ model, onBack 
             </section>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14 sm:py-20 space-y-16">
-                <AnimateOnScroll>
-                    <section className="rounded-[40px] border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
-                        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                            <div>
-                                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">
-                                    Benchmarks oficiais
-                                </p>
-                                <p className="mt-2 text-sm text-prose-light">
-                                    Como o Rio 2.0 não tem um controlador de esforço de pensamento, definimos o uso de
-                                    budget forcing como seu modo high, de maneira a fazer uma comparação fiel a
-                                    modelos com tais mecanismos.
-                                    <br />
-                                    Em nossos testes, a quantidade de tokens de raciocínio é comparável a modelos como
-                                    o gpt-oss 20b (high).
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                            {BENCHMARKS.map((row) => (
-                                <div
-                                    key={row.metric}
-                                    className="rounded-3xl border border-slate-200 bg-white/80 p-5 shadow-sm"
-                                >
-                                    <div className="flex items-center justify-between gap-4">
-                                        <p className="text-base font-semibold text-prose">{row.metric}</p>
-                                        <span className="text-3xl font-bold text-prose">{row.score}</span>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-                </AnimateOnScroll>
-
                 <AnimateOnScroll>
                     <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-10">
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
