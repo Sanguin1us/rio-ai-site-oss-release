@@ -3,13 +3,13 @@ import type { Model } from '../types/index';
 import { DetailHeader } from './detail/DetailHeader';
 import { DetailUseCases } from './detail/DetailUseCases';
 import { DetailCodeSnippets } from './detail/DetailCodeSnippets';
-import { DetailSpecs } from './detail/DetailSpecs';
 import { AnimateOnScroll } from './AnimateOnScroll';
 import { ArrowUpRight } from 'lucide-react';
 import { Rio25OpenDetail } from './detail/Rio25OpenDetail';
 import { Rio25OpenVLDetail } from './detail/Rio25OpenVLDetail';
 import { Rio30OpenDetail } from './detail/Rio30OpenDetail';
 import { Rio30OpenMiniDetail } from './detail/Rio30OpenMiniDetail';
+import { Rio30OpenNanoDetail } from './detail/Rio30OpenNanoDetail';
 import { Rio30OpenSearchDetail } from './detail/Rio30OpenSearchDetail';
 
 interface ModelDetailViewProps {
@@ -32,6 +32,10 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
 
   if (model.name === 'Rio 3.0 Open Mini') {
     return <Rio30OpenMiniDetail model={model} onBack={onBack} />;
+  }
+
+  if (model.name === 'Rio 3.0 Open Nano') {
+    return <Rio30OpenNanoDetail model={model} onBack={onBack} />;
   }
 
   if (model.name === 'Rio 3.0 Open Search') {
@@ -93,9 +97,6 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
                   </p>
                 </div>
               )}
-            </AnimateOnScroll>
-            <AnimateOnScroll delay={400}>
-              <DetailSpecs model={model} />
             </AnimateOnScroll>
           </div>
         </div>

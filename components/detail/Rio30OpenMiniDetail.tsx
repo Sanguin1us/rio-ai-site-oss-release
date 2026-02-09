@@ -1,13 +1,6 @@
-import React from 'react';
+﻿import React from 'react';
 import type { Model } from '../../types/index';
-import {
-  ArrowLeft,
-  ArrowUpRight,
-  ArrowDown,
-  Box,
-  GraduationCap,
-  Sparkles,
-} from 'lucide-react';
+import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { ComparisonChart } from './ComparisonChart';
 import {
   ComparisonMetric,
@@ -16,9 +9,13 @@ import {
 } from '../../types/chart';
 import { DetailUseCases } from './DetailUseCases';
 import { DetailCodeSnippets } from './DetailCodeSnippets';
-import { DetailSpecs } from './DetailSpecs';
 import { MathBenchmarkResultsTable } from './MathBenchmarkResultsTable';
 import { AnimateOnScroll } from '../AnimateOnScroll';
+import { OnPolicyDistillationFlow } from './OnPolicyDistillationFlow';
+import {
+  ParameterBenchmarkComparisonChart,
+  ParameterBenchmarkDatum,
+} from './ParameterBenchmarkComparisonChart';
 
 interface Rio30OpenMiniDetailProps {
   model: Model;
@@ -66,6 +63,26 @@ const METRIC_CONFIGS: Array<{
       minY: 67,
     },
   ];
+
+const COMPOSITE_MATH_PARAMETER_DATA: ParameterBenchmarkDatum[] = [
+  { model: 'Rio 2.5 Open', paramsB: 30, score: 87.53, color: '#1E40AF', isRio: true, labelPosition: 'top-left' },
+  { model: 'Rio 3.0 Open', paramsB: 235, score: 91.78, color: '#1E40AF', isRio: true, labelPosition: 'top-left' },
+  {
+    model: 'Rio 3.0 Open Mini',
+    paramsB: 4,
+    score: 78.11,
+    color: '#1E40AF',
+    isRio: true,
+    labelPosition: 'top-right',
+  },
+  { model: 'Qwen 3 235B A22B 2507', paramsB: 235, score: 86.83, color: '#9CA3AF', labelPosition: 'bottom-right' },
+  { model: 'Qwen 3 30B A3B 2507', paramsB: 30, score: 76.08, color: '#9CA3AF', labelPosition: 'top-right' },
+  { model: 'Qwen 3 4B 2507', paramsB: 4, score: 71.12, color: '#9CA3AF', labelPosition: 'top-right' },
+  { model: 'GPT OSS 120B', paramsB: 120, score: 89.17, color: '#9CA3AF', labelPosition: 'bottom-right' },
+  { model: 'GPT OSS 20B', paramsB: 20, score: 82.34, color: '#9CA3AF', labelPosition: 'bottom-right' },
+  { model: 'DeepSeek V3.2', paramsB: 671, score: 90.93, color: '#9CA3AF', labelPosition: 'bottom-right' },
+  { model: 'Kimi K2.5 Thinking', paramsB: 1000, score: 93.12, color: '#9CA3AF', labelPosition: 'top-left' },
+];
 
 export const Rio30OpenMiniDetail: React.FC<Rio30OpenMiniDetailProps> = ({ model, onBack }) => {
   const huggingFaceWeightsUrl = model.huggingFaceUrl;
@@ -121,6 +138,29 @@ export const Rio30OpenMiniDetail: React.FC<Rio30OpenMiniDetailProps> = ({ model,
               )}
             </div>
 
+            <AnimateOnScroll>
+              <OnPolicyDistillationFlow
+                teacherName="Rio 3.0 Preview"
+                studentName={model.baseModel ?? 'Qwen 3 4B 2507'}
+                finalModelName={model.name}
+              />
+            </AnimateOnScroll>
+
+            <div className="relative rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-lg">
+              <div className="absolute inset-0 pointer-events-none">
+                <div className="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rio-primary/10 blur-2xl" />
+              </div>
+              <div className="relative flex h-full flex-col gap-6">
+                <ParameterBenchmarkComparisonChart
+                  label="Desempenho em Benchmarks Matemáticos"
+                  yMin={70}
+                  yMax={95}
+                  yTicks={[70, 75, 80, 85, 90, 95]}
+                  data={COMPOSITE_MATH_PARAMETER_DATA}
+                />
+              </div>
+            </div>
+
             <div className="relative rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-lg">
               <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rio-primary/10 blur-2xl" />
@@ -149,251 +189,9 @@ export const Rio30OpenMiniDetail: React.FC<Rio30OpenMiniDetailProps> = ({ model,
         </AnimateOnScroll>
 
         <AnimateOnScroll>
-          <section className="rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-10">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rio-primary">
-                  Como treinamos esse modelo
-                </p>
-                <h2 className="mt-2 text-3xl font-bold text-prose">
-                  Destilação On-Policy com Rio 3.0 Preview
-                </h2>
-              </div>
-              <p className="text-sm text-prose-light max-w-lg">Treinamento nativo em 4-bit</p>
-            </div>
-            <div className="mt-10 rounded-[32px] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 sm:p-8">
-              <div className="flex flex-col gap-2">
-                <h3 className="text-xl font-semibold text-prose">Pipeline de Treinamento</h3>
-                <p className="text-sm text-prose-light max-w-4xl">
-                  Partimos de um modelo base e aplicamos destilação on-policy utilizando o Rio 3.0 Preview
-                  como professor, transferindo seu conhecimento para produzir o modelo final.
-                </p>
-              </div>
-
-              <div className="mt-10 flex flex-col items-center gap-4">
-                {/* Base Model */}
-                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100">
-                    <Box className="h-6 w-6 text-rio-primary" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-prose">{model.baseModel ?? 'Qwen3-4B'}</p>
-                    <p className="text-xs text-prose-light">Modelo base</p>
-                  </div>
-                </div>
-
-                {/* Arrow */}
-                <div className="flex items-center justify-center py-2">
-                  <ArrowDown className="h-8 w-8 text-slate-300" />
-                </div>
-
-                {/* OPD Process with Teacher */}
-                <div className="relative flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed border-rio-primary/30 bg-rio-primary/5 px-8 py-6">
-                  <p className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-white px-3 py-1 text-xs font-semibold uppercase tracking-wider text-rio-primary shadow-sm">
-                    On-Policy Distillation
-                  </p>
-
-                  <div className="flex flex-col sm:flex-row items-center gap-6 mt-2">
-                    {/* Teacher Model */}
-                    <div className="flex items-center gap-3 rounded-2xl border border-rio-primary/20 bg-white px-4 py-3 shadow-sm">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-rio-primary/10">
-                        <GraduationCap className="h-5 w-5 text-rio-primary" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-prose">Rio 3.0 Preview</p>
-                        <p className="text-xs text-prose-light">Professor</p>
-                      </div>
-                    </div>
-
-                    {/* Flowing particles - Desktop (horizontal, 2D) */}
-                    <div className="hidden sm:flex items-center justify-center w-24 h-16 relative">
-                      {/* Particle field */}
-                      {[
-                        { delay: 0, y: 20, size: 6, duration: 1.8, curve: -8 },
-                        { delay: 0.3, y: 45, size: 8, duration: 1.5, curve: 6 },
-                        { delay: 0.5, y: 30, size: 5, duration: 2.0, curve: -4 },
-                        { delay: 0.8, y: 55, size: 7, duration: 1.6, curve: 10 },
-                        { delay: 1.1, y: 15, size: 6, duration: 1.9, curve: -6 },
-                        { delay: 1.4, y: 40, size: 5, duration: 1.7, curve: 5 },
-                        { delay: 1.7, y: 60, size: 8, duration: 1.4, curve: -10 },
-                        { delay: 2.0, y: 25, size: 6, duration: 2.1, curve: 8 },
-                      ].map((p, i) => (
-                        <span
-                          key={i}
-                          className="absolute rounded-full bg-rio-primary shadow-lg shadow-rio-primary/40"
-                          style={{
-                            width: p.size,
-                            height: p.size,
-                            top: `${p.y}%`,
-                            animation: `flowParticleMini${i} ${p.duration}s ease-in-out infinite`,
-                            animationDelay: `${p.delay}s`,
-                            opacity: 0,
-                          }}
-                        />
-                      ))}
-                      <style>{`
-                        @keyframes flowParticleMini0 {
-                          0% { left: -6px; opacity: 0; transform: translateY(0) scale(0.3); }
-                          15% { opacity: 0.8; transform: translateY(-8px) scale(1); }
-                          50% { transform: translateY(-4px) scale(0.9); }
-                          85% { opacity: 0.8; transform: translateY(-8px) scale(1); }
-                          100% { left: calc(100% + 6px); opacity: 0; transform: translateY(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMini1 {
-                          0% { left: -8px; opacity: 0; transform: translateY(0) scale(0.3); }
-                          15% { opacity: 0.9; transform: translateY(6px) scale(1); }
-                          50% { transform: translateY(3px) scale(0.85); }
-                          85% { opacity: 0.9; transform: translateY(6px) scale(1); }
-                          100% { left: calc(100% + 8px); opacity: 0; transform: translateY(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMini2 {
-                          0% { left: -5px; opacity: 0; transform: translateY(0) scale(0.3); }
-                          15% { opacity: 0.7; transform: translateY(-4px) scale(1); }
-                          50% { transform: translateY(-2px) scale(0.95); }
-                          85% { opacity: 0.7; transform: translateY(-4px) scale(1); }
-                          100% { left: calc(100% + 5px); opacity: 0; transform: translateY(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMini3 {
-                          0% { left: -7px; opacity: 0; transform: translateY(0) scale(0.3); }
-                          15% { opacity: 0.85; transform: translateY(10px) scale(1); }
-                          50% { transform: translateY(5px) scale(0.9); }
-                          85% { opacity: 0.85; transform: translateY(10px) scale(1); }
-                          100% { left: calc(100% + 7px); opacity: 0; transform: translateY(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMini4 {
-                          0% { left: -6px; opacity: 0; transform: translateY(0) scale(0.3); }
-                          15% { opacity: 0.75; transform: translateY(-6px) scale(1); }
-                          50% { transform: translateY(-3px) scale(0.85); }
-                          85% { opacity: 0.75; transform: translateY(-6px) scale(1); }
-                          100% { left: calc(100% + 6px); opacity: 0; transform: translateY(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMini5 {
-                          0% { left: -5px; opacity: 0; transform: translateY(0) scale(0.3); }
-                          15% { opacity: 0.8; transform: translateY(5px) scale(1); }
-                          50% { transform: translateY(2px) scale(0.9); }
-                          85% { opacity: 0.8; transform: translateY(5px) scale(1); }
-                          100% { left: calc(100% + 5px); opacity: 0; transform: translateY(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMini6 {
-                          0% { left: -8px; opacity: 0; transform: translateY(0) scale(0.3); }
-                          15% { opacity: 0.9; transform: translateY(-10px) scale(1); }
-                          50% { transform: translateY(-5px) scale(0.85); }
-                          85% { opacity: 0.9; transform: translateY(-10px) scale(1); }
-                          100% { left: calc(100% + 8px); opacity: 0; transform: translateY(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMini7 {
-                          0% { left: -6px; opacity: 0; transform: translateY(0) scale(0.3); }
-                          15% { opacity: 0.85; transform: translateY(8px) scale(1); }
-                          50% { transform: translateY(4px) scale(0.9); }
-                          85% { opacity: 0.85; transform: translateY(8px) scale(1); }
-                          100% { left: calc(100% + 6px); opacity: 0; transform: translateY(0) scale(0.3); }
-                        }
-                      `}</style>
-                    </div>
-
-                    {/* Flowing particles - Mobile (vertical, 2D) */}
-                    <div className="flex sm:hidden items-center justify-center w-16 h-16 relative overflow-hidden">
-                      {[
-                        { delay: 0, x: 30, size: 6, duration: 1.4, curve: -6 },
-                        { delay: 0.35, x: 55, size: 7, duration: 1.2, curve: 8 },
-                        { delay: 0.7, x: 40, size: 5, duration: 1.5, curve: -4 },
-                        { delay: 1.0, x: 65, size: 6, duration: 1.3, curve: 6 },
-                        { delay: 1.3, x: 25, size: 7, duration: 1.1, curve: -8 },
-                      ].map((p, i) => (
-                        <span
-                          key={i}
-                          className="absolute rounded-full bg-rio-primary shadow-lg shadow-rio-primary/40"
-                          style={{
-                            width: p.size,
-                            height: p.size,
-                            left: `${p.x}%`,
-                            animation: `flowParticleMiniMobile${i} ${p.duration}s ease-in-out infinite`,
-                            animationDelay: `${p.delay}s`,
-                            opacity: 0,
-                          }}
-                        />
-                      ))}
-                      <style>{`
-                        @keyframes flowParticleMiniMobile0 {
-                          0% { top: -6px; opacity: 0; transform: translateX(0) scale(0.3); }
-                          15% { opacity: 0.8; transform: translateX(-6px) scale(1); }
-                          50% { transform: translateX(-3px) scale(0.9); }
-                          85% { opacity: 0.8; transform: translateX(-6px) scale(1); }
-                          100% { top: calc(100% + 6px); opacity: 0; transform: translateX(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMiniMobile1 {
-                          0% { top: -7px; opacity: 0; transform: translateX(0) scale(0.3); }
-                          15% { opacity: 0.85; transform: translateX(8px) scale(1); }
-                          50% { transform: translateX(4px) scale(0.85); }
-                          85% { opacity: 0.85; transform: translateX(8px) scale(1); }
-                          100% { top: calc(100% + 7px); opacity: 0; transform: translateX(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMiniMobile2 {
-                          0% { top: -5px; opacity: 0; transform: translateX(0) scale(0.3); }
-                          15% { opacity: 0.75; transform: translateX(-4px) scale(1); }
-                          50% { transform: translateX(-2px) scale(0.9); }
-                          85% { opacity: 0.75; transform: translateX(-4px) scale(1); }
-                          100% { top: calc(100% + 5px); opacity: 0; transform: translateX(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMiniMobile3 {
-                          0% { top: -6px; opacity: 0; transform: translateX(0) scale(0.3); }
-                          15% { opacity: 0.8; transform: translateX(6px) scale(1); }
-                          50% { transform: translateX(3px) scale(0.85); }
-                          85% { opacity: 0.8; transform: translateX(6px) scale(1); }
-                          100% { top: calc(100% + 6px); opacity: 0; transform: translateX(0) scale(0.3); }
-                        }
-                        @keyframes flowParticleMiniMobile4 {
-                          0% { top: -7px; opacity: 0; transform: translateX(0) scale(0.3); }
-                          15% { opacity: 0.9; transform: translateX(-8px) scale(1); }
-                          50% { transform: translateX(-4px) scale(0.9); }
-                          85% { opacity: 0.9; transform: translateX(-8px) scale(1); }
-                          100% { top: calc(100% + 7px); opacity: 0; transform: translateX(0) scale(0.3); }
-                        }
-                      `}</style>
-                    </div>
-
-                    {/* Student/Base being trained */}
-                    <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100">
-                        <Box className="h-5 w-5 text-slate-600" />
-                      </span>
-                      <div>
-                        <p className="text-sm font-semibold text-prose">Modelo base</p>
-                        <p className="text-xs text-prose-light">Aluno</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Arrow */}
-                <div className="flex items-center justify-center py-2">
-                  <ArrowDown className="h-8 w-8 text-slate-300" />
-                </div>
-
-                {/* Final Model */}
-                <div className="flex items-center gap-3 rounded-2xl border-2 border-emerald-300 bg-gradient-to-r from-emerald-50 to-white px-5 py-4 shadow-md">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100">
-                    <Sparkles className="h-6 w-6 text-emerald-600" />
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-prose">{model.name}</p>
-                    <p className="text-xs text-emerald-600 font-medium">Modelo final</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        </AnimateOnScroll>
-
-        <AnimateOnScroll>
-          <section className="grid gap-12 lg:grid-cols-5">
-            <div className="space-y-12 lg:col-span-3">
-              {model.useCases && <DetailUseCases useCases={model.useCases} />}
-              {model.codeSnippets && <DetailCodeSnippets snippets={model.codeSnippets} />}
-            </div>
-            <div className="space-y-12 lg:col-span-2">
-              <DetailSpecs model={model} />
-            </div>
+          <section className="space-y-12">
+            {model.useCases && <DetailUseCases useCases={model.useCases} />}
+            {model.codeSnippets && <DetailCodeSnippets snippets={model.codeSnippets} />}
           </section>
         </AnimateOnScroll>
       </div>

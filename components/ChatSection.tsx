@@ -713,8 +713,8 @@ export const ChatSection = () => {
 
   const suggestionChips = [
     { label: 'Escrever', prompt: 'Escreva um poema curto sobre o Rio.' },
-    { label: 'Aprender', prompt: 'Explique como a IA pode ajudar a cidade.' },
-    { label: 'Código', prompt: 'Crie um exemplo simples em JavaScript.' },
+    { label: 'Aprender', prompt: 'Me ensine sobre o Teorema de Pitágoras' },
+    { label: 'Código', prompt: 'Code a game of Pong in .html.' },
     { label: 'Planejar', prompt: 'Sugira um roteiro de um dia no Rio.' },
   ];
 

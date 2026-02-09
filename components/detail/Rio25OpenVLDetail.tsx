@@ -3,8 +3,8 @@ import type { Model } from '../../types/index';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
 import { DetailUseCases } from './DetailUseCases';
 import { DetailCodeSnippets } from './DetailCodeSnippets';
-import { DetailSpecs } from './DetailSpecs';
 import { AnimateOnScroll } from '../AnimateOnScroll';
+import { OnPolicyDistillationFlow } from './OnPolicyDistillationFlow';
 import { CHART_DIMENSIONS, CHART_PADDING } from '../../types/chart';
 
 interface Rio25OpenVLDetailProps {
@@ -234,8 +234,8 @@ const getTopScores = (row: BenchmarkRow): Set<ScoreKey> => {
 
 const scoreCellClass = (isTopScore: boolean) =>
   isTopScore
-    ? 'px-4 py-3 font-semibold text-emerald-700 bg-emerald-50'
-    : 'px-4 py-3 text-prose';
+    ? 'px-4 py-3 font-semibold text-emerald-700 bg-emerald-50 text-center'
+    : 'px-4 py-3 text-prose text-center';
 
 const formatParameterTick = (value: number) => `${value}B`;
 const formatParameterValue = (value: number) => `${value}B`;
@@ -601,6 +601,14 @@ export const Rio25OpenVLDetail: React.FC<Rio25OpenVLDetailProps> = ({ model, onB
               )}
             </div>
 
+            <AnimateOnScroll>
+              <OnPolicyDistillationFlow
+                teacherName="Rio 2.5 Omni"
+                studentName="Qwen 3 VL 4b"
+                finalModelName={model.name}
+              />
+            </AnimateOnScroll>
+
             <div className="relative rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-lg">
               <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute -top-6 -right-6 h-32 w-32 rounded-full bg-rio-primary/10 blur-2xl" />
@@ -628,19 +636,19 @@ export const Rio25OpenVLDetail: React.FC<Rio25OpenVLDetailProps> = ({ model, onB
                 <thead>
                   <tr className="border-b border-slate-200">
                     <th className="px-4 py-3 text-left font-semibold text-prose">Benchmark</th>
-                    <th className="px-4 py-3 text-left font-semibold text-rio-primary">
+                    <th className="px-4 py-3 text-center font-semibold text-rio-primary">
                       Rio 2.5 Open VL
                     </th>
-                    <th className="px-4 py-3 text-left font-semibold text-prose">
+                    <th className="px-4 py-3 text-center font-semibold text-prose">
                       Qwen3-VL 2B Thinking
                     </th>
-                    <th className="px-4 py-3 text-left font-semibold text-prose">
+                    <th className="px-4 py-3 text-center font-semibold text-prose">
                       Qwen3-VL 4B Thinking
                     </th>
-                    <th className="px-4 py-3 text-left font-semibold text-prose">
+                    <th className="px-4 py-3 text-center font-semibold text-prose">
                       Qwen3-VL 8B Thinking
                     </th>
-                    <th className="px-4 py-3 text-left font-semibold text-prose">
+                    <th className="px-4 py-3 text-center font-semibold text-prose">
                       Qwen3-VL 30B-A3B Thinking
                     </th>
                   </tr>
@@ -673,14 +681,9 @@ export const Rio25OpenVLDetail: React.FC<Rio25OpenVLDetailProps> = ({ model, onB
         </AnimateOnScroll>
 
         <AnimateOnScroll>
-          <section className="grid lg:grid-cols-5 gap-12">
-            <div className="space-y-12 lg:col-span-3">
-              {model.useCases && <DetailUseCases useCases={model.useCases} />}
-              {model.codeSnippets && <DetailCodeSnippets snippets={model.codeSnippets} />}
-            </div>
-            <div className="space-y-12 lg:col-span-2">
-              <DetailSpecs model={model} />
-            </div>
+          <section className="space-y-12">
+            {model.useCases && <DetailUseCases useCases={model.useCases} />}
+            {model.codeSnippets && <DetailCodeSnippets snippets={model.codeSnippets} />}
           </section>
         </AnimateOnScroll>
       </div>

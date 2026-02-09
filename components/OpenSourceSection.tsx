@@ -18,7 +18,7 @@ export const OpenSourceSection: React.FC<OpenSourceSectionProps> = ({ models, on
           </h2>
           <p className="mt-4 text-lg text-prose-light">
             Acreditamos no poder da colaboração para acelerar a inovação. Explore nossos modelos de
-            código aberto, licenciados sob a licença MIT, e junte-se a nós na construção do futuro da
+            código aberto, sob a licença MIT, e junte-se a nós na construção do futuro da
             inteligência artificial.
           </p>
         </AnimateOnScroll>
