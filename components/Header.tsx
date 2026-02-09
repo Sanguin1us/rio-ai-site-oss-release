@@ -53,8 +53,8 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, currentView }) => {
                     onClick={() => onNavigate(link.view)}
                     className={`text-[15px] font-medium transition-colors duration-200 ${
                       currentView === link.view
-                        ? 'text-rio-primary'
-                        : 'text-prose hover:text-rio-primary'
+                        ? 'text-[#3262B7]'
+                        : 'text-[#212529] hover:text-rio-primary'
                     }`}
                   >
                     {link.name}

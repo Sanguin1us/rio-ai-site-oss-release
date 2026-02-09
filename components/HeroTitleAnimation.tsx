@@ -80,7 +80,7 @@ const Letter: React.FC<{ char: string; index: number; startAnimation: boolean }>
       {shards.map((shard, i) => (
         <span
           key={i}
-          className="absolute inset-0 text-rio-primary drop-shadow-[0_15px_35px_rgba(0,43,127,0.15)]"
+          className="absolute inset-0 text-[#3262B7] drop-shadow-[0_15px_35px_rgba(0,43,127,0.15)]"
           style={{
             clipPath: shard.clipPath,
             transform: startAnimation
@@ -98,7 +98,7 @@ const Letter: React.FC<{ char: string; index: number; startAnimation: boolean }>
 
       {/* Solid letter fade in to fix any hairline gaps */}
       <span
-        className="absolute inset-0 text-rio-primary drop-shadow-[0_15px_35px_rgba(0,43,127,0.15)]"
+        className="absolute inset-0 text-[#3262B7] drop-shadow-[0_15px_35px_rgba(0,43,127,0.15)]"
         style={{
           opacity: startAnimation ? 1 : 0,
           transition: 'opacity 0.5s ease-out',

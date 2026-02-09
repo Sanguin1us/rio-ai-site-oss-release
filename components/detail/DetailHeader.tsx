@@ -28,7 +28,9 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="lg:max-w-3xl">
             <h1 className="text-3xl sm:text-4xl font-bold text-prose">{model.name}</h1>
-            <p className="mt-3 text-lg text-prose-light max-w-3xl">{model.description}</p>
+            <p className="mt-3 max-w-3xl whitespace-pre-line text-lg text-prose-light">
+              {model.description}
+            </p>
             <div className="mt-6 flex flex-wrap gap-2">
               {model.tags.map((tag) => (
                 <span

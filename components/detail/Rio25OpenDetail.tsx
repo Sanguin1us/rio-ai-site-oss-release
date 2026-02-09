@@ -104,7 +104,9 @@ export const Rio25OpenDetail: React.FC<Rio25OpenDetailProps> = ({ model, onBack 
                 <h1 className="text-4xl font-bold leading-tight text-prose sm:text-5xl">
                   {model.name}
                 </h1>
-                <p className="text-lg text-prose-light leading-relaxed">{model.description}</p>
+                <p className="whitespace-pre-line text-lg text-prose-light leading-relaxed">
+                  {model.description}
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {model.tags.map((tag) => (
                     <span

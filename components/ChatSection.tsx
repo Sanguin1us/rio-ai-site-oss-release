@@ -950,7 +950,7 @@ export const ChatSection = () => {
           <AnimateOnScroll className="max-w-3xl mx-auto">
             <div className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center">
               <div className="text-center mb-6 sm:mb-7">
-                <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
+                <h2 className="text-3xl font-bold tracking-tight bg-[linear-gradient(90deg,#3F38AC_0%,#429FEB_100%)] bg-clip-text text-transparent sm:text-4xl">
                   Converse com o {CHAT_MODEL_NAME}
                 </h2>
                 <p className="mt-3 max-w-2xl mx-auto text-lg text-prose-light">

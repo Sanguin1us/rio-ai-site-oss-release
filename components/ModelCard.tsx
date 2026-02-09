@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Model } from '../types/index';
-import { ArrowRight } from 'lucide-react';
 
 interface ModelCardProps {
   model: Model;
@@ -13,7 +12,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) =>
     <button
       type="button"
       onClick={() => onSelectModel(model)}
-      aria-label={`Ver detalhes de ${name}`}
+      aria-label={`Ver mais sobre ${name}`}
       className="group flex w-full flex-col rounded-lg bg-white border border-slate-200 text-left shadow-sm transition-all duration-300 hover:shadow-lg hover:border-rio-primary hover:-translate-y-1 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rio-primary focus-visible:ring-offset-2"
     >
       <div className="p-6 flex-grow">
@@ -37,15 +36,14 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) =>
             {tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700"
+                className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-[#6C757D]"
               >
                 {tag}
               </span>
             ))}
           </div>
-          <span className="inline-flex items-center gap-2 text-sm font-semibold text-rio-primary transition group-hover:text-blue-800">
-            Ver Detalhes
-            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+          <span className="inline-flex w-[92px] items-center justify-center text-center text-sm font-semibold text-[#3262B7] transition group-hover:opacity-85">
+            Ver mais
           </span>
         </div>
       </div>

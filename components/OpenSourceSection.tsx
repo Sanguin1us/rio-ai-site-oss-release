@@ -13,8 +13,8 @@ export const OpenSourceSection: React.FC<OpenSourceSectionProps> = ({ models, on
     <section id="open-source" className="bg-white py-20 sm:py-24">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-prose sm:text-4xl">
-            <span className="text-rio-primary">Democratizando</span> a IA no Brasil
+          <h2 className="text-3xl font-bold tracking-tight bg-[linear-gradient(90deg,#3F38AC_0%,#429FEB_100%)] bg-clip-text text-transparent sm:text-4xl">
+            Democratizando a IA no Brasil
           </h2>
           <p className="mt-4 text-lg text-prose-light">
             Acreditamos no poder da colaboração para acelerar a inovação. Explore nossos modelos de

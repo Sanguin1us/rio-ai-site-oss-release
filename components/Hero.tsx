@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArrowDown, ArrowRight } from 'lucide-react';
 import { AnimateOnScroll } from './AnimateOnScroll';
 import { HeroTitleAnimation } from './HeroTitleAnimation';
 import type { View } from '../types/index';
@@ -22,22 +21,24 @@ export const Hero: React.FC<HeroProps> = ({ onNavigate, onAnimationComplete }) =
           </p>
         </AnimateOnScroll>
         <AnimateOnScroll delay={400}>
-          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row sm:items-stretch">
+          <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <button
               type="button"
               onClick={() => onNavigate?.('opensource')}
-              className="inline-flex items-center gap-2 rounded-md bg-rio-primary px-6 py-3 text-base font-semibold text-white transition hover:bg-rio-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rio-primary"
+              className="group relative inline-flex h-[67px] min-w-[227px] items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(90deg,#3C36B9_0%,#42AFE1_100%)] px-8 text-base font-semibold text-white shadow-[0_8px_18px_rgba(60,54,185,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(60,54,185,0.4)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rio-primary"
             >
-              Conheça nossos modelos
-              <ArrowDown className="h-5 w-5" />
+              <span className="absolute inset-0 -translate-x-full bg-[linear-gradient(115deg,transparent_25%,rgba(255,255,255,0.35)_50%,transparent_75%)] transition-transform duration-500 group-hover:translate-x-full" />
+              <span className="relative z-10">Conheça os modelos</span>
             </button>
             <button
               type="button"
               onClick={() => onNavigate?.('chat')}
-              className="inline-flex items-center gap-2 rounded-md border border-rio-primary px-6 py-3 text-base font-semibold text-rio-primary transition hover:bg-rio-primary hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rio-primary"
+              className="group relative inline-flex h-[67px] min-w-[227px] items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(90deg,#42AFE1_0%,#3C36B9_100%)] p-px shadow-[0_8px_18px_rgba(47,95,190,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_14px_30px_rgba(47,95,190,0.28)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rio-primary"
             >
-              Converse com o Rio 3
-              <ArrowRight className="h-5 w-5" />
+              <span className="absolute inset-0 -translate-x-full bg-[linear-gradient(115deg,transparent_25%,rgba(255,255,255,0.45)_50%,transparent_75%)] transition-transform duration-500 group-hover:translate-x-full" />
+              <span className="relative z-10 flex h-full w-full items-center justify-center rounded-full bg-white px-8 text-base font-semibold text-[#2F5FBE] transition-colors duration-300 group-hover:bg-[#F7FBFF]">
+                Converse com o Rio 3
+              </span>
             </button>
           </div>
         </AnimateOnScroll>

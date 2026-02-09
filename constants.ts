@@ -6,7 +6,7 @@ export const RIO_MODELS: Model[] = [
   {
     name: 'Rio 3.0 Open',
     description:
-      'Modelo open source principal da geração 3.0, equilibrando qualidade e custo para uso amplo.',
+      'Nosso modelo Open Source flagship,\ncom performance igual aos melhores modelos abertos atuais.',
     category: 'Open Source',
     Icon: ModelGlyphXL,
     tags: ['235B parâmetros · 22B ativos', 'Licença MIT'],
@@ -32,7 +32,7 @@ export const RIO_MODELS: Model[] = [
   {
     name: 'Rio 3.0 Open Mini',
     description:
-      'Modelo open source compacto da geração 3.0, pensado para eficiência e experimentação rápida.',
+      'Nossa versão Open Source mobile,\nfeita para rodar em qualquer celular.',
     category: 'Open Source',
     Icon: ModelGlyphM,
     tags: ['4B parâmetros', 'Licença MIT'],
@@ -58,7 +58,7 @@ export const RIO_MODELS: Model[] = [
   {
     name: 'Rio 3.0 Open Nano',
     description:
-      'Modelo open source ultracompacto da geração 3.0, otimizado para baixa latência e cenários com recursos limitados.',
+      'Nosso modelo mais compacto.\nConsegue rodar dez mil perguntas por apenas 1 real.',
     category: 'Open Source',
     Icon: ModelGlyphS,
     tags: ['1.7B parâmetros', 'Licença MIT'],
@@ -72,7 +72,7 @@ export const RIO_MODELS: Model[] = [
   {
     name: 'Rio 2.5 Open',
     description:
-      'Uma versão aberta do futuro. Este modelo open source, baseado no Qwen 3, oferece um equilíbrio excepcional entre performance e eficiência.',
+      'Nosso modelo mais criativo e cheio de personalidade,\nfeito para rodar localmente no seu computador.',
     category: 'Open Source',
     Icon: ModelGlyphL,
     tags: ['30B parâmetros · 3B ativos', 'Licença MIT'],
@@ -121,7 +121,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-open")
   {
     name: 'Rio 2.5 Open VL',
     description:
-      'Modelo open source multimodal da geração 2.5,\nprojetado para tarefas de visão e linguagem.',
+      'Nosso modelo de visão computacional.\nGrounding, OCR, QA, Vídeos? Ele faz tudo.',
     category: 'Open Source',
     Icon: Eye,
     tags: ['4B parâmetros', 'Licença MIT'],
@@ -135,7 +135,7 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-open")
   {
     name: 'Rio 3.0 Open Search',
     description:
-      'Modelo open source voltado para busca e recuperação de informação, ideal para experiências de pesquisa e RAG.',
+      'O modelo de pesquisa na web mais avançado do mundo.',
     category: 'Open Source',
     Icon: Search,
     tags: ['235B parâmetros · 22B ativos', 'Licença MIT'],
