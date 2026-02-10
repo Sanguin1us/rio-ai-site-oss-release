@@ -375,7 +375,7 @@ export const MathBenchmarkResultsTable: React.FC = () => {
         <p className="mt-3">
           <span className="font-semibold text-prose">**</span>{' '}
           {isEnglish
-            ? 'The benchmark scores are from MathArena and the model&apos;s official reported scores when available. Otherwise, we run the evals.'
+            ? 'The benchmark scores are from MathArena and the model\'s official reported scores when available. Otherwise, we run the evals.'
             : 'As pontuações dos benchmarks são do MathArena e dos scores oficiais reportados pelos modelos quando disponíveis. Caso contrário, executamos as avaliações.'}
         </p>
       </div>
