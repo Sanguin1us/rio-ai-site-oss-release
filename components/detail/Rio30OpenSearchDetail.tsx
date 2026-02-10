@@ -6,6 +6,7 @@ import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { AnimateOnScroll } from '../AnimateOnScroll';
 import { OnPolicyDistillationFlow } from './OnPolicyDistillationFlow';
 import { CHART_DIMENSIONS, CHART_PADDING } from '../../types/chart';
+import { useLocale } from '../../contexts/LocaleContext';
 
 interface Rio30OpenSearchDetailProps {
   model: Model;
@@ -259,6 +260,7 @@ const AverageSizeComparisonChart: React.FC<AverageSizeComparisonChartProps> = ({
   yTicks,
   data,
 }) => {
+  const { isEnglish } = useLocale();
   const [hovered, setHovered] = useState<BenchmarkChartDatum | null>(null);
   const [pinned, setPinned] = useState<BenchmarkChartDatum | null>(null);
   const hoverTimeout = useRef<number | null>(null);
@@ -402,7 +404,7 @@ const AverageSizeComparisonChart: React.FC<AverageSizeComparisonChartProps> = ({
             textAnchor="middle"
             className="text-[11px] fill-slate-400"
           >
-            Parâmetros do modelo
+            {isEnglish ? 'Model parameters' : 'Parâmetros do modelo'}
           </text>
 
           {data.map((item) => {
@@ -444,7 +446,7 @@ const AverageSizeComparisonChart: React.FC<AverageSizeComparisonChartProps> = ({
                 className="cursor-pointer outline-none"
                 tabIndex={0}
                 role="button"
-                aria-label={`${item.model} - ${label} ${formatAverageScoreValue(item.score)}, parâmetros ${formatAverageSizeValue(item.sizeB)}`}
+                aria-label={`${item.model} - ${label} ${formatAverageScoreValue(item.score)}, ${isEnglish ? 'parameters' : 'parâmetros'} ${formatAverageSizeValue(item.sizeB)}`}
                 onMouseEnter={() => handleHover(item)}
                 onFocus={() => handleHover(item)}
                 onMouseLeave={scheduleClearHover}
@@ -529,13 +531,13 @@ const AverageSizeComparisonChart: React.FC<AverageSizeComparisonChartProps> = ({
                   </div>
                   <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Score médio
+                      {isEnglish ? 'Average score' : 'Score médio'}
                     </span>
                     <span className="text-sm font-semibold text-rio-primary">
                       {formatAverageScoreValue(activeDatum.score)}
                     </span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Parâmetros
+                      {isEnglish ? 'Parameters' : 'Parâmetros'}
                     </span>
                     <span className="text-xs font-semibold text-slate-700">
                       {formatAverageSizeValue(activeDatum.sizeB)}
@@ -555,6 +557,7 @@ export const Rio30OpenSearchDetail: React.FC<Rio30OpenSearchDetailProps> = ({
   model,
   onBack,
 }) => {
+  const { isEnglish } = useLocale();
   const huggingFaceWeightsUrl =
     model.huggingFaceUrl ?? 'https://huggingface.co/prefeitura-rio/Rio-3.0-Open-Search';
 
@@ -585,7 +588,7 @@ export const Rio30OpenSearchDetail: React.FC<Rio30OpenSearchDetailProps> = ({
               </div>
               <div className="relative flex h-full flex-col gap-6">
                 <AverageSizeComparisonChart
-                  label="Desempenho em Benchmarks de Busca"
+                  label={isEnglish ? 'Performance on Search Benchmarks' : 'Desempenho em Benchmarks de Busca'}
                   yMin={45}
                   yMax={75}
                   yTicks={[45, 50, 55, 60, 65, 70, 75]}

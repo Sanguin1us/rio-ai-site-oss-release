@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Model } from '../../types/index';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
+import { useLocale } from '../../contexts/LocaleContext';
 
 interface DetailHeaderProps {
   model: Model;
@@ -13,6 +14,8 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
   onBack,
   huggingFaceWeightsUrl,
 }) => {
+  const { isEnglish } = useLocale();
+
   return (
     <header className="bg-light-bg border-b border-slate-200 py-12 sm:py-16">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,7 +25,7 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
             className="inline-flex items-center gap-2 text-sm font-semibold text-prose-light hover:text-rio-primary transition"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar para modelos Open
+            {isEnglish ? 'Back to Open models' : 'Voltar para modelos Open'}
           </button>
         </div>
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
@@ -52,11 +55,11 @@ export const DetailHeader: React.FC<DetailHeaderProps> = ({
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
                 <img
                   src="/logos/huggingface-2.svg"
-                  alt="Logomarca do Hugging Face"
+                  alt={isEnglish ? 'Hugging Face logo' : 'Logomarca do Hugging Face'}
                   className="h-6 w-6"
                 />
               </span>
-              <span className="text-base">Acessar pesos</span>
+              <span className="text-base">{isEnglish ? 'Access weights' : 'Acessar pesos'}</span>
               <ArrowUpRight className="h-4 w-4" />
             </a>
           )}

@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Model } from '../types/index';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface ModelCardProps {
   model: Model;
@@ -7,12 +8,13 @@ interface ModelCardProps {
 }
 
 export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) => {
+  const { isEnglish } = useLocale();
   const { name, description, tags, isOpenSource } = model;
   return (
     <button
       type="button"
       onClick={() => onSelectModel(model)}
-      aria-label={`Ver mais sobre ${name}`}
+      aria-label={isEnglish ? `View more about ${name}` : `Ver mais sobre ${name}`}
       className="group flex w-full flex-col rounded-lg bg-white border border-slate-200 text-left shadow-sm transition-all duration-300 hover:shadow-lg hover:border-rio-primary hover:-translate-y-1 h-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rio-primary focus-visible:ring-offset-2"
     >
       <div className="p-6 flex-grow">
@@ -43,7 +45,7 @@ export const ModelCard: React.FC<ModelCardProps> = ({ model, onSelectModel }) =>
             ))}
           </div>
           <span className="inline-flex w-[92px] items-center justify-center text-center text-sm font-semibold text-[#3262B7] transition group-hover:opacity-85">
-            Ver mais
+            {isEnglish ? 'View more' : 'Ver mais'}
           </span>
         </div>
       </div>

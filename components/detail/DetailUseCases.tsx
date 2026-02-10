@@ -1,14 +1,19 @@
 import React from 'react';
 import type { UseCase } from '../../types/index';
+import { useLocale } from '../../contexts/LocaleContext';
 
 interface DetailUseCasesProps {
   useCases: UseCase[];
 }
 
 export const DetailUseCases: React.FC<DetailUseCasesProps> = ({ useCases }) => {
+  const { isEnglish } = useLocale();
+
   return (
     <div>
-      <h2 className="text-2xl font-bold text-prose mb-6">Casos de Uso</h2>
+      <h2 className="text-2xl font-bold text-prose mb-6">
+        {isEnglish ? 'Use cases' : 'Casos de Uso'}
+      </h2>
       <div className="space-y-6">
         {useCases.map((useCase) => (
           <div key={useCase.title} className="flex items-start gap-4">

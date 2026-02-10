@@ -21,11 +21,11 @@ import { AnimateOnScroll } from './AnimateOnScroll';
 import { ThinkingAnimation } from './ThinkingAnimation';
 import { ChatMessage, useRioChat } from '../hooks/useRioChat';
 import { normalizeMathDelimiters } from '../lib/markdown';
+import { useLocale } from '../contexts/LocaleContext';
 import 'katex/dist/katex.min.css';
 
 const CHAT_MODEL_ID = 'rio-3.0-open';
 const CHAT_MODEL_NAME = 'Rio 3.0 Open';
-const CHAT_MODEL_SUBTITLE = 'Nosso modelo open source mais avançado.';
 
 const getNodeText = (node: React.ReactNode): string => {
   if (typeof node === 'string' || typeof node === 'number') {
@@ -63,6 +63,7 @@ const CodeBlock: React.FC<{
   highlight?: typeof Highlight;
   theme?: PrismTheme;
 }> = ({ inline, className, children, node, highlight, theme, ...codeProps }) => {
+  const { isEnglish } = useLocale();
   const [codeCopied, setCodeCopied] = useState(false);
   const codeCopyTimeoutRef = useRef<number | null>(null);
 
@@ -138,7 +139,7 @@ const CodeBlock: React.FC<{
             type="button"
             onClick={handleCopyCode}
             className={blockCopyButtonClass}
-            aria-label="Copiar bloco de código"
+            aria-label={isEnglish ? 'Copy code block' : 'Copiar bloco de código'}
           >
             {codeCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
           </button>
@@ -158,7 +159,7 @@ const CodeBlock: React.FC<{
           type="button"
           onClick={handleCopyCode}
           className={blockCopyButtonClass}
-          aria-label="Copiar bloco de código"
+          aria-label={isEnglish ? 'Copy code block' : 'Copiar bloco de código'}
         >
           {codeCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </button>
@@ -212,6 +213,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
   onSaveEdit,
   onCancelEdit,
 }) => {
+  const { isEnglish } = useLocale();
   const isUser = message.role === 'user';
   const [copiedBubble, setCopiedBubble] = useState(false);
   const bubbleCopyTimeoutRef = useRef<number | null>(null);
@@ -288,7 +290,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-slate-500">
-              Editar a mensagem ramificará o chat.
+              {isEnglish ? 'Editing this message will branch the chat.' : 'Editar a mensagem ramificará o chat.'}
             </p>
             <div className="flex items-center gap-2">
               <button
@@ -296,7 +298,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                 onClick={onCancelEdit}
                 className="px-4 py-1.5 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
               >
-                Cancelar
+                {isEnglish ? 'Cancel' : 'Cancelar'}
               </button>
               <button
                 type="button"
@@ -304,7 +306,7 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
                 disabled={!editContent?.trim()}
                 className="px-4 py-1.5 text-sm font-medium text-white bg-rio-primary hover:bg-rio-primary/90 rounded-lg transition disabled:opacity-50 disabled:pointer-events-none"
               >
-                Salvar
+                {isEnglish ? 'Save' : 'Salvar'}
               </button>
             </div>
           </div>
@@ -463,8 +465,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               onClick={handleCopyMessage}
               disabled={disableActions || copiedBubble}
               className={actionButtonClass}
-              aria-label="Copiar mensagem"
-              title="Copiar mensagem"
+              aria-label={isEnglish ? 'Copy message' : 'Copiar mensagem'}
+              title={isEnglish ? 'Copy message' : 'Copiar mensagem'}
             >
               {copiedBubble ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </button>
@@ -476,8 +478,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               onClick={onRegenerate}
               disabled={disableActions}
               className={actionButtonClass}
-              aria-label="Tentar novamente"
-              title="Tentar novamente"
+              aria-label={isEnglish ? 'Try again' : 'Tentar novamente'}
+              title={isEnglish ? 'Try again' : 'Tentar novamente'}
             >
               <RefreshCw className="h-4 w-4" />
             </button>
@@ -489,8 +491,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               onClick={onRegenerate}
               disabled={disableActions}
               className={actionButtonClass}
-              aria-label="Tentar novamente"
-              title="Tentar novamente"
+              aria-label={isEnglish ? 'Try again' : 'Tentar novamente'}
+              title={isEnglish ? 'Try again' : 'Tentar novamente'}
             >
               <RefreshCw className="h-4 w-4" />
             </button>
@@ -502,8 +504,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               onClick={onEdit}
               disabled={disableActions}
               className={actionButtonClass}
-              aria-label="Editar mensagem"
-              title="Editar mensagem"
+              aria-label={isEnglish ? 'Edit message' : 'Editar mensagem'}
+              title={isEnglish ? 'Edit message' : 'Editar mensagem'}
             >
               <Edit3 className="h-4 w-4" />
             </button>
@@ -515,8 +517,8 @@ const ChatBubble: React.FC<ChatBubbleProps> = ({
               onClick={handleCopyMessage}
               disabled={disableActions || copiedBubble}
               className={actionButtonClass}
-              aria-label="Copiar mensagem"
-              title="Copiar mensagem"
+              aria-label={isEnglish ? 'Copy message' : 'Copiar mensagem'}
+              title={isEnglish ? 'Copy message' : 'Copiar mensagem'}
             >
               {copiedBubble ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </button>
@@ -632,6 +634,17 @@ type EditingState = {
 };
 
 export const ChatSection = () => {
+  const { isEnglish } = useLocale();
+  const chatModelSubtitle = isEnglish
+    ? 'Our most advanced open-source model.'
+    : 'Nosso modelo open source mais avançado.';
+  const chatSystemPrompt = isEnglish
+    ? 'Be friendly and respectful, always aiming to help in the best way possible. Respond in the same language as the user.'
+    : 'Seja amigável e respeitoso, sempre buscando atender da melhor maneira possível. Responda na mesma língua que o usuário estiver usando.';
+  const chatErrorMessage = isEnglish
+    ? 'Sorry, I ran into an error while communicating with the API. Please try again later.'
+    : 'Desculpe, ocorreu um erro ao me comunicar com a API. Por favor, tente novamente mais tarde.';
+
   const {
     messages,
     input,
@@ -645,6 +658,8 @@ export const ChatSection = () => {
     clearChat,
   } = useRioChat({
     model: CHAT_MODEL_ID,
+    systemPrompt: chatSystemPrompt,
+    errorMessage: chatErrorMessage,
   });
   const chatEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
@@ -669,8 +684,12 @@ export const ChatSection = () => {
 
   const inputTextareaRef = useRef<HTMLTextAreaElement>(null);
   const inputPlaceholder = isEmptyChat
-    ? 'Como posso ajudar você hoje?'
-    : `Perguntar para o ${CHAT_MODEL_NAME}...`;
+    ? isEnglish
+      ? 'How can I help you today?'
+      : 'Como posso ajudar você hoje?'
+    : isEnglish
+      ? `Ask ${CHAT_MODEL_NAME}...`
+      : `Perguntar para o ${CHAT_MODEL_NAME}...`;
 
   // Track previous state to detect transitions
   const prevIsLoadingRef = useRef(isLoading);
@@ -711,12 +730,19 @@ export const ChatSection = () => {
     inputTextareaRef.current.style.height = `${Math.min(inputTextareaRef.current.scrollHeight, 200)}px`;
   }, [input]);
 
-  const suggestionChips = [
-    { label: 'Escrever', prompt: 'Escreva um poema curto sobre o Rio.' },
-    { label: 'Aprender', prompt: 'Me ensine sobre o Teorema de Pitágoras' },
-    { label: 'Código', prompt: 'Code a game of Pong in .html.' },
-    { label: 'Planejar', prompt: 'Sugira um roteiro de um dia no Rio.' },
-  ];
+  const suggestionChips = isEnglish
+    ? [
+        { label: 'Write', prompt: 'Write a short poem about Rio.' },
+        { label: 'Learn', prompt: 'Teach me about the Pythagorean theorem.' },
+        { label: 'Code', prompt: 'Code a game of Pong in .html.' },
+        { label: 'Plan', prompt: 'Suggest a one-day itinerary in Rio.' },
+      ]
+    : [
+        { label: 'Escrever', prompt: 'Escreva um poema curto sobre o Rio.' },
+        { label: 'Aprender', prompt: 'Me ensine sobre o Teorema de Pitágoras' },
+        { label: 'Código', prompt: 'Code a game of Pong in .html.' },
+        { label: 'Planejar', prompt: 'Sugira um roteiro de um dia no Rio.' },
+      ];
 
   const handleSuggestionClick = (prompt: string) => {
     setInput(prompt);
@@ -749,7 +775,7 @@ export const ChatSection = () => {
               onClick={handleClearChat}
               disabled={messages.length === 0 || isLoading || isClearing}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50"
-              title="Limpar conversa"
+              title={isEnglish ? 'Clear conversation' : 'Limpar conversa'}
             >
               <Trash2 className="h-5 w-5" />
             </button>
@@ -775,6 +801,7 @@ export const ChatSection = () => {
               }
             }}
             placeholder={inputPlaceholder}
+            spellCheck={false}
             rows={1}
             className="flex-1 border-none bg-transparent px-1 py-0 text-sm leading-9 text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-0 resize-none max-h-[200px] overflow-y-auto"
             style={{ minHeight: '40px' }}
@@ -789,17 +816,17 @@ export const ChatSection = () => {
                 stop();
               }}
               className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 text-slate-700 transition-colors duration-200 hover:border-slate-400 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
-              aria-label="Interromper"
+              aria-label={isEnglish ? 'Stop' : 'Interromper'}
             >
               <Square className="h-3.5 w-3.5 fill-current text-rose-500" />
-              <span className="text-xs font-medium sm:text-sm">Parar</span>
+              <span className="text-xs font-medium sm:text-sm">{isEnglish ? 'Stop' : 'Parar'}</span>
             </button>
           ) : (
             <button
               type="submit"
               disabled={!canSubmit}
               className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-rio-primary transition-all duration-300 hover:bg-rio-primary/10 disabled:pointer-events-none disabled:opacity-50"
-              aria-label="Enviar mensagem"
+              aria-label={isEnglish ? 'Send message' : 'Enviar mensagem'}
             >
               <ArrowUp className="h-5 w-5" />
             </button>
@@ -951,10 +978,10 @@ export const ChatSection = () => {
             <div className="mx-auto flex min-h-[60vh] w-full max-w-2xl flex-col items-center justify-center">
               <div className="text-center mb-6 sm:mb-7">
                 <h2 className="text-3xl font-bold tracking-tight bg-[linear-gradient(90deg,#3F38AC_0%,#429FEB_100%)] bg-clip-text text-transparent sm:text-4xl">
-                  Converse com o {CHAT_MODEL_NAME}
+                  {isEnglish ? 'Chat with' : 'Converse com o'} {CHAT_MODEL_NAME}
                 </h2>
                 <p className="mt-3 max-w-2xl mx-auto text-lg text-prose-light">
-                  {CHAT_MODEL_SUBTITLE}
+                  {chatModelSubtitle}
                 </p>
               </div>
               <div className="w-full mb-2 sm:mb-3">{renderComposer('intro')}</div>

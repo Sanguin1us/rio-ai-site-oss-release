@@ -5,6 +5,7 @@ import type {
     LabelOverride,
     ModelComparisonDatum,
 } from '../../types/chart';
+import { useLocale } from '../../contexts/LocaleContext';
 import {
     CHART_DIMENSIONS,
     CHART_PADDING,
@@ -101,6 +102,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
     labelOverrides = {},
     minCost,
 }) => {
+    const { isEnglish } = useLocale();
     const [hovered, setHovered] = useState<ModelComparisonDatum | null>(null);
     const [pinned, setPinned] = useState<ModelComparisonDatum | null>(null);
     const hoverTimeout = useRef<number | null>(null);
@@ -277,7 +279,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                         textAnchor="middle"
                         className="text-[11px] fill-slate-400"
                     >
-                        Custo por 1M tokens (USD)
+                        {isEnglish ? 'Cost per 1M tokens (USD)' : 'Custo por 1M tokens (USD)'}
                     </text>
 
                     {/* Data points */}
@@ -314,7 +316,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                                 className="cursor-pointer outline-none focus-visible:opacity-100"
                                 tabIndex={0}
                                 role="button"
-                                aria-label={`${item.model} - ${label} ${formatTooltipScore(metricValue)}, custo ${formatTooltipCost(item.cost)} por 1M tokens`}
+                                aria-label={`${item.model} - ${label} ${formatTooltipScore(metricValue)}, ${isEnglish ? 'cost' : 'custo'} ${formatTooltipCost(item.cost)} ${isEnglish ? 'per' : 'por'} 1M tokens`}
                                 onMouseEnter={() => handleHover(item)}
                                 onFocus={() => handleHover(item)}
                                 onMouseLeave={scheduleClearHover}
@@ -412,7 +414,7 @@ export const ComparisonChart: React.FC<ComparisonChartProps> = ({
                                             {formatTooltipScore(tooltipBox.score)}
                                         </span>
                                         <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                                            Preço
+                                            {isEnglish ? 'Price' : 'Preço'}
                                         </span>
                                         <span className="text-xs font-semibold text-slate-700">
                                             {formatTooltipCost(activeDatum.cost)} / 1M tokens

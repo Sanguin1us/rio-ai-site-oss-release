@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowDown, Box, Brain, GraduationCap } from 'lucide-react';
+import { useLocale } from '../../contexts/LocaleContext';
 
 interface OnPolicyDistillationFlowProps {
   teacherName: string;
@@ -31,6 +32,8 @@ export const OnPolicyDistillationFlow: React.FC<OnPolicyDistillationFlowProps> =
   studentName,
   finalModelName,
 }) => {
+  const { isEnglish } = useLocale();
+
   return (
     <section className="rounded-3xl p-6 sm:p-10">
       <div className="mt-10 rounded-[32px] bg-white p-6 sm:p-8">
@@ -47,7 +50,7 @@ export const OnPolicyDistillationFlow: React.FC<OnPolicyDistillationFlowProps> =
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-prose">{teacherName}</p>
-                  <p className="text-xs text-prose-light">Professor</p>
+                  <p className="text-xs text-prose-light">{isEnglish ? 'Teacher' : 'Professor'}</p>
                 </div>
               </div>
 
@@ -97,7 +100,7 @@ export const OnPolicyDistillationFlow: React.FC<OnPolicyDistillationFlowProps> =
                 </span>
                 <div>
                   <p className="text-sm font-semibold text-prose">{studentName}</p>
-                  <p className="text-xs text-prose-light">Aluno</p>
+                  <p className="text-xs text-prose-light">{isEnglish ? 'Student' : 'Aluno'}</p>
                 </div>
               </div>
             </div>

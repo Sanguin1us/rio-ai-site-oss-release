@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface ThinkingAnimationProps {
   modelName?: string;
@@ -14,10 +15,12 @@ interface ThinkingAnimationProps {
  * - Breathe — gentle, organic rhythm that feels alive but calm
  */
 export const ThinkingAnimation: React.FC<ThinkingAnimationProps> = () => {
+  const { isEnglish } = useLocale();
+
   return (
     <div className="flex justify-start">
       <span className="text-[14px] leading-relaxed text-slate-400 animate-thinking-pulse">
-        Pensando...
+        {isEnglish ? 'Thinking...' : 'Pensando...'}
       </span>
     </div>
   );

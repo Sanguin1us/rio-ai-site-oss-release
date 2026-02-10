@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocale } from '../../contexts/LocaleContext';
 
 interface MathBenchmarkRow {
   model: string;
@@ -263,6 +264,8 @@ const isTopScore = (row: MathBenchmarkRow, key: ScoreKey) => {
 };
 
 export const MathBenchmarkResultsTable: React.FC = () => {
+  const { isEnglish } = useLocale();
+
   return (
     <section className="rounded-3xl border border-slate-200 bg-white p-6 sm:p-10 shadow-sm">
       <div className="overflow-x-auto">
@@ -354,8 +357,10 @@ export const MathBenchmarkResultsTable: React.FC = () => {
       </div>
       <div className="mt-4 p-4 text-xs text-prose-light">
         <p>
-          <span className="font-semibold text-prose">* Composite Math</span> is the average of
-          the following benchmarks:
+          <span className="font-semibold text-prose">* Composite Math</span>{' '}
+          {isEnglish
+            ? 'is the average of the following benchmarks:'
+            : 'é a média dos seguintes benchmarks:'}
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {COMPOSITE_MATH_BENCHMARKS.map((benchmark) => (
@@ -368,9 +373,10 @@ export const MathBenchmarkResultsTable: React.FC = () => {
           ))}
         </div>
         <p className="mt-3">
-          <span className="font-semibold text-prose">**</span> The benchmark scores are from
-          MathArena and the model&apos;s official reported scores when available. Otherwise, we run
-          the evals.
+          <span className="font-semibold text-prose">**</span>{' '}
+          {isEnglish
+            ? 'The benchmark scores are from MathArena and the model&apos;s official reported scores when available. Otherwise, we run the evals.'
+            : 'As pontuações dos benchmarks são do MathArena e dos scores oficiais reportados pelos modelos quando disponíveis. Caso contrário, executamos as avaliações.'}
         </p>
       </div>
     </section>

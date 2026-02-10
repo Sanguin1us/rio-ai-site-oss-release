@@ -16,6 +16,7 @@ import {
   ParameterBenchmarkComparisonChart,
   ParameterBenchmarkDatum,
 } from './ParameterBenchmarkComparisonChart';
+import { useLocale } from '../../contexts/LocaleContext';
 
 interface Rio30OpenMiniDetailProps {
   model: Model;
@@ -85,6 +86,7 @@ const COMPOSITE_MATH_PARAMETER_DATA: ParameterBenchmarkDatum[] = [
 ];
 
 export const Rio30OpenMiniDetail: React.FC<Rio30OpenMiniDetailProps> = ({ model, onBack }) => {
+  const { isEnglish } = useLocale();
   const huggingFaceWeightsUrl = model.huggingFaceUrl;
 
   return (
@@ -96,7 +98,7 @@ export const Rio30OpenMiniDetail: React.FC<Rio30OpenMiniDetailProps> = ({ model,
             className="inline-flex items-center gap-2 text-sm font-semibold text-prose-light hover:text-rio-primary transition"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar para modelos Open
+            {isEnglish ? 'Back to Open models' : 'Voltar para modelos Open'}
           </button>
 
           <div className="mt-6 space-y-10">
@@ -130,11 +132,11 @@ export const Rio30OpenMiniDetail: React.FC<Rio30OpenMiniDetailProps> = ({ model,
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
                     <img
                       src="/logos/huggingface-2.svg"
-                      alt="Logomarca do Hugging Face"
+                      alt={isEnglish ? 'Hugging Face logo' : 'Logomarca do Hugging Face'}
                       className="h-6 w-6"
                     />
                   </span>
-                  <span className="text-base">Acessar pesos</span>
+                  <span className="text-base">{isEnglish ? 'Access weights' : 'Acessar pesos'}</span>
                   <ArrowUpRight className="h-4 w-4" />
                 </a>
               )}
@@ -154,7 +156,7 @@ export const Rio30OpenMiniDetail: React.FC<Rio30OpenMiniDetailProps> = ({ model,
               </div>
               <div className="relative flex h-full flex-col gap-6">
                 <ParameterBenchmarkComparisonChart
-                  label="Desempenho em Benchmarks Matemáticos"
+                  label={isEnglish ? 'Performance on Math Benchmarks' : 'Desempenho em Benchmarks Matemáticos'}
                   yMin={70}
                   yMax={95}
                   yTicks={[70, 75, 80, 85, 90, 95]}

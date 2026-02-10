@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { CHART_DIMENSIONS, CHART_PADDING } from '../../types/chart';
+import { useLocale } from '../../contexts/LocaleContext';
 
 export type ParameterLabelPosition = 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
 
@@ -49,6 +50,7 @@ export const ParameterBenchmarkComparisonChart: React.FC<ParameterBenchmarkCompa
   yTicks,
   data,
 }) => {
+  const { isEnglish } = useLocale();
   const [hovered, setHovered] = useState<ParameterBenchmarkDatum | null>(null);
   const [pinned, setPinned] = useState<ParameterBenchmarkDatum | null>(null);
   const hoverTimeout = useRef<number | null>(null);
@@ -192,7 +194,7 @@ export const ParameterBenchmarkComparisonChart: React.FC<ParameterBenchmarkCompa
             textAnchor="middle"
             className="text-[11px] fill-slate-400"
           >
-            Parâmetros do modelo
+            {isEnglish ? 'Model parameters' : 'Parâmetros do modelo'}
           </text>
 
           {data.map((item) => {
@@ -234,7 +236,7 @@ export const ParameterBenchmarkComparisonChart: React.FC<ParameterBenchmarkCompa
                 className="cursor-pointer outline-none"
                 tabIndex={0}
                 role="button"
-                aria-label={`${item.model} - ${label} ${formatScoreValue(item.score)}, parâmetros ${formatParameterValue(item.paramsB)}`}
+                aria-label={`${item.model} - ${label} ${formatScoreValue(item.score)}, ${isEnglish ? 'parameters' : 'parâmetros'} ${formatParameterValue(item.paramsB)}`}
                 onMouseEnter={() => handleHover(item)}
                 onFocus={() => handleHover(item)}
                 onMouseLeave={scheduleClearHover}
@@ -319,13 +321,13 @@ export const ParameterBenchmarkComparisonChart: React.FC<ParameterBenchmarkCompa
                   </div>
                   <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Score médio
+                      {isEnglish ? 'Average score' : 'Score médio'}
                     </span>
                     <span className="text-sm font-semibold text-rio-primary">
                       {formatScoreValue(activeDatum.score)}
                     </span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Parâmetros
+                      {isEnglish ? 'Parameters' : 'Parâmetros'}
                     </span>
                     <span className="text-xs font-semibold text-slate-700">
                       {formatParameterValue(activeDatum.paramsB)}

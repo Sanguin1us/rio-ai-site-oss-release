@@ -6,6 +6,7 @@ import { DetailCodeSnippets } from './DetailCodeSnippets';
 import { AnimateOnScroll } from '../AnimateOnScroll';
 import { OnPolicyDistillationFlow } from './OnPolicyDistillationFlow';
 import { CHART_DIMENSIONS, CHART_PADDING } from '../../types/chart';
+import { useLocale } from '../../contexts/LocaleContext';
 
 interface Rio25OpenVLDetailProps {
   model: Model;
@@ -252,6 +253,7 @@ const ParameterComparisonChart: React.FC<ParameterComparisonChartProps> = ({
   yTicks,
   data,
 }) => {
+  const { isEnglish } = useLocale();
   const [hovered, setHovered] = useState<ParameterDatum | null>(null);
   const [pinned, setPinned] = useState<ParameterDatum | null>(null);
   const hoverTimeout = useRef<number | null>(null);
@@ -395,7 +397,7 @@ const ParameterComparisonChart: React.FC<ParameterComparisonChartProps> = ({
             textAnchor="middle"
             className="text-[11px] fill-slate-400"
           >
-            Parâmetros do modelo
+            {isEnglish ? 'Model parameters' : 'Parâmetros do modelo'}
           </text>
 
           {data.map((item) => {
@@ -437,7 +439,7 @@ const ParameterComparisonChart: React.FC<ParameterComparisonChartProps> = ({
                 className="cursor-pointer outline-none"
                 tabIndex={0}
                 role="button"
-                aria-label={`${item.model} - ${label} ${formatScoreValue(item.score)}, parâmetros ${formatParameterValue(item.paramsB)}`}
+                aria-label={`${item.model} - ${label} ${formatScoreValue(item.score)}, ${isEnglish ? 'parameters' : 'parâmetros'} ${formatParameterValue(item.paramsB)}`}
                 onMouseEnter={() => handleHover(item)}
                 onFocus={() => handleHover(item)}
                 onMouseLeave={scheduleClearHover}
@@ -522,13 +524,13 @@ const ParameterComparisonChart: React.FC<ParameterComparisonChartProps> = ({
                   </div>
                   <div className="mt-2 grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5">
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Score médio
+                      {isEnglish ? 'Average score' : 'Score médio'}
                     </span>
                     <span className="text-sm font-semibold text-rio-primary">
                       {formatScoreValue(activeDatum.score)}
                     </span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Parâmetros
+                      {isEnglish ? 'Parameters' : 'Parâmetros'}
                     </span>
                     <span className="text-xs font-semibold text-slate-700">
                       {formatParameterValue(activeDatum.paramsB)}
@@ -545,6 +547,7 @@ const ParameterComparisonChart: React.FC<ParameterComparisonChartProps> = ({
 };
 
 export const Rio25OpenVLDetail: React.FC<Rio25OpenVLDetailProps> = ({ model, onBack }) => {
+  const { isEnglish } = useLocale();
   const huggingFaceWeightsUrl =
     model.huggingFaceUrl ?? 'https://huggingface.co/prefeitura-rio/Rio-2.5-Open-VL';
 
@@ -557,7 +560,7 @@ export const Rio25OpenVLDetail: React.FC<Rio25OpenVLDetailProps> = ({ model, onB
             className="inline-flex items-center gap-2 text-sm font-semibold text-prose-light hover:text-rio-primary transition"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar para modelos Open
+            {isEnglish ? 'Back to Open models' : 'Voltar para modelos Open'}
           </button>
 
           <div className="mt-6 space-y-10">
@@ -591,11 +594,11 @@ export const Rio25OpenVLDetail: React.FC<Rio25OpenVLDetailProps> = ({ model, onB
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
                     <img
                       src="/logos/huggingface-2.svg"
-                      alt="Logomarca do Hugging Face"
+                      alt={isEnglish ? 'Hugging Face logo' : 'Logomarca do Hugging Face'}
                       className="h-6 w-6"
                     />
                   </span>
-                  <span className="text-base">Acessar pesos</span>
+                  <span className="text-base">{isEnglish ? 'Access weights' : 'Acessar pesos'}</span>
                   <ArrowUpRight className="h-4 w-4" />
                 </a>
               )}
@@ -615,7 +618,7 @@ export const Rio25OpenVLDetail: React.FC<Rio25OpenVLDetailProps> = ({ model, onB
               </div>
               <div className="relative flex h-full flex-col gap-6">
                 <ParameterComparisonChart
-                  label="Desempenho em Benchmarks Visuais"
+                  label={isEnglish ? 'Performance on Visual Benchmarks' : 'Desempenho em Benchmarks Visuais'}
                   yMin={65}
                   yMax={80}
                   yTicks={[65, 70, 75, 80]}

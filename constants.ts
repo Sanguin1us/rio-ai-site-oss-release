@@ -1,4 +1,5 @@
 import type { Model } from './types/index';
+import type { Locale } from './types/locale';
 import { Code2, Terminal, Eye, Search } from 'lucide-react';
 import { ModelGlyphXL, ModelGlyphL, ModelGlyphM, ModelGlyphS } from './components/icons/ModelSizeGlyphs';
 
@@ -147,3 +148,89 @@ model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-open")
     huggingFaceUrl: 'https://huggingface.co/prefeitura-rio/Rio-3.0-Open-Search',
   },
 ];
+
+const RIO_MODELS_EN: Record<
+  string,
+  {
+    description: string;
+    tags?: string[];
+    parameters?: string;
+    codeSnippets?: Record<string, string>;
+  }
+> = {
+  'Rio 3.0 Open': {
+    description:
+      'Our flagship open-source model,\nwith performance on par with today\'s best open models.',
+    tags: ['235B parameters · 22B active', 'MIT License'],
+    parameters: '235 Billion (22B active)',
+  },
+  'Rio 3.0 Open Mini': {
+    description:
+      'Our mobile open-source version,\nbuilt to run on any smartphone.',
+    tags: ['4B parameters', 'MIT License'],
+    parameters: '4 Billion',
+  },
+  'Rio 3.0 Open Nano': {
+    description:
+      'Our most compact model.\nIt can run ten thousand prompts for just 1 BRL.',
+    tags: ['1.7B parameters', 'MIT License'],
+    parameters: '1.7 Billion',
+  },
+  'Rio 2.5 Open': {
+    description:
+      'Our most creative model, full of personality,\nbuilt to run locally on your computer.',
+    tags: ['30B parameters · 3B active', 'MIT License'],
+    parameters: '30 Billion (3B active)',
+    codeSnippets: {
+      Python: `from transformers import AutoTokenizer, AutoModelForCausalLM
+
+tokenizer = AutoTokenizer.from_pretrained("IPLANRIO/rio-2.5-open")
+model = AutoModelForCausalLM.from_pretrained("IPLANRIO/rio-2.5-open")
+
+# Try the new generation of Rio models!`,
+      cURL: `curl -X POST https://api.iplan.rio/v1/chat/completions \\
+-H "Authorization: Bearer $RIO_API_KEY" \\
+-H "Content-Type: application/json" \\
+-d '{
+  "model": "rio-2.5-open",
+  "messages": [{"role": "user", "content": "What\'s new in Rio 2.5?"}]
+}'`,
+    },
+  },
+  'Rio 2.5 Open VL': {
+    description:
+      'Our computer vision model.\nGrounding, OCR, QA, videos? It does it all.',
+    tags: ['4B parameters', 'MIT License'],
+  },
+  'Rio 3.0 Open Search': {
+    description:
+      'The world\'s most advanced web search model.',
+    tags: ['235B parameters · 22B active', 'MIT License'],
+  },
+};
+
+export const getRioModels = (locale: Locale): Model[] => {
+  if (locale === 'pt-BR') {
+    return RIO_MODELS;
+  }
+
+  return RIO_MODELS.map((model) => {
+    const translatedModel = RIO_MODELS_EN[model.name];
+    if (!translatedModel) {
+      return model;
+    }
+
+    return {
+      ...model,
+      description: translatedModel.description,
+      tags: translatedModel.tags ?? model.tags,
+      parameters: translatedModel.parameters ?? model.parameters,
+      codeSnippets: translatedModel.codeSnippets
+        ? model.codeSnippets?.map((snippet) => ({
+            ...snippet,
+            code: translatedModel.codeSnippets?.[snippet.lang] ?? snippet.code,
+          }))
+        : model.codeSnippets,
+    };
+  });
+};

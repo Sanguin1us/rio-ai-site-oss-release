@@ -1,35 +1,44 @@
 import React from 'react';
 import type { View } from '../types/index';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface HeaderProps {
   onNavigate: (view: View) => void;
   currentView: View;
 }
 
-const Logos: React.FC<{ onNavigate: (view: View) => void }> = ({ onNavigate }) => (
-  <button
-    onClick={() => onNavigate('home')}
-    className="flex items-center gap-4 text-sm text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-rio-primary rounded-md"
-  >
-    <div className="flex items-center gap-2 font-bold text-slate-800">
+const Logos: React.FC<{ onNavigate: (view: View) => void }> = ({ onNavigate }) => {
+  const { isEnglish } = useLocale();
+
+  return (
+    <button
+      onClick={() => onNavigate('home')}
+      className="flex items-center gap-4 text-sm text-slate-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-rio-primary rounded-md"
+    >
+      <div className="flex items-center gap-2 font-bold text-slate-800">
+        <img
+          src="/logos/Logo%20Prefeitura%20Horizontal%202025.png"
+          alt={isEnglish ? 'Rio de Janeiro City Hall logo' : 'Logo da Prefeitura do Rio de Janeiro'}
+          className="h-10 w-auto"
+        />
+      </div>
+    </button>
+  );
+};
+
+const IplanRioLogo = () => {
+  const { isEnglish } = useLocale();
+
+  return (
+    <div className="flex items-center">
       <img
-        src="/logos/Logo%20Prefeitura%20Horizontal%202025.png"
-        alt="Logo da Prefeitura do Rio de Janeiro"
-        className="h-10 w-auto"
+        src="/logos/iplanrio%20logo%20horizontal.png"
+        alt={isEnglish ? 'IplanRio logo' : 'Logo da IplanRio'}
+        className="h-8 w-auto"
       />
     </div>
-  </button>
-);
-
-const IplanRioLogo = () => (
-  <div className="flex items-center">
-    <img
-      src="/logos/iplanrio%20logo%20horizontal.png"
-      alt="Logo da IplanRio"
-      className="h-8 w-auto"
-    />
-  </div>
-);
+  );
+};
 
 export const Header: React.FC<HeaderProps> = ({ onNavigate, currentView }) => {
   const navLinks: { name: string; view: View }[] = [

@@ -11,6 +11,7 @@ import { Rio30OpenDetail } from './detail/Rio30OpenDetail';
 import { Rio30OpenMiniDetail } from './detail/Rio30OpenMiniDetail';
 import { Rio30OpenNanoDetail } from './detail/Rio30OpenNanoDetail';
 import { Rio30OpenSearchDetail } from './detail/Rio30OpenSearchDetail';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface ModelDetailViewProps {
   model: Model;
@@ -18,6 +19,8 @@ interface ModelDetailViewProps {
 }
 
 export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack }) => {
+  const { isEnglish } = useLocale();
+
   if (model.name === 'Rio 2.5 Open') {
     return <Rio25OpenDetail model={model} onBack={onBack} />;
   }
@@ -70,14 +73,17 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
               {model.huggingFaceUrl ? (
                 <div className="rounded-lg border border-slate-200 bg-gradient-to-br from-blue-50/60 to-white p-6 shadow-sm">
                   <div className="flex items-center justify-between gap-3">
-                    <h3 className="text-lg font-semibold text-prose">Explore no Hugging Face</h3>
+                    <h3 className="text-lg font-semibold text-prose">
+                      {isEnglish ? 'Explore on Hugging Face' : 'Explore no Hugging Face'}
+                    </h3>
                     <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-semibold text-green-800 ring-1 ring-inset ring-green-200">
                       Open Source
                     </span>
                   </div>
                   <p className="mt-3 text-sm text-prose-light leading-relaxed">
-                    Acesse nosso modelo aberto no Hugging Face, explore a documentação e veja como
-                    usá-lo em minutos.
+                    {isEnglish
+                      ? 'Access our open model on Hugging Face, explore the docs, and get started in minutes.'
+                      : 'Acesse nosso modelo aberto no Hugging Face, explore a documentação e veja como usá-lo em minutos.'}
                   </p>
                   <a
                     href={model.huggingFaceUrl}
@@ -85,15 +91,19 @@ export const ModelDetailView: React.FC<ModelDetailViewProps> = ({ model, onBack 
                     rel="noopener noreferrer"
                     className="mt-5 inline-flex items-center gap-2 rounded-md bg-rio-primary px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rio-primary"
                   >
-                    Abrir repositório
+                    {isEnglish ? 'Open repository' : 'Abrir repositório'}
                     <ArrowUpRight className="h-4 w-4" />
                   </a>
                 </div>
               ) : (
                 <div className="rounded-lg border border-slate-200 bg-white p-6">
-                  <h3 className="text-lg font-semibold text-prose">Pesos em breve</h3>
+                  <h3 className="text-lg font-semibold text-prose">
+                    {isEnglish ? 'Weights coming soon' : 'Pesos em breve'}
+                  </h3>
                   <p className="mt-2 text-sm text-prose-light">
-                    Assim que os pesos forem liberados, vamos publicar o acesso por aqui.
+                    {isEnglish
+                      ? 'As soon as the weights are released, we will publish access here.'
+                      : 'Assim que os pesos forem liberados, vamos publicar o acesso por aqui.'}
                   </p>
                 </div>
               )}

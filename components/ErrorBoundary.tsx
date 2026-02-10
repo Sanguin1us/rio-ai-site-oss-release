@@ -1,5 +1,6 @@
 import { Component, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { useLocale } from '../contexts/LocaleContext';
 
 interface ErrorBoundaryProps {
     children: ReactNode;
@@ -51,6 +52,8 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     render(): ReactNode {
         const { hasError, error } = this.state;
         const { children, fallback } = this.props;
+        const isEnglish =
+            typeof document !== 'undefined' && document.documentElement.lang.toLowerCase().startsWith('en');
 
         if (hasError) {
             // Use custom fallback if provided
@@ -63,15 +66,17 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-red-200 bg-red-50 p-6 text-center">
                     <AlertTriangle className="h-10 w-10 text-red-500" />
                     <h3 className="mt-4 text-lg font-semibold text-red-800">
-                        Algo deu errado
+                        {isEnglish ? 'Something went wrong' : 'Algo deu errado'}
                     </h3>
                     <p className="mt-2 max-w-md text-sm text-red-600">
-                        Ocorreu um erro inesperado. Por favor, tente novamente.
+                        {isEnglish
+                            ? 'An unexpected error occurred. Please try again.'
+                            : 'Ocorreu um erro inesperado. Por favor, tente novamente.'}
                     </p>
                     {error && (
                         <details className="mt-4 max-w-md text-left">
                             <summary className="cursor-pointer text-xs text-red-500 hover:text-red-700">
-                                Detalhes técnicos
+                                {isEnglish ? 'Technical details' : 'Detalhes técnicos'}
                             </summary>
                             <pre className="mt-2 overflow-auto rounded bg-red-100 p-2 text-xs text-red-800">
                                 {error.message}
@@ -83,7 +88,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                         className="mt-4 inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                     >
                         <RefreshCw className="h-4 w-4" />
-                        Tentar novamente
+                        {isEnglish ? 'Try again' : 'Tentar novamente'}
                     </button>
                 </div>
             );
@@ -101,6 +106,8 @@ export const SectionErrorBoundary: React.FC<{
     children: ReactNode;
     sectionName?: string;
 }> = ({ children, sectionName }) => {
+    const { isEnglish } = useLocale();
+
     return (
         <ErrorBoundary
             name={sectionName}
@@ -108,7 +115,9 @@ export const SectionErrorBoundary: React.FC<{
                 <div className="flex min-h-[120px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
                     <AlertTriangle className="h-6 w-6 text-slate-400" />
                     <p className="mt-2 text-sm text-slate-500">
-                        Não foi possível carregar esta seção.
+                        {isEnglish
+                            ? 'Unable to load this section.'
+                            : 'Não foi possível carregar esta seção.'}
                     </p>
                 </div>
             }
@@ -125,6 +134,8 @@ export const SectionErrorBoundary: React.FC<{
 export const ChatErrorBoundary: React.FC<{
     children: ReactNode;
 }> = ({ children }) => {
+    const { isEnglish } = useLocale();
+
     return (
         <ErrorBoundary
             name="Chat"
@@ -132,17 +143,19 @@ export const ChatErrorBoundary: React.FC<{
                 <div className="flex h-[500px] flex-col items-center justify-center rounded-lg border border-slate-200 bg-white p-6 text-center shadow-sm">
                     <AlertTriangle className="h-10 w-10 text-amber-500" />
                     <h3 className="mt-4 text-lg font-semibold text-slate-800">
-                        Chat indisponível
+                        {isEnglish ? 'Chat unavailable' : 'Chat indisponível'}
                     </h3>
                     <p className="mt-2 max-w-sm text-sm text-slate-600">
-                        Ocorreu um erro ao carregar o chat. Por favor, recarregue a página.
+                        {isEnglish
+                            ? 'An error occurred while loading the chat. Please reload the page.'
+                            : 'Ocorreu um erro ao carregar o chat. Por favor, recarregue a página.'}
                     </p>
                     <button
                         onClick={() => window.location.reload()}
                         className="mt-4 inline-flex items-center gap-2 rounded-md bg-rio-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-rio-primary focus:ring-offset-2"
                     >
                         <RefreshCw className="h-4 w-4" />
-                        Recarregar página
+                        {isEnglish ? 'Reload page' : 'Recarregar página'}
                     </button>
                 </div>
             }

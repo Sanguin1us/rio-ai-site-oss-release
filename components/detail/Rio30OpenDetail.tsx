@@ -21,6 +21,7 @@ import {
   ParameterBenchmarkComparisonChart,
   ParameterBenchmarkDatum,
 } from './ParameterBenchmarkComparisonChart';
+import { useLocale } from '../../contexts/LocaleContext';
 
 interface Rio30OpenDetailProps {
   model: Model;
@@ -125,6 +126,7 @@ const formatScoreValue = (value: number) => {
 };
 
 const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, yTicks, data }) => {
+  const { isEnglish } = useLocale();
   const [hovered, setHovered] = useState<ParameterDatum | null>(null);
   const [pinned, setPinned] = useState<ParameterDatum | null>(null);
   const hoverTimeout = useRef<number | null>(null);
@@ -271,7 +273,7 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
             textAnchor="middle"
             className="text-[11px] fill-slate-400"
           >
-            Parâmetros do modelo
+            {isEnglish ? 'Model parameters' : 'Parâmetros do modelo'}
           </text>
 
           {data.map((item) => {
@@ -313,7 +315,7 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
                 className="cursor-pointer outline-none"
                 tabIndex={0}
                 role="button"
-                aria-label={`${item.model} - ${tooltipLabel} ${formatScoreValue(item.score)}, parâmetros ${formatParameterValue(item.paramsB)}`}
+                aria-label={`${item.model} - ${tooltipLabel} ${formatScoreValue(item.score)}, ${isEnglish ? 'parameters' : 'parâmetros'} ${formatParameterValue(item.paramsB)}`}
                 onMouseEnter={() => handleHover(item)}
                 onFocus={() => handleHover(item)}
                 onMouseLeave={scheduleClearHover}
@@ -410,7 +412,7 @@ const EmptyParameterChart: React.FC<EmptyParameterChartProps> = ({ label, yMax, 
                       {formatScoreValue(activeDatum.score)}
                     </span>
                     <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                      Parâmetros
+                      {isEnglish ? 'Parameters' : 'Parâmetros'}
                     </span>
                     <span className="text-xs font-semibold text-slate-700">
                       {formatParameterValue(activeDatum.paramsB)}
@@ -446,6 +448,7 @@ const PARAMETER_BENCHMARKS: Record<'hle' | 'matharena', ParameterDatum[]> = {
 };
 
 export const Rio30OpenDetail: React.FC<Rio30OpenDetailProps> = ({ model, onBack }) => {
+  const { isEnglish } = useLocale();
   const huggingFaceWeightsUrl = model.huggingFaceUrl;
 
   return (
@@ -457,7 +460,7 @@ export const Rio30OpenDetail: React.FC<Rio30OpenDetailProps> = ({ model, onBack 
             className="inline-flex items-center gap-2 text-sm font-semibold text-prose-light hover:text-rio-primary transition"
           >
             <ArrowLeft className="h-4 w-4" />
-            Voltar para modelos Open
+            {isEnglish ? 'Back to Open models' : 'Voltar para modelos Open'}
           </button>
 
           <div className="mt-6 space-y-10">
@@ -491,11 +494,11 @@ export const Rio30OpenDetail: React.FC<Rio30OpenDetailProps> = ({ model, onBack 
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50">
                     <img
                       src="/logos/huggingface-2.svg"
-                      alt="Logomarca do Hugging Face"
+                      alt={isEnglish ? 'Hugging Face logo' : 'Logomarca do Hugging Face'}
                       className="h-6 w-6"
                     />
                   </span>
-                  <span className="text-base">Acessar pesos</span>
+                  <span className="text-base">{isEnglish ? 'Access weights' : 'Acessar pesos'}</span>
                   <ArrowUpRight className="h-4 w-4" />
                 </a>
               )}
@@ -515,7 +518,7 @@ export const Rio30OpenDetail: React.FC<Rio30OpenDetailProps> = ({ model, onBack 
               </div>
               <div className="relative flex h-full flex-col gap-6">
                 <ParameterBenchmarkComparisonChart
-                  label="Desempenho em Benchmarks Matemáticos"
+                  label={isEnglish ? 'Performance on Math Benchmarks' : 'Desempenho em Benchmarks Matemáticos'}
                   yMin={70}
                   yMax={95}
                   yTicks={[70, 75, 80, 85, 90, 95]}
